@@ -17,6 +17,9 @@
 #include "Codec_Gains.h"
 #include "main.h"
 
+const int ADC_DVC_Gain = 180;
+const int ADC_DVC_Off = 90;
+
 #define FT8_TONE_SPACING 625
 
 int CQ_State;

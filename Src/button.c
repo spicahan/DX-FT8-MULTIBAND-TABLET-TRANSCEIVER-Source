@@ -31,16 +31,13 @@ int BandIndex;
 int QSO_Fix;
 
 int AGC_Gain = 20;
-int ADC_DVC_Gain = 180;
-int ADC_DVC_Off = 90;
-
 int Band_Minimum;
 
 extern int Auto_QSO_State;
 
 char display_frequency[] = "14.075";
 
-const FreqStruct sBand_Data[] =
+const FreqStruct sBand_Data[NumBands] =
 	{
 		{// 40,
 		 7074, "7.074"},
@@ -57,9 +54,7 @@ const FreqStruct sBand_Data[] =
 		{// 10,
 		 28074, "28.075"}};
 
-#define numButtons 28
-
-ButtonStruct sButtonData[] = {
+ButtonStruct sButtonData[NumButtons] = {
 	{// button 0  inhibit xmit either as beacon or answer CQ
 	 /*text0*/ "Clr ",
 	 /*text1*/ "Clr ",
@@ -453,7 +448,7 @@ void drawButton(uint16_t button)
 
 void checkButton(void)
 {
-	for (uint16_t button = 0; button < numButtons; button++)
+	for (uint16_t button = Clear; button < NumButtons; button++)
 	{
 		if (testButton(sButtonData[button].x, sButtonData[button].y, sButtonData[button].w,
 					   sButtonData[button].h) == 1)
@@ -506,7 +501,7 @@ void executeButton(uint16_t index)
 {
 	switch (index)
 	{
-	case 0: // Reset
+	case Clear: // Reset
 		clear_xmit_messages();
 		terminate_QSO();
 		Auto_QSO_State = 0;
@@ -515,11 +510,11 @@ void executeButton(uint16_t index)
 		clear_log_stored_data();
 		clear_log_messages();
 
-		toggle_button_state(0);
+		toggle_button_state(Clear);
 		break;
 
-	case 1: // Toggle beacon mode
-		if (!sButtonData[1].state)
+	case QSOBeacon: // Toggle beacon mode
+		if (!sButtonData[QSOBeacon].state)
 		{
 			Beacon_On = 0;
 			Beacon_State = 0;
@@ -537,8 +532,8 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case 2: // Toggle tune (setup) mode
-		if (!sButtonData[2].state)
+	case Tune: // Toggle tune (setup) mode
+		if (!sButtonData[Tune].state)
 		{
 			tune_Off_sequence();
 			Tune_On = 0;
@@ -555,39 +550,39 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case 3:
+	case RxTx:
 		// no code required, all dependent stuff works off of button state
 		break;
 
-	case 4: // Toggle QSO TX fix mode
-		if (sButtonData[4].state == 1)
+	case FixedReceived: // Toggle QSO TX fix mode
+		if (sButtonData[FixedReceived].state == 1)
 			QSO_Fix = 1;
 		else
 			QSO_Fix = 0;
 		break;
 
-	case 5: // Toggle synchonisation mode
-		if (!sButtonData[5].state)
+	case Sync: // Toggle synchonisation mode
+		if (!sButtonData[Sync].state)
 			Auto_Sync = 0;
 		else
 			Auto_Sync = 1;
 		break;
 
-	case 6: // Lower Gain
+	case GainDown: // Lower Gain
 		if (AGC_Gain >= 3)
 			AGC_Gain--;
 		show_short(405, 255, AGC_Gain);
 		Set_PGA_Gain(AGC_Gain);
 		break;
 
-	case 7: // Raise Gain
+	case GainUp: // Raise Gain
 		if (AGC_Gain < 31)
 			AGC_Gain++;
 		show_short(405, 255, AGC_Gain);
 		Set_PGA_Gain(AGC_Gain);
 		break;
 
-	case 8: // Lower Freq
+	case FreqDown: // Lower Freq
 		if (cursor > 0)
 		{
 			cursor--;
@@ -596,9 +591,9 @@ void executeButton(uint16_t index)
 		show_variable(400, 25, (int)NCO_Frequency);
 		break;
 
-	case 9: // Raise Freq
+	case FreqUp: // Raise Freq
 		if (cursor < (ft8_buffer - ft8_min_bin - 8))
-		{ 
+		{
 			// limits highest NCO frequency to (3875 - 50)hz
 			cursor++;
 			NCO_Frequency = (double)(cursor + ft8_min_bin) * FFT_Resolution;
@@ -606,8 +601,8 @@ void executeButton(uint16_t index)
 		show_variable(400, 25, (int)NCO_Frequency);
 		break;
 
-	case 12: // Transmit for Calibration
-		if (!sButtonData[12].state)
+	case TxCalibrate: // Transmit for Calibration
+		if (!sButtonData[TxCalibrate].state)
 		{
 			tune_Off_sequence();
 			Arm_Tune = 0;
@@ -624,7 +619,7 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case 13: // Save Band Changes
+	case SaveBand: // Save Band Changes
 		Options_SetValue(0, BandIndex);
 		Options_StoreValue(0);
 		start_freq = sBand_Data[BandIndex].Frequency;
@@ -640,14 +635,14 @@ void executeButton(uint16_t index)
 		toggle_button_state(13);
 		break;
 
-	case 14: // Edit RTC time
+	case SaveRTCTime: // Edit RTC time
 		set_RTC_to_TimeEdit();
-		toggle_button_state(14);
+		toggle_button_state(SaveRTCTime);
 		break;
 
-	case 27: // Edit RTC date
+	case SaveRTCDate: // Edit RTC date
 		set_RTC_to_DateEdit();
-		toggle_button_state(27);
+		toggle_button_state(SaveRTCDate);
 		break;
 	}
 }
@@ -670,7 +665,7 @@ void executeCalibrationButton(uint16_t index)
 {
 	switch (index)
 	{
-	case 10: // Lower Band
+	case BandDown:
 		if (BandIndex > Band_Minimum)
 		{
 			BandIndex--;
@@ -679,7 +674,7 @@ void executeCalibrationButton(uint16_t index)
 		}
 		break;
 
-	case 11: // Raise Band
+	case BandUp:
 		if (BandIndex < _10M)
 		{
 			BandIndex++;
@@ -688,51 +683,51 @@ void executeCalibrationButton(uint16_t index)
 		}
 		break;
 
-	case 15: // Lower Hour
+	case HourDown:
 		processButton(3, 0, 0);
 		break;
 
-	case 16: // Raise Hour
+	case HourUp:
 		processButton(3, 1, 0);
 		break;
 
-	case 17: // Lower Minute
+	case MinuteDown:
 		processButton(4, 0, 0);
 		break;
 
-	case 18: // Raise Minute
+	case MinuteUp:
 		processButton(4, 1, 0);
 		break;
 
-	case 19: // Lower Second
+	case SecondDown:
 		processButton(5, 0, 0);
 		break;
 
-	case 20: // Raise Second
+	case SecondUp:
 		processButton(5, 1, 0);
 		break;
 
-	case 21: // Lower Day
+	case DayDown:
 		processButton(0, 0, 1);
 		break;
 
-	case 22: // Raise Day
+	case DayUp:
 		processButton(0, 1, 1);
 		break;
 
-	case 23: // Lower Month
+	case MonthDown:
 		processButton(1, 0, 1);
 		break;
 
-	case 24: // Raise Month
+	case MonthUp:
 		processButton(1, 1, 1);
 		break;
 
-	case 25: // Lower Year
+	case YearDown:
 		processButton(2, 0, 1);
 		break;
 
-	case 26: // Raise Year
+	case YearUp:
 		processButton(2, 1, 1);
 		break;
 	}
@@ -743,23 +738,26 @@ void setup_Cal_Display(void)
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, FFT_H, 480, 201);
 
-	sButtonData[10].Active = 3;
-	sButtonData[11].Active = 3;
+	sButtonData[BandDown].Active = 3;
+	sButtonData[BandUp].Active = 3;
 
-	for (int button = 12; button <= 14; ++button)
+	for (int button = TxCalibrate; button <= SaveRTCTime; ++button)
 		sButtonData[button].Active = 1;
 
-	for (int button = 15; button < 27; button++)
+	for (int button = HourDown; button < SaveRTCDate; button++)
 	{
 		sButtonData[button].Active = 3;
 		drawButton(button);
 	}
 
-	sButtonData[27].Active = 1;
+	sButtonData[SaveRTCDate].Active = 1;
 
-	for (int button = 10; button <= 14; ++button)
+	for (int button = BandDown; button <= SaveRTCTime; ++button)
+	{
 		drawButton(button);
-	drawButton(27);
+	}
+
+	drawButton(SaveRTCDate);
 
 	show_wide(340, 55, start_freq);
 
@@ -775,15 +773,17 @@ void erase_Cal_Display(void)
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, FFT_H, 480, 201);
 
-	for (int button = 10; button < numButtons; button++)
+	for (int button = BandDown; button < NumButtons; button++)
 	{
 		sButtonData[button].Active = 0;
 	}
 
-	for (int button = 12; button <= 14; ++button)
+	for (int button = TxCalibrate; button <= SaveRTCTime; ++button)
+	{
 		sButtonData[button].state = 0;
+	}
 
-	sButtonData[27].state = 0;
+	sButtonData[SaveRTCDate].state = 0;
 }
 
 void PTT_Out_Init(void)
@@ -897,16 +897,16 @@ void receive_sequence(void)
 {
 	PTT_Out_Set(); // set output high to connect receiver to antenna
 	HAL_Delay(10);
-	sButtonData[3].state = 0;
-	drawButton(3);
+	sButtonData[RxTx].state = 0;
+	drawButton(RxTx);
 }
 
 void xmit_sequence(void)
 {
 	PTT_Out_RST_Clr(); // set output low to disconnect receiver from antenna
 	HAL_Delay(10);
-	sButtonData[3].state = 1;
-	drawButton(3);
+	sButtonData[RxTx].state = 1;
+	drawButton(RxTx);
 }
 
 const uint64_t F_boot = 11229600000ULL;

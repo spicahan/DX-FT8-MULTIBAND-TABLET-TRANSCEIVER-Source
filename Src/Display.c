@@ -215,7 +215,7 @@ void setup_display(void)
 		BSP_LCD_DisplayStringAt(50, 200, (const uint8_t *)callOrLocator, LEFT_MODE);
 	}
 
-	for (int buttonId = 0; buttonId <= 9; ++buttonId)
+	for (int buttonId = Clear; buttonId <= FreqUp; ++buttonId)
 		drawButton(buttonId);
 }
 
@@ -272,9 +272,9 @@ void Process_Touch(void)
 	BSP_TS_GetState(&TS_State);
 
 	if (!Tune_On && !xmit_flag && !Beacon_On)
-		sButtonData[5].state = 0;
+		sButtonData[Sync].state = 0;
 	else
-		sButtonData[5].state = 1;
+		sButtonData[Sync].state = 1;
 
 	if (!touch_detected)
 	{
@@ -382,8 +382,8 @@ void Display_WF(void)
 				FT8_Sync();
 				Auto_Sync = 0;
 				noise_free_sets_count = 0;
-				sButtonData[5].state = 0;
-				drawButton(5);
+				sButtonData[Sync].state = 0;
+				drawButton(Sync);
 			}
 		}
 		else
