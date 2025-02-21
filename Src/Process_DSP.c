@@ -48,7 +48,7 @@ arm_fir_instance_q15 S_FIR_I_32K = {NUM_FIR_COEF, &FIR_State_I[0],
 									&coeff_fir_I_32K[0]};
 
 arm_fir_instance_q15 S_FIR_Q_32K = {NUM_FIR_COEF, &FIR_State_Q[0],
-									&coeff_fir_I_32K[0]};
+									&coeff_fir_Q_32K[0]};
 
 void Process_FIR_I_32K(void)
 {

@@ -126,7 +126,7 @@ float m_RMSConstant = 1.0 /65485.0;
 
 void I2S2_RX_ProcessBuffer(uint16_t offset) {
 
-	static q15_t TX_I, TX_Q;
+	static q15_t TX_I;
 	static long NCO_phz;
 
 	x_NCOphzinc = (PI2 * LO_Freq / (double) Sample_Frequency);
@@ -134,10 +134,9 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
 	for (int i = 0; i < BUFFERSIZE / 4; i++) {
 		NCO_phz += (long) (KCONV * (x_NCOphzinc));
 		TX_I = (Sine_table[(NCO_phz >> 4) & 0xFFF]);
-		TX_Q = (Sine_table[((NCO_phz >> 4) + 0x400) & 0xFFF]);
-
+		
 		FIR_I_In[i] = (q15_t) ((float) TX_I * (float) in_buff[i * 2 + offset] * m_RMSConstant);
-		FIR_Q_In[i] = (q15_t) ((float) TX_Q * (float) in_buff[i * 2 + 1 + offset] * m_RMSConstant);
+		FIR_Q_In[i] = (q15_t) ((float) TX_I * (float) in_buff[i * 2 + 1 + offset] * m_RMSConstant);
 
 	}
 

@@ -228,6 +228,10 @@ void     BSP_LCD_FillEllipse(int Xpos, int Ypos, int XRadius, int YRadius);
 void     BSP_LCD_DisplayOff(void);
 void     BSP_LCD_DisplayOn(void);
 
+void     BSP_LCD_BL_Off(void);
+void     BSP_LCD_BL_On(void);
+
+
 /* These functions can be modified in case the current settings
    need to be changed for specific application needs */
 void     BSP_LCD_MspInit(LTDC_HandleTypeDef *hltdc, void *Params);

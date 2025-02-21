@@ -73,6 +73,39 @@ enum BandIndex
 	NumBands = 7
 };
 
+enum ButtonIds
+{
+	Clear = 0,
+	QSOBeacon,
+	Tune,
+	RxTx,
+	FixedReceived,
+	Sync,
+	GainDown,
+	GainUp,
+	FreqDown,
+	FreqUp,
+	BandDown,
+	BandUp,
+	TxCalibrate,
+	SaveBand,
+	SaveRTCTime,
+	HourDown,
+	HourUp,
+	MinuteDown,
+	MinuteUp,
+	SecondDown,
+	SecondUp,
+	DayDown,
+	DayUp,
+	MonthDown,
+	MonthUp,
+	YearDown,
+	YearUp,
+	SaveRTCDate,
+	NumButtons = 28
+};
+
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
 extern int Beacon_On;
 extern int Arm_Tune;
@@ -81,12 +114,10 @@ extern int QSO_Fix;
 extern uint16_t start_freq;
 extern int BandIndex;
 extern int Band_Minimum;
-extern const FreqStruct sBand_Data[];
+extern const FreqStruct sBand_Data[NumBands];
 extern int AGC_Gain;
-extern int ADC_DVC_Gain;
-extern int ADC_DVC_Off;
 
-void drawButton(uint16_t i);
+void drawButton(uint16_t button);
 void checkButton(void);
 
 void executeButton(uint16_t index);
@@ -105,7 +136,7 @@ void Init_BoardVersionInput(void);
 void DeInit_BoardVersionInput(void);
 void set_codec_input_gain(void);
 
-extern ButtonStruct sButtonData[];
+extern ButtonStruct sButtonData[NumButtons];
 
 void setup_Cal_Display(void);
 void erase_Cal_Display(void);

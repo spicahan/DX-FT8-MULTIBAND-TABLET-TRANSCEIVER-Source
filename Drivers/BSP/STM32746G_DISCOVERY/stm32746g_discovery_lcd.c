@@ -1155,6 +1155,23 @@ void BSP_LCD_FillEllipse(int Xpos, int Ypos, int XRadius, int YRadius)
   while (y <= 0);
 }
 
+void BSP_LCD_BL_Off(void)
+{
+  /* Display Off */
+  __HAL_LTDC_DISABLE(&hLtdcHandler);     /* De-assert LCD_DISP pin */
+  HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_RESET);/* De-assert LCD_BL_CTRL pin */
+}
+
+void BSP_LCD_BL_On(void)
+{
+  /* Display On */
+  __HAL_LTDC_ENABLE(&hLtdcHandler);       /* Assert LCD_DISP pin */
+  HAL_GPIO_WritePin(LCD_BL_CTRL_GPIO_PORT, LCD_BL_CTRL_PIN, GPIO_PIN_SET);  /* Assert LCD_BL_CTRL pin */
+}
+
+
+
+
 /**
   * @brief  Enables the display.
   * @retval None
