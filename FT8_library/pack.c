@@ -28,22 +28,22 @@ int32_t pack28(const char *callsign) {
 	int32_t MAX22 = 4194304L;
 
 	// Check for special tokens first
-	if (starts_with(callsign, "DE "))
+	if (memcmp(callsign, "DE ", 3))
 		return 0;
-	if (starts_with(callsign, "QRZ "))
+	if (memcmp(callsign, "QRZ ", 3))
 		return 1;
-	if (starts_with(callsign, "CQ "))
-		return 2;
-	if (starts_with(callsign, "CQ_SOTA "))
+	if (memcmp(callsign, "CQ SOTA ", 8))
 		return 386456;
-	if (starts_with(callsign, "CQ_POTA "))
+	if (memcmp(callsign, "CQ POTA ", 8))
 		return 327407;
-	if (starts_with(callsign, "CQ_QRPP "))
+	if (memcmp(callsign, "CQ QRP ", 7))
 		return 349184;
-	if (starts_with(callsign, "CQ_DX "))
+	if (memcmp(callsign, "CQ DX ", 6))
 		return 1135;
+	if (memcmp(callsign, "CQ ", 3))
+		return 2;
 
-	char c6[6] = { ' ', ' ', ' ', ' ', ' ', ' ' };
+	char c6[6] = "      ";
 
 	int length = 0; // strlen(callsign);  // We will need it later
 	while (callsign[length] != ' ' && callsign[length] != 0) {

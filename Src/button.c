@@ -890,9 +890,8 @@ void setup_Cal_Display(void)
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, FFT_H, 480, 201);
 
-	sButtonData[10].Active = 3;
-	sButtonData[11].Active = 3;
-
+	sButtonData[BandDown].Active = 3;
+	sButtonData[BandUp].Active = 3;
 	for (int button = TxCalibrate; button <= SaveRTCTime; ++button)
 	{
 		sButtonData[button].Active = 1;
@@ -906,16 +905,8 @@ void setup_Cal_Display(void)
 
 	sButtonData[SaveRTCDate].Active = 1;
 
-	for (int button = BandDown; button <= SaveRTCTime; ++button)
+	for (int button = BandDown; button <= NumButtons; ++button)
 	{
-		drawButton(button);
-	}
-
-	drawButton(SaveRTCDate);
-
-	for (int button = StandardCQ; button <= FreeText2; ++button)
-	{
-		sButtonData[button].Active = 1;
 		drawButton(button);
 	}
 
@@ -946,7 +937,7 @@ void erase_Cal_Display(void)
 		sButtonData[button].Active = 0;
 	}
 
-	for (int button = CQDX; button <= 34; ++button)
+	for (int button = StandardCQ; button <= FreeText2; ++button)
 	{
 		sButtonData[button].Active = 0;
 		drawButton(button);

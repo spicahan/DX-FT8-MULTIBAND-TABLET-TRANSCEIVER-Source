@@ -61,9 +61,9 @@ static FATFS FS;
 static FIL fil;
 
 const char CQ[] = "CQ";
-const char CQ_DX[] = "CQ_DX";
-const char CQ_POTA[] = "CQ_POTA";
-const char CQ_QRPP[] = "QRPP";
+const char DX[] = "DX";
+const char POTA[] = "POTA";
+const char QRP[] = "QRP";
 const char Beacon_seventy_three[] = "RR73";
 const char QSO_seventy_three[] = "73";
 const uint8_t blank[] = "                  ";
@@ -78,24 +78,31 @@ void set_cq(void)
 	uint8_t packed[K_BYTES];
 	if (Free_Index == 0)
 	{
-		const char *mode = CQ;
+		const char *mode = NULL;
 		switch (CQ_Mode_Index)
 		{
 			case 0:
 			default:
 				break;
 			case 1:
-				mode = CQ_DX;
+				mode = DX;
 				break;
 			case 2:
-				mode = CQ_POTA;
+				mode = POTA;
 				break;
 			case 3:
-				mode = CQ_QRPP;
+				mode = QRP;
 				break;
 		}
-
-		sprintf(message, "%s %s %s", mode, Station_Call, Locator);
+		
+		if (mode == NULL)
+		{
+			sprintf(message, "%s %s %s", CQ, Station_Call, Locator);
+		}
+		else
+		{
+			sprintf(message, "%s %s %s %s", CQ, mode, Station_Call, Locator);
+		}
 	}
 	else
 	{
