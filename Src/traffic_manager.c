@@ -17,9 +17,6 @@
 #include "Codec_Gains.h"
 #include "main.h"
 
-const int ADC_DVC_Gain = 180;
-const int ADC_DVC_Off = 90;
-
 #define FT8_TONE_SPACING 625
 
 int CQ_State;
@@ -28,6 +25,7 @@ int Beacon_State;
 int RSL_sent;
 int QSO_xmit_count;
 int RR73_sent;
+int BlockTmitAfterCQ=0;
 
 void service_QSO_mode(int decoded_signals)
 {
@@ -92,18 +90,21 @@ void service_Beacon_mode(int decoded_signals)
 	switch (Beacon_State)
 	{
 	case 0:
+
 		break;
 
 	case 1:
 		receive_status = Check_Calling_Stations(decoded_signals);
 		if (receive_status == 1)
 		{
-			setup_to_transmit_on_next_DSP_Flag();
+			if(BlockTmitAfterCQ == 1) BlockTmitAfterCQ = 0;
+			else setup_to_transmit_on_next_DSP_Flag();
 		}
 		else
 		{
 			set_cq();
 			setup_to_transmit_on_next_DSP_Flag();
+			BlockTmitAfterCQ = 1;
 		}
 
 		Beacon_State = 2;
@@ -113,7 +114,8 @@ void service_Beacon_mode(int decoded_signals)
 		receive_status = Check_Calling_Stations(decoded_signals);
 		if (receive_status == 1)
 		{
-			setup_to_transmit_on_next_DSP_Flag();
+			if(BlockTmitAfterCQ == 1) BlockTmitAfterCQ = 0;
+			else setup_to_transmit_on_next_DSP_Flag();
 		}
 		Beacon_State = 1;
 		break;

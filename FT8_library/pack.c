@@ -34,18 +34,14 @@ int32_t pack28(const char *callsign) {
 		return 1;
 	if (starts_with(callsign, "CQ "))
 		return 2;
-
-	if (starts_with(callsign, "CQ_")) {
-
-		// TODO:
-		// if(nnum.eq.3 .and. nlet.eq.0) then n28=3+nqsy
-		// if(nlet.ge.1 .and. nlet.le.4 .and. nnum.eq.0) then n28=3+1000+m
-	}
-
-	// TODO: Check for <...> callsign
-	// if(text(1:1).eq.'<')then
-	//   call save_hash_call(text,n10,n12,n22)   !Save callsign in hash table
-	//   n28=NTOKENS + n22
+	if (starts_with(callsign, "CQ_SOTA "))
+		return 386456;
+	if (starts_with(callsign, "CQ_POTA "))
+		return 327407;
+	if (starts_with(callsign, "CQ_QRPP "))
+		return 349184;
+	if (starts_with(callsign, "CQ_DX "))
+		return 1135;
 
 	char c6[6] = { ' ', ' ', ' ', ' ', ' ', ' ' };
 
@@ -271,16 +267,7 @@ int pack77(const char *msg, uint8_t *c77) {
 		return 0;
 	}
 
-	// TODO:
-	// Check 0.5 (telemetry)
-	// i3=0 n3=5 write(c77,1006) ntel,n3,i3 1006 format(b23.23,2b24.24,2b3.3)
-
-	// Check Type 4 (One nonstandard call and one hashed call)
-	// pack77_4(nwords,w,i3,n3,c77)
-
-	// Default to free text
-	// i3=0 n3=0
-	//  packtext77(msg, c77);
+	packtext77(msg, c77);
 	return 0;
 }
 

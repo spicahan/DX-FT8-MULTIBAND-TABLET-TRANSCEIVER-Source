@@ -22,6 +22,13 @@ extern char reply_message_list[18][8];
 extern int reply_message_count;
 
 extern char SDPath[4]; /* SD card logical drive path */
+//static char Extra_Data[13];
+static char Free_Text1[20];
+static char Free_Text2[20];
+
+extern int CQ_Mode_Index;
+extern int Free_Index;
+extern int Send_Free;
 
 void clear_reply_message_box(void);
 void set_reply(uint16_t index);

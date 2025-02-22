@@ -193,7 +193,7 @@ void setup_display(void)
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9.1", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
 	BSP_LCD_DisplayStringAt(50, 160,
@@ -215,7 +215,7 @@ void setup_display(void)
 		BSP_LCD_DisplayStringAt(50, 200, (const uint8_t *)callOrLocator, LEFT_MODE);
 	}
 
-	for (int buttonId = Clear; buttonId <= FreqUp; ++buttonId)
+	for (int buttonId = 0; buttonId <= 9; ++buttonId)
 		drawButton(buttonId);
 }
 
@@ -237,27 +237,21 @@ uint16_t testButton(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 	return 0;
 }
 
-static uint8_t FFT_Touch()
+static uint16_t FFT_Touch()
 {
 	if ((valx > FFT_X && valx < FFT_X + FFT_W) && (valy > FFT_Y && valy < 30))
 		return 1;
 	return 0;
 }
 
-static uint8_t LCD_Backlight_Touch()
-{
-	// Touch on the 'frequency' area top right of the display
-	if ((valx > FFT_W) && (valy < 25))
-		return 1;
-	return 0;
-}
-
-static uint8_t FT8_Touch(void)
+static int FT8_Touch(void)
 {
 	if ((valx > 0 && valx < 240) && (valy > 40 && valy < 240))
 	{
 		int y_test = valy - 40;
+
 		FT_8_TouchIndex = y_test / 20;
+
 		return 1;
 	}
 	return 0;
@@ -266,15 +260,14 @@ static uint8_t FT8_Touch(void)
 void Process_Touch(void)
 {
 	static uint8_t touch_detected = 0;
-	static uint8_t display_on = 1;
 
 	TS_StateTypeDef TS_State;
 	BSP_TS_GetState(&TS_State);
 
 	if (!Tune_On && !xmit_flag && !Beacon_On)
-		sButtonData[Sync].state = 0;
+		sButtonData[5].state = 0;
 	else
-		sButtonData[Sync].state = 1;
+		sButtonData[5].state = 1;
 
 	if (!touch_detected)
 	{
@@ -292,37 +285,19 @@ void Process_Touch(void)
 	// Display touch lifted
 	else if (!TS_State.touchDetected)
 	{
-		uint8_t turn_backlight_on = 1;
-
 		touch_detected = 0;
-		if (display_on)
+		// In the FFT area?
+		if (FFT_Touch())
 		{
-			// In the FFT area?
-			if (FFT_Touch())
-			{
-				cursor = (valx - FFT_X);
-				if (cursor > FFT_W - 8)
-					cursor = FFT_W - 8;
-
-				NCO_Frequency = (double)(cursor + ft8_min_bin) * FFT_Resolution;
-				show_variable(400, 25, (int)NCO_Frequency);
-			}
-			// in the backlight area?
-			else if (LCD_Backlight_Touch())
-			{
-				BSP_LCD_DisplayOff();
-				turn_backlight_on = display_on = 0;
-			}
-			else
-			{
-				checkButton();
-			}
+			cursor = (valx - FFT_X);
+			if (cursor > FFT_W - 8)
+				cursor = FFT_W - 8;
+			NCO_Frequency = (double)(cursor + ft8_min_bin) * FFT_Resolution;
+			show_variable(400, 25, (int)NCO_Frequency);
 		}
-
-		if (turn_backlight_on && !display_on)
+		else
 		{
-			BSP_LCD_DisplayOn();
-			display_on = 1;
+			checkButton();
 		}
 	}
 }
@@ -382,8 +357,8 @@ void Display_WF(void)
 				FT8_Sync();
 				Auto_Sync = 0;
 				noise_free_sets_count = 0;
-				sButtonData[Sync].state = 0;
-				drawButton(Sync);
+				sButtonData[5].state = 0;
+				drawButton(5);
 			}
 		}
 		else
