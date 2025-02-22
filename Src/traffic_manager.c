@@ -25,7 +25,7 @@ int Beacon_State;
 int RSL_sent;
 int QSO_xmit_count;
 int RR73_sent;
-int BlockTmitAfterCQ=0;
+int BlockTmitAfterCQ = 0;
 
 void service_QSO_mode(int decoded_signals)
 {
@@ -97,8 +97,10 @@ void service_Beacon_mode(int decoded_signals)
 		receive_status = Check_Calling_Stations(decoded_signals);
 		if (receive_status == 1)
 		{
-			if(BlockTmitAfterCQ == 1) BlockTmitAfterCQ = 0;
-			else setup_to_transmit_on_next_DSP_Flag();
+			if (BlockTmitAfterCQ == 1)
+				BlockTmitAfterCQ = 0;
+			else
+				setup_to_transmit_on_next_DSP_Flag();
 		}
 		else
 		{
@@ -114,8 +116,10 @@ void service_Beacon_mode(int decoded_signals)
 		receive_status = Check_Calling_Stations(decoded_signals);
 		if (receive_status == 1)
 		{
-			if(BlockTmitAfterCQ == 1) BlockTmitAfterCQ = 0;
-			else setup_to_transmit_on_next_DSP_Flag();
+			if (BlockTmitAfterCQ == 1)
+				BlockTmitAfterCQ = 0;
+			else
+				setup_to_transmit_on_next_DSP_Flag();
 		}
 		Beacon_State = 1;
 		break;

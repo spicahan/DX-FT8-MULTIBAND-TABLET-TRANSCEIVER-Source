@@ -11,9 +11,9 @@
 #include <math.h>
 #include "arm_math.h"
 
-extern char Locator[5]; // four character locator  + /0
-extern char Station_Call[7]; //six character call sign + /0
-extern char Target_Call[7]; //six character call sign + /0
+extern char Locator[5];        // four character locator  + /0
+extern char Station_Call[7];   // six character call sign + /0
+extern char Target_Call[7];    // six character call sign + /0
 extern char Target_Locator[5]; // four character locator  + /0
 extern int Target_RSL;
 
@@ -22,13 +22,13 @@ extern char reply_message_list[18][8];
 extern int reply_message_count;
 
 extern char SDPath[4]; /* SD card logical drive path */
-//static char Extra_Data[13];
-static char Free_Text1[20];
-static char Free_Text2[20];
 
 extern int CQ_Mode_Index;
 extern int Free_Index;
 extern int Send_Free;
+
+extern int CQ_Mode_Index;
+extern int Free_Index;
 
 void clear_reply_message_box(void);
 void set_reply(uint16_t index);

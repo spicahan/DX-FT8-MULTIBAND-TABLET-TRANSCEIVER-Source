@@ -73,13 +73,52 @@ enum BandIndex
 	NumBands = 7
 };
 
+enum ButtonIds
+{
+	First = 0,
+	Clear = 0,
+	QSOBeacon,
+	Tune,
+	CQFree,
+	FixedReceived,
+	Sync,
+	GainDown,
+	GainUp,
+	FreqDown,
+	FreqUp,
+	BandDown,
+	BandUp,
+	TxCalibrate,
+	SaveBand,
+	SaveRTCTime,
+	HourDown,
+	HourUp,
+	MinuteDown,
+	MinuteUp,
+	SecondDown,
+	SecondUp,
+	DayDown,
+	DayUp,
+	MonthDown,
+	MonthUp,
+	YearDown,
+	YearUp,
+	SaveRTCDate,
+	RxTx,
+	StandardCQ,
+	CQDX,
+	CQPOTA,
+	QRPP,
+	FreeText1,
+	FreeText2,
+	NumButtons = 35
+};
+
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
 extern int Beacon_On;
 extern int Arm_Tune;
 extern int Auto_Sync;
 extern int QSO_Fix;
-extern int Send_Free;
-extern int Choose_Free;
 extern uint16_t start_freq;
 extern int BandIndex;
 extern int Band_Minimum;

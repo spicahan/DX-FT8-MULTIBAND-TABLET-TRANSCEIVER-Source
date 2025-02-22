@@ -40,10 +40,10 @@
 
 #include "button.h"
 
-char Station_Call[7];	  // six character call sign + /0
-char Locator[5];		  // four character locator  + /0
-char Target_Call[7];	  // six character call sign + /0
-char Target_Locator[5];	  // four character locator  + /0
+char Station_Call[7];	// six character call sign + /0
+char Locator[5];		// four character locator  + /0
+char Target_Call[7];	// six character call sign + /0
+char Target_Locator[5]; // four character locator  + /0
 int Station_RSL;
 
 char reply_message[21];
@@ -61,29 +61,56 @@ static FATFS FS;
 static FIL fil;
 
 const char CQ[] = "CQ";
+const char CQ_DX[] = "CQ_DX";
+const char CQ_POTA[] = "CQ_POTA";
+const char CQ_QRPP[] = "QRPP";
 const char Beacon_seventy_three[] = "RR73";
 const char QSO_seventy_three[] = "73";
 const uint8_t blank[] = "                  ";
 
 int Free_Text_Max = 0;
+static char Free_Text1[20];
+static char Free_Text2[20];
 
 void set_cq(void)
 {
 	char message[28];
 	uint8_t packed[K_BYTES];
-	if(Send_Free == 0 ){
-		if(CQ_Mode_Index == 0)
-			sprintf(message, "CQ %s %s", Station_Call, Locator);
-		else if(CQ_Mode_Index == 1)
-			sprintf(message, "CQ_DX %s %s", Station_Call, Locator);
-		else if(CQ_Mode_Index == 2)
-			sprintf(message, "CQ_POTA %s %s", Station_Call, Locator);
-		else //if(CQ_Mode_Index == 3)
-			sprintf(message, "CQ_QRPP %s %s", Station_Call, Locator);
+	if (Free_Index == 0)
+	{
+		const char *mode = CQ;
+		switch (CQ_Mode_Index)
+		{
+			case 0:
+			default:
+				break;
+			case 1:
+				mode = CQ_DX;
+				break;
+			case 2:
+				mode = CQ_POTA;
+				break;
+			case 3:
+				mode = CQ_QRPP;
+				break;
+		}
+
+		sprintf(message, "%s %s %s", mode, Station_Call, Locator);
 	}
-	else {//if(Send_Free == 1)
-		if(Free_Index == 1) sprintf(message, "%s", Free_Text1);
-		else if(Free_Index == 2) sprintf(message, "%s", Free_Text2);
+	else
+	{
+		switch(Free_Index)
+		{
+			default:
+			case 0:
+				break;
+			case 1:
+				sprintf(message, "%s", Free_Text1);
+				break;
+			case 2:
+				sprintf(message, "%s", Free_Text2);
+				break;
+		}
 	}
 
 	pack77(message, packed);
@@ -186,6 +213,27 @@ void clear_xmit_messages(void)
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
 }
 
+static void set_text(char *text, const char *source, int field_id)
+{
+	strcpy(text, source);
+	for (int i = 0; i < strlen(text); ++i)
+	{
+		if (!isalnum((int)text[i]))
+		{
+			text[0] = 0;
+			break;
+		}
+	}
+
+	if (field_id >= 0)
+	{
+		sButtonData[field_id].text0 = text;
+		sButtonData[field_id].text1 = text;
+	}
+}
+
+static const char* delimiters = ":\r\n";
+
 void Read_Station_File(void)
 {
 	uint16_t result = 0;
@@ -195,15 +243,20 @@ void Read_Station_File(void)
 	f_mount(&FS, SDPath, 1);
 	if (f_open(&fil, "StationData.txt", FA_OPEN_ALWAYS | FA_READ) == FR_OK)
 	{
-		char *call_part, *locator_part = NULL, *extra_part = NULL;
+		char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
 		memset(read_buffer, 0, sizeof(read_buffer));
 		f_lseek(&fil, 0);
 		f_gets(read_buffer, sizeof(read_buffer), &fil);
 
 		Station_Call[0] = 0;
-		call_part = strtok(read_buffer, ":\r\n");
+		call_part = strtok(read_buffer, delimiters);
 		if (call_part != NULL)
-			locator_part = strtok(NULL, ":\r\n");
+			locator_part = strtok(NULL, delimiters);
+		if (locator_part != NULL)
+			free_text1_part = strtok(NULL, delimiters);
+		if (free_text1_part != NULL)
+			free_text2_part = strtok(NULL, delimiters);
+
 		if (call_part != NULL)
 		{
 			i = strlen(call_part);
@@ -228,42 +281,28 @@ void Read_Station_File(void)
 			i = strlen(locator_part);
 			result = i > 0 && i < sizeof(Locator) ? 1 : 0;
 			if (result != 0)
-			{
-				strcpy(Locator, locator_part);
-				for (i = 0; i < strlen(Locator); ++i)
-				{
-					if (!isalnum((int)Locator[i]))
-					{
-						Locator[0] = 0;
-						break;
-					}
-				}
-			}
+				set_text(Locator, locator_part, -1);
 		}
 
 		Free_Text1[0] = 0;
-		extra_part = strtok(NULL, ":\r\n");
-		if (extra_part != NULL)
+		if (result != 0 && free_text1_part != NULL)
 		{
-            strncpy(Free_Text1, extra_part, sizeof(Free_Text1) - 1);
-            Free_Text1[sizeof(Free_Text1) - 1] = 0; // Null-terminate
-            Free_Text_Max = 1;
-            sButtonData[33].text0 = Free_Text1;
-            sButtonData[33].text1 = Free_Text1;
+			i = strlen(free_text1_part);
+			result = i < sizeof(Free_Text1) ? 1 : 0;
+			if (i > 0 && result != 0)
+				set_text(Free_Text1, free_text1_part, FreeText1);
 		}
+
 		Free_Text2[0] = 0;
-		extra_part = strtok(NULL, ":\r\n");
-		if (extra_part != NULL)
+		if (result != 0 && free_text2_part != NULL)
 		{
-            strncpy(Free_Text2, extra_part, sizeof(Free_Text2) - 1);
-            Free_Text2[sizeof(Free_Text2) - 1] = 0; // Null-terminate
-            Free_Text_Max = 2;
-            sButtonData[34].text0 = Free_Text2;
-            sButtonData[34].text1 = Free_Text2;
+			i = strlen(free_text2_part);
+			result = i < sizeof(Free_Text2) ? 1 : 0;
+			if (i > 0 && result != 0)
+				set_text(Free_Text2, free_text2_part, FreeText2);
 		}
 
 		f_close(&fil);
-
 	}
 }
 
