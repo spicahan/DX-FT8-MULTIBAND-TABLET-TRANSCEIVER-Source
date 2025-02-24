@@ -433,7 +433,7 @@ ButtonStruct sButtonData[] = {
 	 /*state*/ 0,
 	 /*x*/ 168,
 	 /*y*/ line2,
-	 /*w*/ 0, // setting the width and height to 0 turns off touch response , display only
+	 /*w*/ 0, // display only
 	 /*h*/ 30},
 
 	{// button 29 Standard CQ
@@ -533,7 +533,7 @@ void drawButton(uint16_t button)
 
 void checkButton(void)
 {
-	for (uint16_t button = First; button < NumButtons; button++)
+	for (uint16_t button = Clear; button < NumButtons; button++)
 	{
 		if (testButton(sButtonData[button].x, sButtonData[button].y, sButtonData[button].w,
 					   sButtonData[button].h) == 1)
@@ -937,16 +937,13 @@ void erase_Cal_Display(void)
 		sButtonData[button].Active = 0;
 	}
 
-	for (int button = StandardCQ; button <= FreeText2; ++button)
-	{
+	for (int button = StandardCQ; button <= FreeText2; ++button){
 		sButtonData[button].Active = 0;
 		drawButton(button);
 	}
 
 	for (int button = TxCalibrate; button <= SaveRTCTime; ++button)
-	{
 		sButtonData[button].state = 0;
-	}
 
 	sButtonData[SaveRTCDate].state = 0;
 	sButtonData[RxTx].Active = 1;

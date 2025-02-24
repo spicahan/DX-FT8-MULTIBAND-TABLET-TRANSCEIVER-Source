@@ -75,7 +75,6 @@ enum BandIndex
 
 enum ButtonIds
 {
-	First = 0,
 	Clear = 0,
 	QSOBeacon,
 	Tune,
