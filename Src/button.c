@@ -577,7 +577,6 @@ void executeButton(uint16_t index)
 		clear_reply_message_box();
 		clear_log_stored_data();
 		clear_log_messages();
-
 		toggle_button_state(Clear);
 		break;
 
@@ -623,14 +622,14 @@ void executeButton(uint16_t index)
 		break;
 
 	case CQFree:
-		if (sButtonData[CQFree].state == 0 && Free_Index != 0)
+		if (!sButtonData[CQFree].state && Free_Index != 0)
 		{
 			Free_Index = 0;
 		}
 		break;
 
 	case FixedReceived:
-		if (sButtonData[FixedReceived].state == 1)
+		if (sButtonData[FixedReceived].state)
 			QSO_Fix = 1;
 		else
 			QSO_Fix = 0;
@@ -721,7 +720,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case StandardCQ:
-		if (sButtonData[StandardCQ].state == 1)
+		if (sButtonData[StandardCQ].state)
 		{
 			CQ_Mode_Index = 0;
 			reset_buttons(CQDX, CQPOTA, QRPP, " CQ ");
@@ -729,7 +728,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case CQDX:
-		if (sButtonData[CQDX].state == 1)
+		if (sButtonData[CQDX].state)
 		{
 			CQ_Mode_Index = 1;
 			reset_buttons(StandardCQ, CQPOTA, QRPP, " DX ");
@@ -737,7 +736,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case CQPOTA:
-		if (sButtonData[CQPOTA].state == 1)
+		if (sButtonData[CQPOTA].state)
 		{
 			CQ_Mode_Index = 2;
 			reset_buttons(StandardCQ, CQDX, QRPP, "POTA");
@@ -745,7 +744,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case QRPP:
-		if (sButtonData[QRPP].state == 1)
+		if (sButtonData[QRPP].state)
 		{
 			CQ_Mode_Index = 3;
 			reset_buttons(StandardCQ, CQDX, CQPOTA, "QRPP");
@@ -756,7 +755,7 @@ void executeButton(uint16_t index)
 		Free_Index = 0;
 		sButtonData[FreeText2].state = 0;
 		drawButton(FreeText2);
-		if (sButtonData[FreeText1].state == 1)
+		if (sButtonData[FreeText1].state)
 		{
 			Free_Index = 1;
 		}
@@ -770,7 +769,7 @@ void executeButton(uint16_t index)
 		Free_Index = 0;
 		sButtonData[FreeText1].state = 0;
 		drawButton(FreeText1);
-		if (sButtonData[FreeText2].state == 1)
+		if (sButtonData[FreeText2].state)
 		{
 			Free_Index = 2;
 		}
