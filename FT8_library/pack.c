@@ -28,19 +28,19 @@ int32_t pack28(const char *callsign) {
 	int32_t MAX22 = 4194304L;
 
 	// Check for special tokens first
-	if (memcmp(callsign, "DE ", 3))
+	if (memcmp(callsign, "DE ", 3) == 0)
 		return 0;
-	if (memcmp(callsign, "QRZ ", 3))
+	if (memcmp(callsign, "QRZ ", 3) == 0)
 		return 1;
-	if (memcmp(callsign, "CQ SOTA ", 8))
+	if (memcmp(callsign, "CQ SOTA ", 8) == 0)
 		return 386456;
-	if (memcmp(callsign, "CQ POTA ", 8))
+	if (memcmp(callsign, "CQ POTA ", 8) == 0)
 		return 327407;
-	if (memcmp(callsign, "CQ QRP ", 7))
+	if (memcmp(callsign, "CQ QRP ", 7) == 0)
 		return 349184;
-	if (memcmp(callsign, "CQ DX ", 6))
+	if (memcmp(callsign, "CQ DX ", 6) == 0)
 		return 1135;
-	if (memcmp(callsign, "CQ ", 3))
+	if (memcmp(callsign, "CQ ", 3) == 0)
 		return 2;
 
 	char c6[6] = "      ";

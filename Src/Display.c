@@ -154,7 +154,7 @@ void show_short(uint16_t x, uint16_t y, uint8_t variable)
 	sprintf(string, "%2i", variable);
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
-	BSP_LCD_DisplayStringAt(x, y, (const uint8_t *)string, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(x, y, (const uint8_t *)string, CENTER_MODE);
 }
 
 void show_UTC_time(uint16_t x, uint16_t y, int utc_hours, int utc_minutes,
@@ -193,7 +193,7 @@ void setup_display(void)
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9.2", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
 	BSP_LCD_DisplayStringAt(50, 160,
@@ -215,7 +215,7 @@ void setup_display(void)
 		BSP_LCD_DisplayStringAt(50, 200, (const uint8_t *)callOrLocator, LEFT_MODE);
 	}
 
-	for (int buttonId = 0; buttonId <= 9; ++buttonId)
+	for (int buttonId = Clear; buttonId <= FreqUp; ++buttonId)
 		drawButton(buttonId);
 }
 
@@ -237,14 +237,22 @@ uint16_t testButton(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 	return 0;
 }
 
-static uint16_t FFT_Touch()
+static uint8_t FFT_Touch()
 {
 	if ((valx > FFT_X && valx < FFT_X + FFT_W) && (valy > FFT_Y && valy < 30))
 		return 1;
 	return 0;
 }
 
-static int FT8_Touch(void)
+static uint8_t LCD_Backlight_Touch()
+{
+	// Touch on the 'frequency' area top right of the display
+	if ((valx > FFT_W) && (valy < 25))
+		return 1;
+	return 0;
+}
+
+static uint8_t FT8_Touch(void)
 {
 	if ((valx > 0 && valx < 240) && (valy > 40 && valy < 240))
 	{
@@ -260,19 +268,20 @@ static int FT8_Touch(void)
 void Process_Touch(void)
 {
 	static uint8_t touch_detected = 0;
+	static uint8_t display_on = 1;
 
 	TS_StateTypeDef TS_State;
 	BSP_TS_GetState(&TS_State);
 
 	if (!Tune_On && !xmit_flag && !Beacon_On)
-		sButtonData[5].state = 0;
+		sButtonData[Sync].state = 0;
 	else
-		sButtonData[5].state = 1;
+		sButtonData[Sync].state = 1;
 
 	if (!touch_detected)
 	{
 		// Display touched?
-		if  (TS_State.touchDetected)
+		if (TS_State.touchDetected)
 		{
 			valx = (uint16_t)TS_State.touchX[0];
 			valy = (uint16_t)TS_State.touchY[0];
@@ -285,19 +294,37 @@ void Process_Touch(void)
 	// Display touch lifted
 	else if (!TS_State.touchDetected)
 	{
+		uint8_t turn_backlight_on = 1;
+
 		touch_detected = 0;
-		// In the FFT area?
-		if (FFT_Touch())
+		if (display_on)
 		{
-			cursor = (valx - FFT_X);
-			if (cursor > FFT_W - 8)
-				cursor = FFT_W - 8;
-			NCO_Frequency = (double)(cursor + ft8_min_bin) * FFT_Resolution;
-			show_variable(400, 25, (int)NCO_Frequency);
+			// In the FFT area?
+			if (FFT_Touch())
+			{
+				cursor = (valx - FFT_X);
+				if (cursor > FFT_W - 8)
+					cursor = FFT_W - 8;
+
+				NCO_Frequency = (double)(cursor + ft8_min_bin) * FFT_Resolution;
+				show_variable(400, 25, (int)NCO_Frequency);
+			}
+			// in the backlight area?
+			else if (LCD_Backlight_Touch())
+			{
+				BSP_LCD_DisplayOff();
+				turn_backlight_on = display_on = 0;
+			}
+			else
+			{
+				checkButton();
+			}
 		}
-		else
+
+		if (turn_backlight_on && !display_on)
 		{
-			checkButton();
+			BSP_LCD_DisplayOn();
+			display_on = 1;
 		}
 	}
 }
@@ -322,7 +349,7 @@ void Display_WF(void)
 
 	// draw the waterfall
 	// Draw from the bottom to the top
-	uint8_t* ptr = &WF_Bfr[byte_count_to_last_line];
+	uint8_t *ptr = &WF_Bfr[byte_count_to_last_line];
 	for (int y = FFT_H - 1; y >= 0; y--)
 	{
 		for (int x = 0; x < FFT_W; x++)
@@ -331,10 +358,10 @@ void Display_WF(void)
 		}
 
 		ptr -= (FFT_W * 2);
-		
-		BSP_LCD_DrawPixel(cursor, y, LCD_COLOR_RED);
+
+		BSP_LCD_DrawPixel(cursor, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
 		// Each FFT datum is 6.25hz, the transmit bandwidth is 50Hz (= 8 pixels)
-		BSP_LCD_DrawPixel(cursor + 8, y, LCD_COLOR_RED);
+		BSP_LCD_DrawPixel(cursor + 8, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
 	}
 
 	if (!ft8_marker && Auto_Sync)
@@ -357,8 +384,8 @@ void Display_WF(void)
 				FT8_Sync();
 				Auto_Sync = 0;
 				noise_free_sets_count = 0;
-				sButtonData[5].state = 0;
-				drawButton(5);
+				sButtonData[Sync].state = 0;
+				drawButton(Sync);
 			}
 		}
 		else
