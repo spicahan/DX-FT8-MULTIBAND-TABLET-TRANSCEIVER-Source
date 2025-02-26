@@ -559,6 +559,12 @@ static void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
 	drawButton(CQFree);
 }
 
+static void update_CQFree_button()
+{
+	sButtonData[CQFree].state = 0;	
+	drawButton(CQFree);
+}
+
 void executeButton(uint16_t index)
 {
 	switch (index)
@@ -617,10 +623,9 @@ void executeButton(uint16_t index)
 		break;
 
 	case CQFree:
-		if (sButtonData[CQFree].state == 1 && Free_Index > 0)
+		if (sButtonData[CQFree].state == 0 && Free_Index != 0)
 		{
-			sButtonData[CQFree].state = 0;
-			drawButton(CQFree);
+			Free_Index = 0;
 		}
 		break;
 
@@ -749,21 +754,29 @@ void executeButton(uint16_t index)
 
 	case FreeText1:
 		Free_Index = 0;
+		sButtonData[FreeText2].state = 0;
+		drawButton(FreeText2);
 		if (sButtonData[FreeText1].state == 1)
 		{
-			sButtonData[FreeText2].state = 0;
-			drawButton(FreeText2);
 			Free_Index = 1;
+		}
+		else
+		{
+			update_CQFree_button();
 		}
 		break;
 
 	case FreeText2:
 		Free_Index = 0;
+		sButtonData[FreeText1].state = 0;
+		drawButton(FreeText1);
 		if (sButtonData[FreeText2].state == 1)
 		{
-			sButtonData[FreeText1].state = 0;
-			drawButton(FreeText1);
 			Free_Index = 2;
+		}
+		else
+		{
+			update_CQFree_button();
 		}
 		break;
 	}
