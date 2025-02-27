@@ -15,9 +15,9 @@ static int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 		if (n28 <= 2) {
 			if (n28 == 0)
 				strcpy(result, "DE");
-			if (n28 == 1)
+			else if (n28 == 1)
 				strcpy(result, "QRZ");
-			if (n28 == 2)
+			else if (n28 == 2)
 				strcpy(result, "CQ");
 			return 0;   // Success
 		}
@@ -175,7 +175,7 @@ static int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *fiel
 			}
 			int_to_dd(dst, irpt - 35, 2, 1);
 		}
-		// if(msg(1:3).eq.'CQ ' .and. irpt.ge.2) unpk77_success=.false.
+		// if(msg(1:3).eq.'CQ ' .and. irpt.ge.2) unpk77_success=.0.
 		// if (irpt >= 2 && strncmp(field1, "CQ", 2) == 0) return -1;
 	}
 

@@ -81,8 +81,8 @@ void set_cq(void)
 		const char *mode = NULL;
 		switch (CQ_Mode_Index)
 		{
-			case 0:
 			default:
+			case 0:
 				break;
 			case 1:
 				mode = DX;
@@ -101,7 +101,7 @@ void set_cq(void)
 		}
 		else
 		{
-			sprintf(message, "%s %s %s %s", CQ, mode, Station_Call, Locator);
+			sprintf(message, "%s_%s %s %s", CQ, mode, Station_Call, Locator);
 		}
 	}
 	else
@@ -112,10 +112,10 @@ void set_cq(void)
 			case 0:
 				break;
 			case 1:
-				sprintf(message, "%s", Free_Text1);
+				strcpy(message, Free_Text1);
 				break;
 			case 2:
-				sprintf(message, "%s", Free_Text2);
+				strcpy(message, Free_Text2);
 				break;
 		}
 	}

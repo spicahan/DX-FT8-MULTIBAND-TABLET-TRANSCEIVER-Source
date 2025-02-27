@@ -32,13 +32,13 @@ static int32_t pack28(const char *callsign) {
 		return 0;
 	if (memcmp(callsign, "QRZ ", 3) == 0)
 		return 1;
-	if (memcmp(callsign, "CQ SOTA ", 8) == 0)
+	if (memcmp(callsign, "CQ_SOTA ", 8) == 0)
 		return 386456;
-	if (memcmp(callsign, "CQ POTA ", 8) == 0)
+	if (memcmp(callsign, "CQ_POTA ", 8) == 0)
 		return 327407;
-	if (memcmp(callsign, "CQ QRP ", 7) == 0)
+	if (memcmp(callsign, "CQ_QRP ", 7) == 0)
 		return 349184;
-	if (memcmp(callsign, "CQ DX ", 6) == 0)
+	if (memcmp(callsign, "CQ_DX ", 6) == 0)
 		return 1135;
 	if (memcmp(callsign, "CQ ", 3) == 0)
 		return 2;
