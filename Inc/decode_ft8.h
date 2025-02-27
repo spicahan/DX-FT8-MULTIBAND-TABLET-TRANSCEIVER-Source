@@ -9,11 +9,6 @@
 #define DECODE_FT8_H_
 
 extern int Auto_QSO_State;
-extern char Locator[5];          // four character locator  + /0
-extern char Station_Call[7];     // six character call sign + /0
-extern char Target_Call[7];      // six character call sign + /0
-extern char Target_Locator[5];   // four character locator  + /0
-extern char RSL[5];
 extern int Station_RSL;
 extern int Target_RSL;
 
@@ -45,7 +40,6 @@ typedef struct
     int RSL;
     int received_RSL;
     int RR73;
-
 } Calling_Station;
 
 int Check_Calling_Stations(int num_decoded);
@@ -54,5 +48,6 @@ void process_selected_Station(int stations_decoded, int TouchIndex);
 void clear_log_stored_data(void);
 void set_QSO_Xmit_Freq(int freq);
 void clear_decoded_messages(void);
+void string_init(char *string, int size, uint8_t *is_initialised, char character);
 
 #endif /* DECODE_FT8_H_ */

@@ -2,10 +2,6 @@
 
 #include <string.h>
 
-extern _Bool true;
-extern _Bool false;
-
-
 const char * trim_front(const char *str) {
     // Skip leading whitespace
     while (*str == ' ') {
@@ -16,9 +12,9 @@ const char * trim_front(const char *str) {
 
 void trim_back(char *str) {
     // Skip trailing whitespace by replacing it with '\0' characters
-    int idx = strlen(str) - 1;
+    size_t idx = strlen(str) - 1;
     while (idx >= 0 && str[idx] == ' ') {
-        str[idx--] = '\0';
+        str[idx--] = 0;
     }
 }
 
@@ -69,6 +65,13 @@ int char_index(const char *string, char c) {
     return -1;  // Not found
 }
 
+#ifndef stpcpy
+char* stpcpy(char* dst, const char* src)
+{
+    strcpy(dst, src);
+    return dst + strlen(src);
+}
+#endif
 
 // Text message formatting:
 //   - replaces lowercase letters with uppercase
@@ -94,11 +97,11 @@ int dd_to_int(const char *str, int length) {
     _Bool negative;
     int i;
     if (str[0] == '-') {
-        negative = true;
+        negative = 1;
         i = 1;                          // Consume the - sign
     }
     else {
-        negative = false;
+        negative = 0;
         i = (str[0] == '+') ? 1 : 0;    // Consume a + sign if found
     }
 
