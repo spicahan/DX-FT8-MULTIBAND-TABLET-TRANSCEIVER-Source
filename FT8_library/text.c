@@ -2,10 +2,6 @@
 
 #include <string.h>
 
-extern _Bool true;
-extern _Bool false;
-
-
 const char * trim_front(const char *str) {
     // Skip leading whitespace
     while (*str == ' ') {
@@ -94,11 +90,11 @@ int dd_to_int(const char *str, int length) {
     _Bool negative;
     int i;
     if (str[0] == '-') {
-        negative = true;
+        negative = 1;
         i = 1;                          // Consume the - sign
     }
     else {
-        negative = false;
+        negative = 0;
         i = (str[0] == '+') ? 1 : 0;    // Consume a + sign if found
     }
 

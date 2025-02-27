@@ -3,17 +3,13 @@
 
 #include <string.h>
 
-extern _Bool true;
-extern _Bool false;
-
-//const uint32_t NBASE = 37L*36L*10L*27L*27L*27L;
 const uint32_t MAX22 = 4194304L;
 const uint32_t NTOKENS = 2063592L;
 const uint16_t MAXGRID4 = 32400L;
 
 // n28 is a 28-bit integer, e.g. n28a or n28b, containing all the
 // call sign bits from a packed message.
-int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
+static int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 	// Check for special tokens DE, QRZ, CQ, CQ_nnn, CQ_aaaa
 	if (n28 < NTOKENS) {
 		if (n28 <= 2) {
@@ -28,7 +24,7 @@ int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 		if (n28 <= 1002) {
 			// CQ_nnn with 3 digits
 			strcpy(result, "CQ ");
-			int_to_dd(result + 3, n28 - 3, 3, true);
+			int_to_dd(result + 3, n28 - 3, 3, 1);
 			return 0;   // Success
 		}
 		if (n28 <= 532443L) {
@@ -59,7 +55,7 @@ int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 		// TODO: implement
 		// strcpy(result, "<...>");
 		result[0] = '<';
-		int_to_dd(result + 1, n28, 7, true);
+		int_to_dd(result + 1, n28, 7, 1);
 		result[8] = '>';
 		result[9] = '\0';
 		return 0;
@@ -99,7 +95,7 @@ int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 	return 0;   // Success
 }
 
-int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
+static int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
 		char *field3) {
 	uint32_t n28a, n28b;
 	uint16_t igrid4;
@@ -177,7 +173,7 @@ int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
 			if (ir > 0) {
 				*dst++ = 'R'; // Add "R" before report
 			}
-			int_to_dd(dst, irpt - 35, 2, true);
+			int_to_dd(dst, irpt - 35, 2, 1);
 		}
 		// if(msg(1:3).eq.'CQ ' .and. irpt.ge.2) unpk77_success=.false.
 		// if (irpt >= 2 && strncmp(field1, "CQ", 2) == 0) return -1;
@@ -213,7 +209,7 @@ int unpack_text(const uint8_t *a71, char *text) {
 	return 0;       // Success
 }
 
-int unpack_telemetry(const uint8_t *a71, char *telemetry) {
+static int unpack_telemetry(const uint8_t *a71, char *telemetry) {
 	uint8_t b71[9];
 
 	// Shift bits in a71 right by 1
@@ -239,7 +235,7 @@ int unpack_telemetry(const uint8_t *a71, char *telemetry) {
 
 //none standard for wsjt-x 2.0
 //by KD8CEC
-int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
+static int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
 		char *field3) {
 	/*
 	 wsjt-x 2.1.0 rc5
@@ -279,7 +275,7 @@ int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
 	// should replace with hash12(n12, call_3);
 	// strcpy(call_3, "<...>");
 	call_3[0] = '<';
-	int_to_dd(call_3 + 1, n12, 4, true);
+	int_to_dd(call_3 + 1, n12, 4, 1);
 	call_3[5] = '>';
 	call_3[6] = '\0';
 

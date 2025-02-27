@@ -22,7 +22,7 @@ const char A4[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 // Pack a special token, a 22-bit hash code, or a valid base call
 // into a 28-bit integer.
-int32_t pack28(const char *callsign) {
+static int32_t pack28(const char *callsign) {
 
 	int32_t NTOKENS = 2063592L;
 	int32_t MAX22 = 4194304L;
@@ -89,31 +89,30 @@ int32_t pack28(const char *callsign) {
 	return -1;
 }
 
-_Bool true = 1;
-_Bool false = 0;
-
 // Check if a string could be a valid standard callsign or a valid
 // compound callsign.
 // Return base call "bc" and a logical "cok" indicator.
-_Bool chkcall(const char *call) {
+#if 0
+static _Bool chkcall(const char *call) {
 	int length = strlen(call);   // n1=len_trim(w)
 	if (length > 11)
-		return false;
+		return 0;
 	if (0 != strchr(call, '.'))
-		return false;
+		return 0;
 	if (0 != strchr(call, '+'))
-		return false;
+		return 0;
 	if (0 != strchr(call, '-'))
-		return false;
+		return 0;
 	if (0 != strchr(call, '?'))
-		return false;
+		return 0;
 	if (length > 6 && 0 != strchr(call, '/'))
-		return false;
+		return 0;
 
-	return true;
+	return 1;
 }
+#endif
 
-uint16_t packgrid(const char *grid4) {
+static uint16_t packgrid(const char *grid4) {
 	uint16_t MAXGRID4 = 32400;
 
 	if (grid4 == 0) {
@@ -156,7 +155,7 @@ uint16_t packgrid(const char *grid4) {
 }
 
 // Pack Type 1 (Standard 77-bit message) and Type 2 (ditto, with a "/P" call)
-int pack77_1(const char *msg, uint8_t *b77) {
+static int pack77_1(const char *msg, uint8_t *b77) {
 	// Locate the first delimiter
 	const char *s1 = strchr(msg, ' ');
 	if (s1 == 0)
@@ -206,7 +205,7 @@ int pack77_1(const char *msg, uint8_t *b77) {
 	return 0;
 }
 
-void packtext77(const char *text, uint8_t *b77) {
+static void packtext77(const char *text, uint8_t *b77) {
 	int length = strlen(text);
 
 	// Skip leading and trailing spaces
@@ -273,11 +272,7 @@ int pack77(const char *msg, uint8_t *c77) {
 
 #ifdef UNIT_TEST
 
-#include <iostream>
-
-using namespace std;
-
-bool test1() {
+int test1() {
     const char *inputs[] = {
         "",
         " ",
@@ -293,14 +288,14 @@ bool test1() {
     };
 
     for (int i = 0; inputs[i]; ++i) {
-        int32_t result = ft8_v2::pack28(inputs[i]);
+        int32_t result = pack28(inputs[i]);
         printf("pack28(\"%s\") = %d\n", inputs[i], result);
     }
 
-    return true;
+    return 1;
 }
 
-bool test2() {
+int test2() {
     const char *inputs[] = {
         "CQ LL3JG",
         "CQ LL3JG KO26",
@@ -313,7 +308,7 @@ bool test2() {
 
     for (int i = 0; inputs[i]; ++i) {
         uint8_t result[10];
-        int rc = ft8_v2::pack77_1(inputs[i], result);
+        int rc = pack77_1(inputs[i], result);
         printf("pack77_1(\"%s\") = %d\t[", inputs[i], rc);
         for (int j = 0; j < 10; ++j) {
             printf("%02x ", result[j]);
@@ -321,7 +316,7 @@ bool test2() {
         printf("]\n");
     }
 
-    return true;
+    return 1;
 }
 
 int main() {
