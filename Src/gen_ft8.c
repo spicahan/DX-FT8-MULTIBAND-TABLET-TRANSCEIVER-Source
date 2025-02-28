@@ -101,7 +101,7 @@ void set_cq(void)
 		}
 		else
 		{
-			sprintf(message, "%s_%s %s %s", CQ, mode, Station_Call, Locator);
+			sprintf(message, "%s %s %s %s", CQ, mode, Station_Call, Locator);
 		}
 	}
 	else
