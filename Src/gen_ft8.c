@@ -225,7 +225,7 @@ static void set_text(char *text, const char *source, int field_id)
 	strcpy(text, source);
 	for (int i = 0; i < strlen(text); ++i)
 	{
-		if (!isalnum((int)text[i]))
+		if (!isprint((int)text[i]))
 		{
 			text[0] = 0;
 			break;
@@ -245,7 +245,7 @@ void Read_Station_File(void)
 {
 	uint16_t result = 0;
 	size_t i;
-	char read_buffer[64];
+	char read_buffer[128];
 
 	f_mount(&FS, SDPath, 1);
 	if (f_open(&fil, "StationData.txt", FA_OPEN_ALWAYS | FA_READ) == FR_OK)
