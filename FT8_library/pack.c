@@ -31,6 +31,7 @@ static const char SOTA_[5] = "SOTA ";
 static const char RRR[4] = "RRR";
 static const char RR73[5] = "RR73";
 static const char _73[3] = "73";
+static const char SlashP[2] = "/P";
 
 // Pack a special token, a 22-bit hash code, or a valid base call
 // into a 28-bit integer.
@@ -70,7 +71,7 @@ int32_t pack28(const char* callsign)
         length -= 2;
     }
     
-    // Copy callsign to 6 character buffer
+    // Copy callsign intto 6 character buffer
     if (starts_with(callsign, "3DA0") && length <= 7)
     {
         // Work-around for Swaziland prefix: 3DA0XYZ -> 3D0XYZ
@@ -126,7 +127,7 @@ static uint8_t has_suffix(const char* str)
     {
         first = str;
     }
-    return memcmp(first - 2, "/P", 2) == 0;
+    return memcmp(first - 2, SlashP, sizeof(SlashP)) == 0;
 }
 
 static uint16_t packgrid(const char* grid4)
@@ -269,10 +270,7 @@ static void packtext77(const char* text, uint8_t* b77)
     }
 
     // Clear the first 72 bits representing a long number
-    for (int i = 0; i < 9; ++i)
-    {
-        b77[i] = 0;
-    }
+    memset(b77, 0, 9);
 
     // Now express the text as base-42 number stored
     // in the first 72 bits of b77

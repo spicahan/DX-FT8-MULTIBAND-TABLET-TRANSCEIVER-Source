@@ -239,7 +239,7 @@ static void set_text(char *text, const char *source, int field_id)
 	}
 }
 
-static const char* delimiters = ":\r\n";
+static const char* delimiters = ":;,";
 
 void Read_Station_File(void)
 {
@@ -273,7 +273,7 @@ void Read_Station_File(void)
 				strcpy(Station_Call, call_part);
 				for (i = 0; i < strlen(Station_Call); ++i)
 				{
-					if (!isprint((int)Station_Call[i]) || isspace((int)Station_Call[i]))
+					if (!isprint((int)Station_Call[i]))
 					{
 						Station_Call[0] = 0;
 						break;
