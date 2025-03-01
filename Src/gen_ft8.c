@@ -61,17 +61,32 @@ static uint8_t isInitialized = 0;
 static FATFS FS;
 static FIL fil;
 
+static uint8_t blank[19];
+
 const char CQ[] = "CQ";
 const char DX[] = "DX";
 const char POTA[] = "POTA";
 const char QRP[] = "QRP";
 const char Beacon_seventy_three[] = "RR73";
 const char QSO_seventy_three[] = "73";
-const uint8_t blank[] = "                  ";
 
 int Free_Text_Max = 0;
 static char Free_Text1[MESSAGE_SIZE];
 static char Free_Text2[MESSAGE_SIZE];
+
+static void string_init(char *string, int size, char character)
+{
+	static uint8_t is_initialised = 0;
+	if (is_initialised != size)
+	{
+		for (int i = 0; i < size-1; i++)
+		{
+			string[i] = character;
+		}
+		string[size-1] = 0;
+		is_initialised = size;
+	}
+}
 
 void set_cq(void)
 {
@@ -82,20 +97,20 @@ void set_cq(void)
 		const char *mode = NULL;
 		switch (CQ_Mode_Index)
 		{
-			default:
-			case 0:
-				break;
-			case 1:
-				mode = DX;
-				break;
-			case 2:
-				mode = POTA;
-				break;
-			case 3:
-				mode = QRP;
-				break;
+		default:
+		case 0:
+			break;
+		case 1:
+			mode = DX;
+			break;
+		case 2:
+			mode = POTA;
+			break;
+		case 3:
+			mode = QRP;
+			break;
 		}
-		
+
 		if (mode == NULL)
 		{
 			sprintf(message, "%s %s %s", CQ, Station_Call, Locator);
@@ -107,23 +122,24 @@ void set_cq(void)
 	}
 	else
 	{
-		switch(Free_Index)
+		switch (Free_Index)
 		{
-			default:
-			case 0:
-				break;
-			case 1:
-				strcpy(message, Free_Text1);
-				break;
-			case 2:
-				strcpy(message, Free_Text2);
-				break;
+		default:
+		case 0:
+			break;
+		case 1:
+			strcpy(message, Free_Text1);
+			break;
+		case 2:
+			strcpy(message, Free_Text2);
+			break;
 		}
 	}
 
 	pack77(message, packed);
 	genft8(packed, tones);
 
+	string_init(blank, sizeof(blank), ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
@@ -164,6 +180,7 @@ void set_reply(uint16_t index)
 	pack77(reply_message, packed);
 	genft8(packed, tones);
 
+	string_init(blank, sizeof(blank), ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
@@ -176,7 +193,6 @@ static char xmit_messages[3][MESSAGE_SIZE];
 void compose_messages(void)
 {
 	char RSL[5];
-
 	itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
 
 	sprintf(xmit_messages[0], "%s %s %s", Target_Call, Station_Call, Locator);
@@ -195,6 +211,7 @@ void que_message(int index)
 	pack77(xmit_messages[index], packed);
 	genft8(packed, tones);
 
+	string_init(blank, sizeof(blank), ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, blank, LEFT_MODE);
@@ -240,7 +257,7 @@ static void set_text(char *text, const char *source, int field_id)
 	}
 }
 
-static const char* delimiters = ":;,";
+static const char *delimiters = ":;,";
 
 void Read_Station_File(void)
 {

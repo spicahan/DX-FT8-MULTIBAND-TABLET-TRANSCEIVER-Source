@@ -246,11 +246,27 @@ static int validate_locator(const char locator[])
 		return 0;
 }
 
+static char call_blank[8];
+static char locator_blank[5];
+
+static void string_init(char *string, int size, char character)
+{
+	static uint8_t is_initialised = 0;
+	if (is_initialised != size)
+	{
+		for (int i = 0; i < size-1; i++)
+		{
+			string[i] = character;
+		}
+		string[size-1] = 0;
+		is_initialised = size;
+	}
+}
+
 void clear_log_stored_data(void)
 {
-	const char call_blank[] = "       ";
-	const char locator_blank[] = "    ";
-
+	string_init(call_blank, sizeof(call_blank), ' ');
+	string_init(locator_blank, sizeof(locator_blank), ' ');
 	for (int i = 0; i < log_size; i++)
 	{
 		Answer_CQ[i].number_times_called = 0;
@@ -264,9 +280,8 @@ void clear_log_stored_data(void)
 
 void clear_decoded_messages(void)
 {
-	const char call_blank[] = "       ";
-	const char locator_blank[] = "    ";
-
+	string_init(call_blank, sizeof(call_blank), ' ');
+	string_init(locator_blank, sizeof(locator_blank), ' ');
 	for (int i = 0; i < kMax_decoded_messages; i++)
 	{
 		strcpy(new_decoded[i].call_to, call_blank);
@@ -421,15 +436,14 @@ void set_QSO_Xmit_Freq(int freq)
 
 static int strindex(const char s[], const char t[])
 {
-	int i, j, k, result;
+	int i, j, k;
+	int result = -1;
 
-	result = -1;
-
-	for (i = 0; s[i] != '\0'; i++)
+	for (i = 0; s[i] != 0; i++)
 	{
-		for (j = i, k = 0; t[k] != '\0' && s[j] == t[k]; j++, k++)
+		for (j = i, k = 0; t[k] != 0 && s[j] == t[k]; j++, k++)
 			;
-		if (k > 0 && t[k] == '\0')
+		if (k > 0 && t[k] == 0)
 			result = i;
 	}
 	return result;
