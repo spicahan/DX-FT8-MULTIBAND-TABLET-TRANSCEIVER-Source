@@ -61,7 +61,8 @@ static uint8_t isInitialized = 0;
 static FATFS FS;
 static FIL fil;
 
-static uint8_t blank[19];
+static char blank[19];
+static uint8_t blank_initialised = 0;
 
 const char CQ[] = "CQ";
 const char DX[] = "DX";
@@ -73,20 +74,6 @@ const char QSO_seventy_three[] = "73";
 int Free_Text_Max = 0;
 static char Free_Text1[MESSAGE_SIZE];
 static char Free_Text2[MESSAGE_SIZE];
-
-static void string_init(char *string, int size, char character)
-{
-	static uint8_t is_initialised = 0;
-	if (is_initialised != size)
-	{
-		for (int i = 0; i < size-1; i++)
-		{
-			string[i] = character;
-		}
-		string[size-1] = 0;
-		is_initialised = size;
-	}
-}
 
 void set_cq(void)
 {
@@ -139,10 +126,10 @@ void set_cq(void)
 	pack77(message, packed);
 	genft8(packed, tones);
 
-	string_init(blank, sizeof(blank), ' ');
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
 	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)message, LEFT_MODE);
 }
@@ -180,10 +167,10 @@ void set_reply(uint16_t index)
 	pack77(reply_message, packed);
 	genft8(packed, tones);
 
-	string_init(blank, sizeof(blank), ' ');
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
 	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)reply_message, LEFT_MODE);
 }
@@ -211,10 +198,10 @@ void que_message(int index)
 	pack77(xmit_messages[index], packed);
 	genft8(packed, tones);
 
-	string_init(blank, sizeof(blank), ' ');
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, blank, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)blank, LEFT_MODE);
 
 	BSP_LCD_SetTextColor(LCD_COLOR_RED);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)xmit_messages[index], LEFT_MODE);
@@ -229,13 +216,13 @@ void clear_qued_message(void)
 {
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, blank, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)blank, LEFT_MODE);
 }
 
 void clear_xmit_messages(void)
 {
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
 }
 
 static void set_text(char *text, const char *source, int field_id)

@@ -33,6 +33,7 @@ const int max_log_messages = 8;
 display_message log_messages[8];
 
 static char blank[21];
+static uint8_t blank_initialised = 0;
 
 void update_log_display(int mode)
 {
@@ -72,23 +73,9 @@ void update_log_display(int mode)
 	}
 }
 
-static void string_init(char *string, int size, char character)
-{
-	static uint8_t is_initialised = 0;
-	if (is_initialised != size)
-	{
-		for (int i = 0; i < size-1; i++)
-		{
-			string[i] = character;
-		}
-		string[size-1] = 0;
-		is_initialised = size;
-	}
-}
-
 void clear_log_messages(void)
 {
-	string_init(blank, sizeof(blank), ' ');
+	string_init(blank, sizeof(blank), &blank_initialised,' ');
 
 	for (int i = 0; i < max_log_messages; i++)
 		strcpy(log_messages[i].message, blank);
@@ -140,7 +127,7 @@ void update_Beacon_log_display(int mode)
 
 void clear_Beacon_log_messages(void)
 {
-	string_init(blank, sizeof(blank), ' ');
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 
 	for (int i = 0; i < max_Beacon_log_messages; i++)
 		strcpy(Beacon_log_messages[i].message, blank);

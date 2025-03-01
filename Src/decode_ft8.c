@@ -247,26 +247,14 @@ static int validate_locator(const char locator[])
 }
 
 static char call_blank[8];
+static uint8_t call_initialised = 0;
 static char locator_blank[5];
-
-static void string_init(char *string, int size, char character)
-{
-	static uint8_t is_initialised = 0;
-	if (is_initialised != size)
-	{
-		for (int i = 0; i < size-1; i++)
-		{
-			string[i] = character;
-		}
-		string[size-1] = 0;
-		is_initialised = size;
-	}
-}
+static uint8_t locator_initialised = 0;
 
 void clear_log_stored_data(void)
 {
-	string_init(call_blank, sizeof(call_blank), ' ');
-	string_init(locator_blank, sizeof(locator_blank), ' ');
+	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
+	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
 	for (int i = 0; i < log_size; i++)
 	{
 		Answer_CQ[i].number_times_called = 0;
@@ -280,8 +268,8 @@ void clear_log_stored_data(void)
 
 void clear_decoded_messages(void)
 {
-	string_init(call_blank, sizeof(call_blank), ' ');
-	string_init(locator_blank, sizeof(locator_blank), ' ');
+	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
+	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
 	for (int i = 0; i < kMax_decoded_messages; i++)
 	{
 		strcpy(new_decoded[i].call_to, call_blank);
@@ -447,4 +435,17 @@ static int strindex(const char s[], const char t[])
 			result = i;
 	}
 	return result;
+}
+
+void string_init(char *string, int size, uint8_t *is_initialised, char character)
+{
+	if (*is_initialised != size)
+	{
+		for (int i = 0; i < size-1; i++)
+		{
+			string[i] = character;
+		}
+		string[size-1] = 0;
+		*is_initialised = size;
+	}
 }
