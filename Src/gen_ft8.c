@@ -40,14 +40,15 @@
 
 #include "button.h"
 
-char Station_Call[7];	// six character call sign + /0
-char Locator[5];		// four character locator  + /0
-char Target_Call[7];	// six character call sign + /0
-char Target_Locator[5]; // four character locator  + /0
+char Station_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
+char Locator[5];		// four character locator + null terminator
+char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
+char Target_Locator[5]; // four character locator  + null terminator
 int Station_RSL;
 
-char reply_message[21];
-char reply_message_list[18][8];
+#define MESSAGE_SIZE 25
+char reply_message[MESSAGE_SIZE];
+char reply_message_list[MESSAGE_SIZE][8];
 int reply_message_count;
 
 const int display_start_x = 240;
@@ -69,12 +70,12 @@ const char QSO_seventy_three[] = "73";
 const uint8_t blank[] = "                  ";
 
 int Free_Text_Max = 0;
-static char Free_Text1[20];
-static char Free_Text2[20];
+static char Free_Text1[MESSAGE_SIZE];
+static char Free_Text2[MESSAGE_SIZE];
 
 void set_cq(void)
 {
-	char message[28];
+	char message[23];
 	uint8_t packed[K_BYTES];
 	if (Free_Index == 0)
 	{
@@ -170,7 +171,7 @@ void set_reply(uint16_t index)
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)reply_message, LEFT_MODE);
 }
 
-static char xmit_messages[3][20];
+static char xmit_messages[3][MESSAGE_SIZE];
 
 void compose_messages(void)
 {

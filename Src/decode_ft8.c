@@ -32,13 +32,13 @@
 const int kLDPC_iterations = 20;
 const int kMax_candidates = 20;
 const int kMax_decoded_messages = 20; // chhh 27 feb
-const unsigned int kMax_message_length = 20;
+const unsigned int kMax_message_length = 25;
 const int kMin_score = 40; // Minimum sync score threshold for candidates
 
 static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
-static Decode new_decoded[20]; // chh 27 Feb
+static Decode new_decoded[25]; // chh 27 Feb
 extern char current_QSO_receive_message[];
 extern char current_Beacon_receive_message[];
 
