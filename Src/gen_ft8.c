@@ -46,7 +46,6 @@ char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P 
 char Target_Locator[5]; // four character locator  + null terminator
 int Station_RSL;
 
-#define MESSAGE_SIZE 25
 char reply_message[MESSAGE_SIZE];
 char reply_message_list[MESSAGE_SIZE][8];
 int reply_message_count;
@@ -77,7 +76,7 @@ static char Free_Text2[MESSAGE_SIZE];
 
 void set_cq(void)
 {
-	char message[23];
+	char message[MESSAGE_SIZE];
 	uint8_t packed[K_BYTES];
 	if (Free_Index == 0)
 	{
@@ -148,17 +147,17 @@ void set_reply(uint16_t index)
 	uint8_t packed[K_BYTES];
 	char RSL[5];
 
-	if (index == 0)
-	{
-		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
-	}
-	else if (index == 1)
+	if (index == 1)
 	{
 		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call,
 				Beacon_seventy_three);
 		if (Station_RSL != 99)
 			write_ADIF_Log();
+	}
+	else
+	{
+		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
 	}
 
 	strcpy(current_Beacon_xmit_message, reply_message);
@@ -249,7 +248,6 @@ static const char *delimiters = ":;,";
 void Read_Station_File(void)
 {
 	uint16_t result = 0;
-	size_t i;
 	char read_buffer[128];
 
 	f_mount(&FS, SDPath, 1);
@@ -271,7 +269,7 @@ void Read_Station_File(void)
 
 		if (call_part != NULL)
 		{
-			i = strlen(call_part);
+			size_t i = strlen(call_part);
 			result = i > 0 && i < sizeof(Station_Call) ? 1 : 0;
 			if (result != 0)
 			{
@@ -290,7 +288,7 @@ void Read_Station_File(void)
 		Locator[0] = 0;
 		if (result != 0 && locator_part != NULL)
 		{
-			i = strlen(locator_part);
+			size_t i = strlen(locator_part);
 			result = i > 0 && i < sizeof(Locator) ? 1 : 0;
 			if (result != 0)
 				set_text(Locator, locator_part, -1);
@@ -299,7 +297,7 @@ void Read_Station_File(void)
 		Free_Text1[0] = 0;
 		if (result != 0 && free_text1_part != NULL)
 		{
-			i = strlen(free_text1_part);
+			size_t i = strlen(free_text1_part);
 			result = i < sizeof(Free_Text1) ? 1 : 0;
 			if (i > 0 && result != 0)
 				set_text(Free_Text1, free_text1_part, FreeText1);
@@ -308,7 +306,7 @@ void Read_Station_File(void)
 		Free_Text2[0] = 0;
 		if (result != 0 && free_text2_part != NULL)
 		{
-			i = strlen(free_text2_part);
+			size_t i = strlen(free_text2_part);
 			result = i < sizeof(Free_Text2) ? 1 : 0;
 			if (i > 0 && result != 0)
 				set_text(Free_Text2, free_text2_part, FreeText2);

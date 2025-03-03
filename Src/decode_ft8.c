@@ -38,12 +38,11 @@ const int kMin_score = 40; // Minimum sync score threshold for candidates
 static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
-static Decode new_decoded[25]; // chh 27 Feb
 extern char current_QSO_receive_message[];
 extern char current_Beacon_receive_message[];
 
 static display_message display[10];
-
+static Decode new_decoded[25]; // chh 27 Feb
 static Calling_Station Answer_CQ[50]; //
 static int log_size = 50;
 
@@ -55,7 +54,7 @@ int Target_RSL;
 
 int ft8_decode(void)
 {
-	// Find top candidates by Costas sync score and localize them in time and frequency
+	// Find top candidates by Costas sync score and localise them in time and frequency
 	Candidate candidate_list[kMax_candidates];
 
 	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer, kCostas_map, kMax_candidates, candidate_list, kMin_score);
@@ -82,7 +81,7 @@ int ft8_decode(void)
 		if (n_errors > 0)
 			continue;
 
-		// Extract payload + CRC (first K bits)
+		// Extract pay load + CRC (first K bits)
 		uint8_t a91[K_BYTES];
 		pack_bits(plain, K, a91);
 
@@ -143,7 +142,6 @@ int ft8_decode(void)
 				{
 					strcpy(new_decoded[num_decoded].target_locator, locator);
 				}
-
 				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
 				{
 					new_decoded[num_decoded].RR73 = 1;
@@ -316,11 +314,10 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
-					update_Beacon_log_display(0);
-				else
 				if (Beacon_On == 0)
 					update_log_display(0);
+				else
+					update_Beacon_log_display(0);
 
 				strcpy(Target_Call, call_from);
 
@@ -348,11 +345,10 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
-					update_Beacon_log_display(0);
-				else
 				if (Beacon_On == 0)
 					update_log_display(0);
+				else
+					update_Beacon_log_display(0);
 
 				if (new_decoded[i].RR73 == 1)
 					RR73_sent = 1;
