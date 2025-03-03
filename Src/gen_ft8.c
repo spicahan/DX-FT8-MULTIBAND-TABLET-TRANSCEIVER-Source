@@ -64,7 +64,7 @@ static char blank[19];
 static uint8_t blank_initialised = 0;
 
 const char CQ[] = "CQ";
-const char DX[] = "DX";
+const char SOTA[] = "SOTA";
 const char POTA[] = "POTA";
 const char QRP[] = "QRP";
 const char Beacon_seventy_three[] = "RR73";
@@ -87,7 +87,7 @@ void set_cq(void)
 		case 0:
 			break;
 		case 1:
-			mode = DX;
+			mode = SOTA;
 			break;
 		case 2:
 			mode = POTA;

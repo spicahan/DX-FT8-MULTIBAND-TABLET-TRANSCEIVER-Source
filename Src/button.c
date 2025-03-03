@@ -417,9 +417,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 30 CQ DX
-	 /*text0*/ " DX ",
-	 /*text1*/ " DX ",
+	{// button 30 CQ SOTA
+	 /*text0*/ "SOTA",
+	 /*text1*/ "SOTA",
 	 /*blank*/ "    ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
@@ -723,15 +723,15 @@ void executeButton(uint16_t index)
 		if (sButtonData[StandardCQ].state)
 		{
 			CQ_Mode_Index = 0;
-			reset_buttons(CQDX, CQPOTA, QRPP, " CQ ");
+			reset_buttons(CQSOTA, CQPOTA, QRPP, " CQ ");
 		}
 		break;
 
-	case CQDX:
-		if (sButtonData[CQDX].state)
+	case CQSOTA:
+		if (sButtonData[CQSOTA].state)
 		{
 			CQ_Mode_Index = 1;
-			reset_buttons(StandardCQ, CQPOTA, QRPP, " DX ");
+			reset_buttons(StandardCQ, CQPOTA, QRPP, "SOTA");
 		}
 		break;
 
@@ -739,7 +739,7 @@ void executeButton(uint16_t index)
 		if (sButtonData[CQPOTA].state)
 		{
 			CQ_Mode_Index = 2;
-			reset_buttons(StandardCQ, CQDX, QRPP, "POTA");
+			reset_buttons(StandardCQ, CQSOTA, QRPP, "POTA");
 		}
 		break;
 
@@ -747,7 +747,7 @@ void executeButton(uint16_t index)
 		if (sButtonData[QRPP].state)
 		{
 			CQ_Mode_Index = 3;
-			reset_buttons(StandardCQ, CQDX, CQPOTA, "QRPP");
+			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRPP");
 		}
 		break;
 

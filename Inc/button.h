@@ -106,7 +106,7 @@ enum ButtonIds
 	YearUp,
 	SaveRTCDate,
 	StandardCQ,
-	CQDX,
+	CQSOTA,
 	CQPOTA,
 	QRPP,
 	FreeText1,
