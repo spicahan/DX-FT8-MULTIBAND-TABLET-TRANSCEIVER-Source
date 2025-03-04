@@ -129,7 +129,7 @@ int main(void)
 	Set_Cursor_Frequency();
 	show_variable(400, 25, (int)NCO_Frequency);
 
-	show_short(405, 255, AGC_Gain);
+	show_short(667, 255, AGC_Gain);
 
 	HAL_Delay(1);
 

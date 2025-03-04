@@ -92,6 +92,7 @@ void service_Beacon_mode(int decoded_signals)
 	switch (Beacon_State)
 	{
 	case 0:
+
 		break;
 
 	case 1:

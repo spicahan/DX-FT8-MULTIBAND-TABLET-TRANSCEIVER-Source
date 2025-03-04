@@ -25,7 +25,7 @@ const uint32_t WFPalette[] = {
 		LCD_COLOR_YELLOW,	 	// 13
 		LCD_COLOR_LIGHTYELLOW,	// 14
 		LCD_COLOR_WHITE,		// 15
-		LCD_COLOR_GRAY			// 16
+		LCD_COLOR_LIGHTGRAY		// 16
 };
 
 const int marker_line_colour_index = 16; // GRAY index in WFPalette

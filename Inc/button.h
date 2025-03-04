@@ -20,6 +20,7 @@
 #define text_2 260
 
 #define button_width 60
+#define button_bar_width 55
 
 #define line0 10
 #define line1 210
@@ -79,6 +80,7 @@ enum ButtonIds
 	QSOBeacon,
 	Tune,
 	RxTx,
+	CQFree,
 	FixedReceived,
 	Sync,
 	GainDown,
@@ -103,7 +105,13 @@ enum ButtonIds
 	YearDown,
 	YearUp,
 	SaveRTCDate,
-	NumButtons = 28
+	StandardCQ,
+	CQSOTA,
+	CQPOTA,
+	QRPP,
+	FreeText1,
+	FreeText2,
+	NumButtons = 35
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal

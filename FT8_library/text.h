@@ -29,3 +29,8 @@ void int_to_dd(char *str, int value, int width, _Bool full_sign);
 
 char charn(int c, int table_idx);
 int nchar(char c, int table_idx);
+
+#ifndef stpcpy
+char* stpcpy(char* dst, const char* src);
+#endif
+

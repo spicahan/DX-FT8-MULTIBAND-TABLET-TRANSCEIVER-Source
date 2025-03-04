@@ -32,18 +32,17 @@
 const int kLDPC_iterations = 20;
 const int kMax_candidates = 20;
 const int kMax_decoded_messages = 20; // chhh 27 feb
-const unsigned int kMax_message_length = 20;
+const unsigned int kMax_message_length = 25;
 const int kMin_score = 40; // Minimum sync score threshold for candidates
 
 static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
-static Decode new_decoded[20]; // chh 27 Feb
 extern char current_QSO_receive_message[];
 extern char current_Beacon_receive_message[];
 
 static display_message display[10];
-
+static Decode new_decoded[25]; // chh 27 Feb
 static Calling_Station Answer_CQ[50]; //
 static int log_size = 50;
 
@@ -55,7 +54,7 @@ int Target_RSL;
 
 int ft8_decode(void)
 {
-	// Find top candidates by Costas sync score and localize them in time and frequency
+	// Find top candidates by Costas sync score and localise them in time and frequency
 	Candidate candidate_list[kMax_candidates];
 
 	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer, kCostas_map, kMax_candidates, candidate_list, kMin_score);
@@ -82,7 +81,7 @@ int ft8_decode(void)
 		if (n_errors > 0)
 			continue;
 
-		// Extract payload + CRC (first K bits)
+		// Extract pay load + CRC (first K bits)
 		uint8_t a91[K_BYTES];
 		pack_bits(plain, K, a91);
 
@@ -143,7 +142,6 @@ int ft8_decode(void)
 				{
 					strcpy(new_decoded[num_decoded].target_locator, locator);
 				}
-
 				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
 				{
 					new_decoded[num_decoded].RR73 = 1;
@@ -246,11 +244,15 @@ static int validate_locator(const char locator[])
 		return 0;
 }
 
+static char call_blank[8];
+static uint8_t call_initialised = 0;
+static char locator_blank[5];
+static uint8_t locator_initialised = 0;
+
 void clear_log_stored_data(void)
 {
-	const char call_blank[] = "       ";
-	const char locator_blank[] = "    ";
-
+	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
+	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
 	for (int i = 0; i < log_size; i++)
 	{
 		Answer_CQ[i].number_times_called = 0;
@@ -264,9 +266,8 @@ void clear_log_stored_data(void)
 
 void clear_decoded_messages(void)
 {
-	const char call_blank[] = "       ";
-	const char locator_blank[] = "    ";
-
+	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
+	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
 	for (int i = 0; i < kMax_decoded_messages; i++)
 	{
 		strcpy(new_decoded[i].call_to, call_blank);
@@ -313,11 +314,10 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
-					update_Beacon_log_display(0);
-				else
 				if (Beacon_On == 0)
 					update_log_display(0);
+				else
+					update_Beacon_log_display(0);
 
 				strcpy(Target_Call, call_from);
 
@@ -345,11 +345,10 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
-					update_Beacon_log_display(0);
-				else
 				if (Beacon_On == 0)
 					update_log_display(0);
+				else
+					update_Beacon_log_display(0);
 
 				if (new_decoded[i].RR73 == 1)
 					RR73_sent = 1;
@@ -421,16 +420,28 @@ void set_QSO_Xmit_Freq(int freq)
 
 static int strindex(const char s[], const char t[])
 {
-	int i, j, k, result;
+	int i, j, k;
+	int result = -1;
 
-	result = -1;
-
-	for (i = 0; s[i] != '\0'; i++)
+	for (i = 0; s[i] != 0; i++)
 	{
-		for (j = i, k = 0; t[k] != '\0' && s[j] == t[k]; j++, k++)
+		for (j = i, k = 0; t[k] != 0 && s[j] == t[k]; j++, k++)
 			;
-		if (k > 0 && t[k] == '\0')
+		if (k > 0 && t[k] == 0)
 			result = i;
 	}
 	return result;
+}
+
+void string_init(char *string, int size, uint8_t *is_initialised, char character)
+{
+	if (*is_initialised != size)
+	{
+		for (int i = 0; i < size-1; i++)
+		{
+			string[i] = character;
+		}
+		string[size-1] = 0;
+		*is_initialised = size;
+	}
 }

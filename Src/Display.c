@@ -32,6 +32,9 @@ char current_QSO_xmit_message[];
 const int max_log_messages = 8;
 display_message log_messages[8];
 
+static char blank[21];
+static uint8_t blank_initialised = 0;
+
 void update_log_display(int mode)
 {
 	for (int i = 0; i < max_log_messages - 1; i++)
@@ -72,7 +75,7 @@ void update_log_display(int mode)
 
 void clear_log_messages(void)
 {
-	const char blank[] = "                    ";
+	string_init(blank, sizeof(blank), &blank_initialised,' ');
 
 	for (int i = 0; i < max_log_messages; i++)
 		strcpy(log_messages[i].message, blank);
@@ -124,7 +127,7 @@ void update_Beacon_log_display(int mode)
 
 void clear_Beacon_log_messages(void)
 {
-	const char blank[] = "                    ";
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 
 	for (int i = 0; i < max_Beacon_log_messages; i++)
 		strcpy(Beacon_log_messages[i].message, blank);
@@ -154,7 +157,7 @@ void show_short(uint16_t x, uint16_t y, uint8_t variable)
 	sprintf(string, "%2i", variable);
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
-	BSP_LCD_DisplayStringAt(x, y, (const uint8_t *)string, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(x, y, (const uint8_t *)string, CENTER_MODE);
 }
 
 void show_UTC_time(uint16_t x, uint16_t y, int utc_hours, int utc_minutes,
@@ -193,7 +196,7 @@ void setup_display(void)
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9.1", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9.2", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
 	BSP_LCD_DisplayStringAt(50, 160,
@@ -257,7 +260,9 @@ static uint8_t FT8_Touch(void)
 	if ((valx > 0 && valx < 240) && (valy > 40 && valy < 240))
 	{
 		int y_test = valy - 40;
+
 		FT_8_TouchIndex = y_test / 20;
+
 		return 1;
 	}
 	return 0;
@@ -279,7 +284,7 @@ void Process_Touch(void)
 	if (!touch_detected)
 	{
 		// Display touched?
-		if  (TS_State.touchDetected)
+		if (TS_State.touchDetected)
 		{
 			valx = (uint16_t)TS_State.touchX[0];
 			valy = (uint16_t)TS_State.touchY[0];
@@ -347,7 +352,7 @@ void Display_WF(void)
 
 	// draw the waterfall
 	// Draw from the bottom to the top
-	uint8_t* ptr = &WF_Bfr[byte_count_to_last_line];
+	uint8_t *ptr = &WF_Bfr[byte_count_to_last_line];
 	for (int y = FFT_H - 1; y >= 0; y--)
 	{
 		for (int x = 0; x < FFT_W; x++)
@@ -356,10 +361,10 @@ void Display_WF(void)
 		}
 
 		ptr -= (FFT_W * 2);
-		
-		BSP_LCD_DrawPixel(cursor, y, LCD_COLOR_RED);
+
+		BSP_LCD_DrawPixel(cursor, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
 		// Each FFT datum is 6.25hz, the transmit bandwidth is 50Hz (= 8 pixels)
-		BSP_LCD_DrawPixel(cursor + 8, y, LCD_COLOR_RED);
+		BSP_LCD_DrawPixel(cursor + 8, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
 	}
 
 	if (!ft8_marker && Auto_Sync)

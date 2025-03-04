@@ -29,6 +29,8 @@ int Auto_Sync;
 uint16_t start_freq;
 int BandIndex;
 int QSO_Fix;
+int CQ_Mode_Index;
+int Free_Index;
 
 int AGC_Gain = 20;
 int Band_Minimum;
@@ -64,7 +66,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*state*/ 0,
 	 /*x*/ 0,
 	 /*y*/ line2,
-	 /*w*/ button_width,
+	 /*w*/ button_bar_width,
 	 /*h*/ 30},
 
 	{// button 1 control Beaconing / CQ chasing
@@ -74,9 +76,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 60,
+	 /*x*/ 55,
 	 /*y*/ line2,
-	 /*w*/ button_width,
+	 /*w*/ button_bar_width,
 	 /*h*/ 30},
 
 	{// button 2 control Tune
@@ -86,78 +88,84 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 120,
+	 /*x*/ 110,
 	 /*y*/ line2,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
 	{// button 3 display R/T status
-	 /*text0*/ "Rcv ",
-	 /*text1*/ "Xmit",
-	 /*blank*/ "    ",
+	 /*text0*/ "Rx",
+	 /*text1*/ "Tx",
+	 /*blank*/ "  ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 180,
+	 /*x*/ 165,
 	 /*y*/ line2,
 	 /*w*/ 0, // setting the width and height to 0 turns off touch response , display only
 	 /*h*/ 0},
 
-	{// button 4 QSO Response Freq 0 fixed, 1 Match received station frequency
+	{// button 4 CQ or free mode
+	 /*text0*/ " CQ ",
+	 /*text1*/ "Free",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 200,
+	 /*y*/ line2,
+	 /*w*/ button_bar_width,
+	 /*h*/ 30},
+
+	{// button 5 QSO Response Freq 0 fixed, 1 Match received station frequency
 	 /*text0*/ "Fixd",
 	 /*text1*/ "Rcvd",
 	 /*blank*/ "   ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 240,
+	 /*x*/ 255,
 	 /*y*/ line2,
-	 /*w*/ button_width,
+	 /*w*/ button_bar_width,
 	 /*h*/ 30},
 
-	{// button 5 Sync FT8
+	{// button 6 Sync FT8
 	 /*text0*/ "Sync",
 	 /*text1*/ "Sync",
 	 /*blank*/ "    ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 300,
+	 /*x*/ 310,
 	 /*y*/ line2,
-	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*w*/ button_bar_width,
+	 /*h*/ 30},
 
-	},
-
-	{// button 6 Lower Gain
+	{// button 7 Lower Gain
 	 /*text0*/ " G- ",
 	 /*text1*/ " G- ",
 	 /*blank*/ "    ",
 	 /*Active*/ 2,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 360,
+	 /*x*/ 365,
 	 /*y*/ line2,
-	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*w*/ button_bar_width - 20,
+	 /*h*/ 30},
 
-	},
-
-	{// button 7 Raise Gain
+	{// button 8 Raise Gain
 	 /*text0*/ " G+ ",
 	 /*text1*/ " G+ ",
 	 /*blank*/ "    ",
 	 /*Active*/ 2,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 430,
+	 /*x*/ 435,
 	 /*y*/ line2,
-	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*w*/ button_bar_width,
+	 /*h*/ 30},
 
-	},
-
-	{// button 8 Lower Cursor
+	{// button 9 Lower Cursor
 	 /*text0*/ "F- ",
 	 /*text1*/ "F- ",
 	 /*blank*/ "    ",
@@ -167,11 +175,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ 360,
 	 /*y*/ line0,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 9 Raise Cursor
+	{// button 10 Raise Cursor
 	 /*text0*/ "F+ ",
 	 /*text1*/ "F+ ",
 	 /*blank*/ "    ",
@@ -181,11 +187,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ 450,
 	 /*y*/ line0,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 10 Band Down
+	{// button 11 Band Down
 	 /*text0*/ "Band-",
 	 /*text1*/ "Band-",
 	 /*blank*/ "    ",
@@ -195,11 +199,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ 270,
 	 /*y*/ 40,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 11 Band Up
+	{// button 12 Band Up
 	 /*text0*/ "Band+",
 	 /*text1*/ "Band+",
 	 /*blank*/ "     ",
@@ -209,11 +211,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ 420,
 	 /*y*/ 40,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 12 Xmit for Calibration
+	{// button 13 Xmit for Calibration
 	 /*text0*/ "Xmit",
 	 /*text1*/ "Xmit",
 	 /*blank*/ "    ",
@@ -221,13 +221,11 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 360,
-	 /*y*/ 140,
+	 /*y*/ 110,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 13 Save Calibration Data
+	{// button 14 Save Calibration Data
 	 /*text0*/ "Save",
 	 /*text1*/ "Save",
 	 /*blank*/ "    ",
@@ -237,11 +235,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ 360,
 	 /*y*/ 70,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 14 Save RTC Time
+	{// button 15 Save RTC Time
 	 /*text0*/ "Set ",
 	 /*text1*/ "Set ",
 	 /*blank*/ "    ",
@@ -251,11 +247,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Button,
 	 /*y*/ RTC_line2,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 15 Hours
+	{// button 16 Hours
 	 /*text0*/ "Hr- ",
 	 /*text1*/ "Hr- ",
 	 /*blank*/ "    ",
@@ -265,11 +259,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Sub,
 	 /*y*/ RTC_line0,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 16 Hours
+	{// button 17 Hours
 	 /*text0*/ "Hr+ ",
 	 /*text1*/ "Hr+ ",
 	 /*blank*/ "    ",
@@ -281,7 +273,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 17 minutes
+	{// button 18 minutes
 	 /*text0*/ "Min-",
 	 /*text1*/ "Min-",
 	 /*blank*/ "    ",
@@ -293,7 +285,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 18 minutes
+	{// button 19 minutes
 	 /*text0*/ "Min+",
 	 /*text1*/ "Min+",
 	 /*blank*/ "    ",
@@ -305,7 +297,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 19 Seconds
+	{// button 20 Seconds
 	 /*text0*/ "Sec-",
 	 /*text1*/ "Sec-",
 	 /*blank*/ "    ",
@@ -315,11 +307,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Sub,
 	 /*y*/ RTC_line2,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 20 Seconds
+	{// button 21 Seconds
 	 /*text0*/ "Sec+",
 	 /*text1*/ "Sec+",
 	 /*blank*/ "    ",
@@ -329,11 +319,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Add,
 	 /*y*/ RTC_line2,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 21 Day
+	{// button 22 Day
 	 /*text0*/ "Day-",
 	 /*text1*/ "Day-",
 	 /*blank*/ "    ",
@@ -345,7 +333,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 22 Day
+	{// button 23 Day
 	 /*text0*/ "Day+",
 	 /*text1*/ "Day+",
 	 /*blank*/ "    ",
@@ -357,7 +345,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 23 Month
+	{// button 24 Month
 	 /*text0*/ "Mon-",
 	 /*text1*/ "Mon-",
 	 /*blank*/ "    ",
@@ -369,7 +357,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 24 Month
+	{// button 25 Month
 	 /*text0*/ "Mon+",
 	 /*text1*/ "Mon+",
 	 /*blank*/ "    ",
@@ -379,11 +367,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Add,
 	 /*y*/ RTC_line4,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 25 Year
+	{// button 26 Year
 	 /*text0*/ "Yr- ",
 	 /*text1*/ "Yr- ",
 	 /*blank*/ "    ",
@@ -395,7 +381,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 26 Year
+	{// button 27 Year
 	 /*text0*/ "Yr+ ",
 	 /*text1*/ "Yr+ ",
 	 /*blank*/ "    ",
@@ -405,11 +391,9 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Add,
 	 /*y*/ RTC_line5,
 	 /*w*/ button_width,
-	 /*h*/ 30
+	 /*h*/ 30},
 
-	},
-
-	{// button 27 Save  RTC Date
+	{// button 28 Save  RTC Date
 	 /*text0*/ "Set ",
 	 /*text1*/ "Set ",
 	 /*blank*/ "    ",
@@ -419,8 +403,79 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*x*/ RTC_Button,
 	 /*y*/ RTC_line5,
 	 /*w*/ button_width,
-	 /*h*/ 30}
+	 /*h*/ 30},
 
+	{// button 29 Standard CQ
+	 /*text0*/ " CQ ",
+	 /*text1*/ " CQ ",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 1,
+	 /*x*/ 240,
+	 /*y*/ 150,
+	 /*w*/ button_width,
+	 /*h*/ 30},
+
+	{// button 30 CQ SOTA
+	 /*text0*/ "SOTA",
+	 /*text1*/ "SOTA",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 300,
+	 /*y*/ 150,
+	 /*w*/ button_width,
+	 /*h*/ 30},
+
+	{// button 31 CQ POTA
+	 /*text0*/ "POTA",
+	 /*text1*/ "POTA",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 360,
+	 /*y*/ 150,
+	 /*w*/ button_width,
+	 /*h*/ 30},
+
+	{// button 32 CQ SOTA
+	 /*text0*/ "QRPP",
+	 /*text1*/ "QRPP",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 420,
+	 /*y*/ 150,
+	 /*w*/ button_width,
+	 /*h*/ 30},
+
+	{// button 33 Free Text 1
+	 /*text0*/ "Free1",
+	 /*text1*/ "Free1",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 240,
+	 /*y*/ 180,
+	 /*w*/ 160,
+	 /*h*/ 30},
+
+	{// button 34 Free Text 2
+	 /*text0*/ "Free2",
+	 /*text1*/ "Free2",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 240,
+	 /*y*/ 205,
+	 /*w*/ 160,
+	 /*h*/ 30},
 }; // end of button definition
 
 void drawButton(uint16_t button)
@@ -435,12 +490,9 @@ void drawButton(uint16_t button)
 
 		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 
-		if (sButtonData[button].state == 1)
-			BSP_LCD_DisplayStringAt(sButtonData[button].x, sButtonData[button].y + 15,
-									(const uint8_t *)sButtonData[button].text1, LEFT_MODE);
-		else
-			BSP_LCD_DisplayStringAt(sButtonData[button].x, sButtonData[button].y + 15,
-									(const uint8_t *)sButtonData[button].text0, LEFT_MODE);
+		BSP_LCD_DisplayStringAt(sButtonData[button].x, sButtonData[button].y + 15,
+								sButtonData[button].state == 1 ? (const uint8_t *)sButtonData[button].text1 : (const uint8_t *)sButtonData[button].text0,
+								LEFT_MODE);
 
 		BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 	}
@@ -450,10 +502,8 @@ void checkButton(void)
 {
 	for (uint16_t button = Clear; button < NumButtons; button++)
 	{
-		if (testButton(sButtonData[button].x, sButtonData[button].y, sButtonData[button].w,
-					   sButtonData[button].h) == 1)
+		if (testButton(sButtonData[button].x, sButtonData[button].y, sButtonData[button].w, sButtonData[button].h) == 1)
 		{
-
 			switch (sButtonData[button].Active)
 			{
 			case 0:
@@ -497,11 +547,29 @@ static void toggle_button_state(int button)
 	drawButton(button);
 }
 
+static void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
+{
+	sButtonData[btn1].state = 0;
+	drawButton(btn1);
+	sButtonData[btn2].state = 0;
+	drawButton(btn2);
+	sButtonData[btn3].state = 0;
+	drawButton(btn3);
+	sButtonData[CQFree].text0 = (char *)button_text;
+	drawButton(CQFree);
+}
+
+static void update_CQFree_button()
+{
+	sButtonData[CQFree].state = 0;	
+	drawButton(CQFree);
+}
+
 void executeButton(uint16_t index)
 {
 	switch (index)
 	{
-	case Clear: // Reset
+	case Clear:
 		clear_xmit_messages();
 		terminate_QSO();
 		Auto_QSO_State = 0;
@@ -509,11 +577,10 @@ void executeButton(uint16_t index)
 		clear_reply_message_box();
 		clear_log_stored_data();
 		clear_log_messages();
-
 		toggle_button_state(Clear);
 		break;
 
-	case QSOBeacon: // Toggle beacon mode
+	case QSOBeacon:
 		if (!sButtonData[QSOBeacon].state)
 		{
 			Beacon_On = 0;
@@ -532,7 +599,7 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case Tune: // Toggle tune (setup) mode
+	case Tune:
 		if (!sButtonData[Tune].state)
 		{
 			tune_Off_sequence();
@@ -554,35 +621,42 @@ void executeButton(uint16_t index)
 		// no code required, all dependent stuff works off of button state
 		break;
 
-	case FixedReceived: // Toggle QSO TX fix mode
-		if (sButtonData[FixedReceived].state == 1)
+	case CQFree:
+		if (!sButtonData[CQFree].state && Free_Index != 0)
+		{
+			Free_Index = 0;
+		}
+		break;
+
+	case FixedReceived:
+		if (sButtonData[FixedReceived].state)
 			QSO_Fix = 1;
 		else
 			QSO_Fix = 0;
 		break;
 
-	case Sync: // Toggle synchonisation mode
+	case Sync:
 		if (!sButtonData[Sync].state)
 			Auto_Sync = 0;
 		else
 			Auto_Sync = 1;
 		break;
 
-	case GainDown: // Lower Gain
+	case GainDown:
 		if (AGC_Gain >= 3)
 			AGC_Gain--;
-		show_short(405, 255, AGC_Gain);
+		show_short(667, 255, AGC_Gain);
 		Set_PGA_Gain(AGC_Gain);
 		break;
 
-	case GainUp: // Raise Gain
+	case GainUp:
 		if (AGC_Gain < 31)
 			AGC_Gain++;
-		show_short(405, 255, AGC_Gain);
+		show_short(667, 255, AGC_Gain);
 		Set_PGA_Gain(AGC_Gain);
 		break;
 
-	case FreqDown: // Lower Freq
+	case FreqDown:
 		if (cursor > 0)
 		{
 			cursor--;
@@ -591,7 +665,7 @@ void executeButton(uint16_t index)
 		show_variable(400, 25, (int)NCO_Frequency);
 		break;
 
-	case FreqUp: // Raise Freq
+	case FreqUp:
 		if (cursor < (ft8_buffer - ft8_min_bin - 8))
 		{
 			// limits highest NCO frequency to (3875 - 50)hz
@@ -601,7 +675,7 @@ void executeButton(uint16_t index)
 		show_variable(400, 25, (int)NCO_Frequency);
 		break;
 
-	case TxCalibrate: // Transmit for Calibration
+	case TxCalibrate:
 		if (!sButtonData[TxCalibrate].state)
 		{
 			tune_Off_sequence();
@@ -619,7 +693,7 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case SaveBand: // Save Band Changes
+	case SaveBand:
 		Options_SetValue(0, BandIndex);
 		Options_StoreValue(0);
 		start_freq = sBand_Data[BandIndex].Frequency;
@@ -632,17 +706,77 @@ void executeButton(uint16_t index)
 
 		SelectFilterBlock();
 
-		toggle_button_state(13);
+		toggle_button_state(SaveBand);
 		break;
 
-	case SaveRTCTime: // Edit RTC time
+	case SaveRTCTime:
 		set_RTC_to_TimeEdit();
 		toggle_button_state(SaveRTCTime);
 		break;
 
-	case SaveRTCDate: // Edit RTC date
+	case SaveRTCDate:
 		set_RTC_to_DateEdit();
 		toggle_button_state(SaveRTCDate);
+		break;
+
+	case StandardCQ:
+		if (sButtonData[StandardCQ].state)
+		{
+			CQ_Mode_Index = 0;
+			reset_buttons(CQSOTA, CQPOTA, QRPP, " CQ ");
+		}
+		break;
+
+	case CQSOTA:
+		if (sButtonData[CQSOTA].state)
+		{
+			CQ_Mode_Index = 1;
+			reset_buttons(StandardCQ, CQPOTA, QRPP, "SOTA");
+		}
+		break;
+
+	case CQPOTA:
+		if (sButtonData[CQPOTA].state)
+		{
+			CQ_Mode_Index = 2;
+			reset_buttons(StandardCQ, CQSOTA, QRPP, "POTA");
+		}
+		break;
+
+	case QRPP:
+		if (sButtonData[QRPP].state)
+		{
+			CQ_Mode_Index = 3;
+			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRPP");
+		}
+		break;
+
+	case FreeText1:
+		Free_Index = 0;
+		sButtonData[FreeText2].state = 0;
+		drawButton(FreeText2);
+		if (sButtonData[FreeText1].state)
+		{
+			Free_Index = 1;
+		}
+		else
+		{
+			update_CQFree_button();
+		}
+		break;
+
+	case FreeText2:
+		Free_Index = 0;
+		sButtonData[FreeText1].state = 0;
+		drawButton(FreeText1);
+		if (sButtonData[FreeText2].state)
+		{
+			Free_Index = 2;
+		}
+		else
+		{
+			update_CQFree_button();
+		}
 		break;
 	}
 }
@@ -742,7 +876,9 @@ void setup_Cal_Display(void)
 	sButtonData[BandUp].Active = 3;
 
 	for (int button = TxCalibrate; button <= SaveRTCTime; ++button)
+	{
 		sButtonData[button].Active = 1;
+	}
 
 	for (int button = HourDown; button < SaveRTCDate; button++)
 	{
@@ -758,6 +894,12 @@ void setup_Cal_Display(void)
 	}
 
 	drawButton(SaveRTCDate);
+
+	for (int button = StandardCQ; button <= FreeText2; ++button)
+	{
+		sButtonData[button].Active = 1;
+		drawButton(button);
+	}
 
 	show_wide(340, 55, start_freq);
 
@@ -778,12 +920,20 @@ void erase_Cal_Display(void)
 		sButtonData[button].Active = 0;
 	}
 
+	for (int button = StandardCQ; button <= FreeText2; ++button){
+		sButtonData[button].Active = 0;
+		drawButton(button);
+	}
+
 	for (int button = TxCalibrate; button <= SaveRTCTime; ++button)
 	{
 		sButtonData[button].state = 0;
 	}
 
 	sButtonData[SaveRTCDate].state = 0;
+
+	sButtonData[CQFree].Active = 1;
+	drawButton(CQFree);
 }
 
 void PTT_Out_Init(void)

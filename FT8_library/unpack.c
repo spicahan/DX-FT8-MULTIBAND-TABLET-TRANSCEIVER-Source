@@ -3,40 +3,35 @@
 
 #include <string.h>
 
-extern _Bool true;
-extern _Bool false;
-
-//const uint32_t NBASE = 37L*36L*10L*27L*27L*27L;
 const uint32_t MAX22 = 4194304L;
 const uint32_t NTOKENS = 2063592L;
 const uint16_t MAXGRID4 = 32400L;
 
 // n28 is a 28-bit integer, e.g. n28a or n28b, containing all the
 // call sign bits from a packed message.
-int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
+static int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 	// Check for special tokens DE, QRZ, CQ, CQ_nnn, CQ_aaaa
 	if (n28 < NTOKENS) {
 		if (n28 <= 2) {
 			if (n28 == 0)
 				strcpy(result, "DE");
-			if (n28 == 1)
+			else if (n28 == 1)
 				strcpy(result, "QRZ");
-			if (n28 == 2)
+			else if (n28 == 2)
 				strcpy(result, "CQ");
 			return 0;   // Success
 		}
 		if (n28 <= 1002) {
 			// CQ_nnn with 3 digits
 			strcpy(result, "CQ ");
-			int_to_dd(result + 3, n28 - 3, 3, true);
+			int_to_dd(result + 3, n28 - 3, 3, 1);
 			return 0;   // Success
 		}
 		if (n28 <= 532443L) {
 			// CQ_aaaa with 4 alphanumeric symbols
 			uint32_t n = n28 - 1003;
-			char aaaa[5];
+			char aaaa[5] = {0};
 
-			aaaa[4] = '\0';
 			for (int i = 3; /* */; --i) {
 				aaaa[i] = charn(n % 27, 4);
 				if (i == 0)
@@ -55,11 +50,11 @@ int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 	n28 = n28 - NTOKENS;
 	if (n28 < MAX22) {
 		// This is a 22-bit hash of a result
-		//call hash22(n22,c13)     !Retrieve result from hash table
+		// call hash22(n22,c13)     !Retrieve result from hash table
 		// TODO: implement
 		// strcpy(result, "<...>");
 		result[0] = '<';
-		int_to_dd(result + 1, n28, 7, true);
+		int_to_dd(result + 1, n28, 7, 1);
 		result[8] = '>';
 		result[9] = '\0';
 		return 0;
@@ -68,8 +63,7 @@ int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 	// Standard callsign
 	uint32_t n = n28 - MAX22;
 
-	char callsign[7];
-	callsign[6] = '\0';
+	char callsign[7] = { 0 };
 	callsign[5] = charn(n % 27, 4);
 	n /= 27;
 	callsign[4] = charn(n % 27, 4);
@@ -95,11 +89,10 @@ int unpack28(uint32_t n28, uint8_t ip, uint8_t i3, char *result) {
 			strcat(result, "/P");
 		}
 	}
-
 	return 0;   // Success
 }
 
-int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
+static int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
 		char *field3) {
 	uint32_t n28a, n28b;
 	uint16_t igrid4;
@@ -148,7 +141,7 @@ int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
 			dst = stpcpy(dst, "R ");
 		}
 
-		dst[4] = '\0';
+		dst[4] = 0;
 		dst[3] = '0' + (n % 10);
 		n /= 10;
 		dst[2] = '0' + (n % 10);
@@ -177,9 +170,9 @@ int unpack_type1(const uint8_t *a77, uint8_t i3, char *field1, char *field2,
 			if (ir > 0) {
 				*dst++ = 'R'; // Add "R" before report
 			}
-			int_to_dd(dst, irpt - 35, 2, true);
+			int_to_dd(dst, irpt - 35, 2, 1);
 		}
-		// if(msg(1:3).eq.'CQ ' .and. irpt.ge.2) unpk77_success=.false.
+		// if(msg(1:3).eq.'CQ ' .and. irpt.ge.2) unpk77_success=.0.
 		// if (irpt >= 2 && strncmp(field1, "CQ", 2) == 0) return -1;
 	}
 
@@ -196,8 +189,7 @@ int unpack_text(const uint8_t *a71, char *text) {
 		carry = (a71[i] & 1) ? 0x80 : 0;
 	}
 
-	char c14[14];
-	c14[13] = 0;
+	char c14[14] = {0};
 	for (int idx = 12; idx >= 0; --idx) {
 		// Divide the long integer in b71 by 42
 		uint16_t rem = 0;
@@ -213,7 +205,7 @@ int unpack_text(const uint8_t *a71, char *text) {
 	return 0;       // Success
 }
 
-int unpack_telemetry(const uint8_t *a71, char *telemetry) {
+static int unpack_telemetry(const uint8_t *a71, char *telemetry) {
 	uint8_t b71[9];
 
 	// Shift bits in a71 right by 1
@@ -233,13 +225,13 @@ int unpack_telemetry(const uint8_t *a71, char *telemetry) {
 		telemetry[i * 2 + 1] = c2;
 	}
 
-	telemetry[18] = '\0';
+	telemetry[18] = 0;
 	return 0;
 }
 
-//none standard for wsjt-x 2.0
+//non-standard for wsjt-x 2.0
 //by KD8CEC
-int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
+static int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
 		char *field3) {
 	/*
 	 wsjt-x 2.1.0 rc5
@@ -265,8 +257,7 @@ int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
 	nrpt |= (a77[9] >> 7);	//76543210
 	icq = ((a77[9] >> 6) & 0x01);
 
-	char c11[12];
-	c11[11] = '\0';
+	char c11[12] = {};
 
 	for (int i = 10; /* no condition */; --i) {
 		c11[i] = charn(n58 % 38, 5);
@@ -279,7 +270,7 @@ int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
 	// should replace with hash12(n12, call_3);
 	// strcpy(call_3, "<...>");
 	call_3[0] = '<';
-	int_to_dd(call_3 + 1, n12, 4, true);
+	int_to_dd(call_3 + 1, n12, 4, 1);
 	call_3[5] = '>';
 	call_3[6] = '\0';
 
@@ -295,12 +286,15 @@ int unpack_nonstandard(const uint8_t *a77, char *field1, char *field2,
 			strcpy(field3, "RR73");
 		else if (nrpt == 3)
 			strcpy(field3, "73");
-		else {
-			field3[0] = '\0';
+        else if (nrpt == 4)
+            strcpy(field3, "RR");
+        else
+        {
+			field3[0] = 0;
 		}
 	} else {
 		strcpy(field1, "CQ");
-		field3[0] = '\0';
+		field3[0] = 0;
 	}
 	strcpy(field2, trim(call_2));
 
@@ -315,7 +309,7 @@ int unpack77_fields(const uint8_t *a77, char *field1, char *field2,
 	n3 = ((a77[8] << 2) & 0x04) | ((a77[9] >> 6) & 0x03);
 	i3 = (a77[9] >> 3) & 0x07;
 
-	field1[0] = field2[0] = field3[0] = '\0';
+	field1[0] = field2[0] = field3[0] = 0;
 
 	if (i3 == 0 && n3 == 0) {
 		// 0.0  Free text
@@ -364,7 +358,6 @@ int unpack77(const uint8_t *a77, char *message) {
 		return rc;
 
 	char *dst = message;
-	// int msg_sz = strlen(field1) + strlen(field2) + strlen(field3) + 2;
 
 	dst = stpcpy(dst, field1);
 	*dst++ = ' ';
