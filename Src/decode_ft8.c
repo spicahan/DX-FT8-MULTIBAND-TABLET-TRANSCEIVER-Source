@@ -52,9 +52,11 @@ static int message_limit = 10;
 int Auto_QSO_State; // chh
 int Target_RSL;
 
+//push flag
+
 int ft8_decode(void)
 {
-	// Find top candidates by Costas sync score and localise them in time and frequency
+	// Find top candidates by Costas sync score and localize them in time and frequency
 	Candidate candidate_list[kMax_candidates];
 
 	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer, kCostas_map, kMax_candidates, candidate_list, kMin_score);
@@ -81,7 +83,7 @@ int ft8_decode(void)
 		if (n_errors > 0)
 			continue;
 
-		// Extract pay load + CRC (first K bits)
+		// Extract payload + CRC (first K bits)
 		uint8_t a91[K_BYTES];
 		pack_bits(plain, K, a91);
 
@@ -141,10 +143,13 @@ int ft8_decode(void)
 				if (validate_locator(locator) == 1)
 				{
 					strcpy(new_decoded[num_decoded].target_locator, locator);
+					new_decoded[num_decoded].sequence = 1;
 				}
+
 				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
 				{
 					new_decoded[num_decoded].RR73 = 1;
+					new_decoded[num_decoded].sequence = 4;
 				}
 				else
 				{
@@ -152,12 +157,14 @@ int ft8_decode(void)
 					{
 						locator[0] = 32;
 						new_decoded[num_decoded].RR73 = 1;
+						new_decoded[num_decoded].sequence = 3;
 					}
 
 					received_RSL = atoi(locator);
 					if (received_RSL < 30) // Prevents an 73 being decoded as a received RSL
 					{
 						new_decoded[num_decoded].received_snr = received_RSL;
+						new_decoded[num_decoded].sequence = 2;
 					}
 				}
 
@@ -261,6 +268,7 @@ void clear_log_stored_data(void)
 		Answer_CQ[i].RSL = 0;
 		Answer_CQ[i].RR73 = 0;
 		Answer_CQ[i].received_RSL = 99;
+		Answer_CQ[i].sequence = 0;
 	}
 }
 
@@ -279,6 +287,7 @@ void clear_decoded_messages(void)
 		new_decoded[i].received_snr = 99;
 		new_decoded[i].slot = 0;
 		new_decoded[i].RR73 = 0;
+		new_decoded[i].sequence = 0;
 	}
 }
 
@@ -291,7 +300,8 @@ int Check_Calling_Stations(int num_decoded)
 		int old_call;
 		int old_call_address;
 
-		if (strindex(new_decoded[i].call_to, Station_Call) >= 0)
+		if (strindex(new_decoded[i].call_to, Station_Call) >= 0 )
+
 		{
 			old_call = 0;
 			for (int j = 0; j < num_calls; j++)
@@ -314,10 +324,11 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
+				if (Beacon_On == 1)
+					update_Beacon_log_display(0);
+				else
 				if (Beacon_On == 0)
 					update_log_display(0);
-				else
-					update_Beacon_log_display(0);
 
 				strcpy(Target_Call, call_from);
 
@@ -327,8 +338,10 @@ int Check_Calling_Stations(int num_decoded)
 				if (new_decoded[i].received_snr != 99)
 					Station_RSL = new_decoded[i].received_snr;
 
-				if (Beacon_On == 1)
-					set_reply(0);
+				if (Beacon_On == 1){
+					if(new_decoded[i].sequence == 1) set_reply(0);
+					else set_reply(1);
+				}
 
 				Beacon_Reply_Status = 1;
 
@@ -336,6 +349,7 @@ int Check_Calling_Stations(int num_decoded)
 				strcpy(Answer_CQ[num_calls].locator, new_decoded[i].target_locator);
 				Answer_CQ[num_calls].RSL = Target_RSL;
 				Answer_CQ[num_calls].received_RSL = Station_RSL;
+				Answer_CQ[num_calls].sequence = new_decoded[i].sequence;
 
 				num_calls++;
 				break;
@@ -345,10 +359,11 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
+				if (Beacon_On == 1)
+					update_Beacon_log_display(0);
+				else
 				if (Beacon_On == 0)
 					update_log_display(0);
-				else
-					update_Beacon_log_display(0);
 
 				if (new_decoded[i].RR73 == 1)
 					RR73_sent = 1;
@@ -367,13 +382,33 @@ int Check_Calling_Stations(int num_decoded)
 				{
 					if (Beacon_On == 1)
 					{
+						/*
 						if (new_decoded[i].RR73 == 1)
 						{
-							set_reply(1);
+							if(new_decoded[i].sequence == 4) set_reply(3);
+							else set_reply(1);
+
 							Answer_CQ[old_call_address].RR73 = 1;
 						}
-						else
-							set_reply(0);
+						else {
+							if(new_decoded[i].sequence == 2) set_reply(2);
+							else set_reply(0);
+						}
+						*/
+
+						if (new_decoded[i].RR73 == 1)
+						{
+						if(Answer_CQ[old_call_address].sequence == 1) set_reply(1); //if this is normal locator sequence send normal Beacon 73
+						else set_reply(3);  // if this is a RSL sequence send QSO 73
+
+						Answer_CQ[old_call_address].RR73 = 1;
+						}
+
+						else {
+						if(	Answer_CQ[old_call_address].sequence == 1) set_reply(0); //if this is a normal locator sequence send RSL
+						else set_reply(3);  //if this is a RSL sequence send R_RSL
+						}
+
 					}
 
 					Beacon_Reply_Status = 1;

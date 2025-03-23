@@ -24,6 +24,7 @@ typedef struct
     char target_locator[7];
     int slot;
     int RR73;
+    int sequence;
 } Decode;
 
 typedef struct
@@ -40,6 +41,7 @@ typedef struct
     int RSL;
     int received_RSL;
     int RR73;
+    int sequence;
 } Calling_Station;
 
 int Check_Calling_Stations(int num_decoded);

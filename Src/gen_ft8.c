@@ -147,17 +147,37 @@ void set_reply(uint16_t index)
 	uint8_t packed[K_BYTES];
 	char RSL[5];
 
-	if (index == 1)
+// 1. [Call] [Call] [Grid]
+// 2. [Call] [Call] [RSL]
+// 3. [Call] [Call] [R-RSL]
+// 4. [Call] [Call] [RRR|RR73|73]
+
+	//new push flag
+
+	itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
+	if (index == 0)
+	{
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
+	}
+	else if (index == 1)
 	{
 		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call,
 				Beacon_seventy_three);
-		if (Station_RSL != 99)
+		if (Station_RSL != 99){
 			write_ADIF_Log();
+		}
 	}
-	else
+	else if (index == 2)
 	{
-		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
+		sprintf(reply_message, "%s %s R%s", Target_Call, Station_Call, RSL);
+	}
+	else if (index == 3)
+	{
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, QSO_seventy_three);
+		if (Station_RSL != 99){
+			write_ADIF_Log();
+		}
+
 	}
 
 	strcpy(current_Beacon_xmit_message, reply_message);
@@ -166,13 +186,13 @@ void set_reply(uint16_t index)
 	pack77(reply_message, packed);
 	genft8(packed, tones);
 
-	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
 	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)reply_message, LEFT_MODE);
 }
+
 
 static char xmit_messages[3][MESSAGE_SIZE];
 
