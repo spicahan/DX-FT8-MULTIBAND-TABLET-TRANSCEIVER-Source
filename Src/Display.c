@@ -13,6 +13,8 @@
 #define FFT_Y 1
 #define FFT_W (ft8_buffer - ft8_min_bin)
 
+//flag
+
 int FT_8_TouchIndex;
 
 uint16_t cursor;
