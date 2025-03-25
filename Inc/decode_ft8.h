@@ -8,17 +8,15 @@
 #ifndef DECODE_FT8_H_
 #define DECODE_FT8_H_
 
-//3/25/Flag
-
 extern int Auto_QSO_State;
 extern int Station_RSL;
 extern int Target_RSL;
 
 typedef struct
 {
-    char call_to[14];   // call also be 'CQ'
+    char call_to[14]; // call also be 'CQ'
     char call_from[14];
-    char locator[7];    // can also be a response 'RR73' etc.
+    char locator[7]; // can also be a response 'RR73' etc.
     int freq_hz;
     int sync_score;
     int snr;
@@ -26,7 +24,7 @@ typedef struct
     char target_locator[7];
     int slot;
     int RR73;
-    int sequence;
+    uint8_t sequence;
 } Decode;
 
 typedef struct

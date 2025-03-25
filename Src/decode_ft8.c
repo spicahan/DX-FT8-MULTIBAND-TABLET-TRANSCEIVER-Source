@@ -42,7 +42,7 @@ extern char current_QSO_receive_message[];
 extern char current_Beacon_receive_message[];
 
 static display_message display[10];
-static Decode new_decoded[25]; // chh 27 Feb
+static Decode new_decoded[25];		  // chh 27 Feb
 static Calling_Station Answer_CQ[50]; //
 static int log_size = 50;
 
@@ -51,8 +51,6 @@ static int message_limit = 10;
 
 int Auto_QSO_State; // chh
 int Target_RSL;
-
-//3/25/Flag
 
 int ft8_decode(void)
 {
@@ -143,28 +141,28 @@ int ft8_decode(void)
 				if (validate_locator(locator) == 1)
 				{
 					strcpy(new_decoded[num_decoded].target_locator, locator);
-					new_decoded[num_decoded].sequence = 1;
+					new_decoded[num_decoded].sequence = 0;
 				}
-
 				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
 				{
 					new_decoded[num_decoded].RR73 = 1;
-					new_decoded[num_decoded].sequence = 4;
+					new_decoded[num_decoded].sequence = 0;
 				}
 				else
 				{
-					if (locator[0] == 82)
+					const char *ptr = locator;
+					if (*ptr == 'R')
 					{
-						locator[0] = 32;
+						ptr++;
 						new_decoded[num_decoded].RR73 = 1;
-						new_decoded[num_decoded].sequence = 3;
+						new_decoded[num_decoded].sequence = 0;
 					}
 
-					received_RSL = atoi(locator);
+					received_RSL = atoi(ptr);
 					if (received_RSL < 30) // Prevents an 73 being decoded as a received RSL
 					{
 						new_decoded[num_decoded].received_snr = received_RSL;
-						new_decoded[num_decoded].sequence = 2;
+						new_decoded[num_decoded].sequence = 1;
 					}
 				}
 
@@ -295,13 +293,12 @@ int Check_Calling_Stations(int num_decoded)
 {
 	int Beacon_Reply_Status = 0;
 	for (int i = 0; i < num_decoded; i++)
-	{ 
+	{
 		// check to see if being called
 		int old_call;
 		int old_call_address;
 
-		if (strindex(new_decoded[i].call_to, Station_Call) >= 0 )
-
+		if (strindex(new_decoded[i].call_to, Station_Call) >= 0)
 		{
 			old_call = 0;
 			for (int j = 0; j < num_calls; j++)
@@ -327,7 +324,6 @@ int Check_Calling_Stations(int num_decoded)
 				if (Beacon_On == 1)
 					update_Beacon_log_display(0);
 				else
-				if (Beacon_On == 0)
 					update_log_display(0);
 
 				strcpy(Target_Call, call_from);
@@ -338,10 +334,11 @@ int Check_Calling_Stations(int num_decoded)
 				if (new_decoded[i].received_snr != 99)
 					Station_RSL = new_decoded[i].received_snr;
 
-				if (Beacon_On == 1){
-					if(new_decoded[i].sequence == 2) set_reply(2);
-					else set_reply(0);
-				}
+				if (Beacon_On == 1)
+					if (new_decoded[i].sequence)
+						set_reply(Reply_R_RSL);
+					else
+						set_reply(Reply_RSL);
 
 				Beacon_Reply_Status = 1;
 
@@ -354,6 +351,7 @@ int Check_Calling_Stations(int num_decoded)
 				num_calls++;
 				break;
 			}
+
 			if (old_call >= 1 && old_call < 5)
 			{
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
@@ -362,7 +360,6 @@ int Check_Calling_Stations(int num_decoded)
 				if (Beacon_On == 1)
 					update_Beacon_log_display(0);
 				else
-				if (Beacon_On == 0)
 					update_log_display(0);
 
 				if (new_decoded[i].RR73 == 1)
@@ -382,24 +379,15 @@ int Check_Calling_Stations(int num_decoded)
 				{
 					if (Beacon_On == 1)
 					{
-
-
 						if (new_decoded[i].RR73 == 1)
 						{
-
-							if(Answer_CQ[old_call_address].sequence == 1) set_reply(1); //if this is  locator response send  Beacon 73
-							else set_reply(3);                                   // if this is a RSL response send QSO 73
-
+							set_reply(Reply_QSO_73); // if this is a RSL response send QSO 73
 							Answer_CQ[old_call_address].RR73 = 1;
-
 						}
-						else {
-
-							if(Answer_CQ[old_call_address].sequence == 1) set_reply(0);    //if this is a  locator response send RSL
-							else set_reply(2);										 //if this is a RSL response send R_RSL
-
+						else
+						{
+							set_reply(Reply_R_RSL); // if this is a RSL response send R_RSL
 						}
-
 					}
 
 					Beacon_Reply_Status = 1;
@@ -407,12 +395,10 @@ int Check_Calling_Stations(int num_decoded)
 
 			} // check for old call
 		} // check for station call
-
 	} // check to see if being called
 
 	return Beacon_Reply_Status;
 }
-
 
 void process_selected_Station(int stations_decoded, int TouchIndex)
 {
@@ -447,12 +433,12 @@ void set_QSO_Xmit_Freq(int freq)
 
 static int strindex(const char s[], const char t[])
 {
-	int i, j, k;
 	int result = -1;
 
-	for (i = 0; s[i] != 0; i++)
+	for (int i = 0; s[i] != 0; i++)
 	{
-		for (j = i, k = 0; t[k] != 0 && s[j] == t[k]; j++, k++)
+		int k = 0;
+		for (int j = i; t[k] != 0 && s[j] == t[k]; j++, k++)
 			;
 		if (k > 0 && t[k] == 0)
 			result = i;
@@ -464,11 +450,11 @@ void string_init(char *string, int size, uint8_t *is_initialised, char character
 {
 	if (*is_initialised != size)
 	{
-		for (int i = 0; i < size-1; i++)
+		for (int i = 0; i < size - 1; i++)
 		{
 			string[i] = character;
 		}
-		string[size-1] = 0;
+		string[size - 1] = 0;
 		*is_initialised = size;
 	}
 }
