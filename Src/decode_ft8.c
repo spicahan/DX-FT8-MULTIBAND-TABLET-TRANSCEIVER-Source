@@ -337,9 +337,11 @@ int Check_Calling_Stations(int num_decoded)
 				if (Beacon_On == 1)
 				{
 					if (new_decoded[i].sequence == Seq_Locator)
-						set_reply(Reply_R_RSL);
-					else
+						//set_reply(Reply_R_RSL);
 						set_reply(Reply_RSL);
+					else
+						//set_reply(Reply_RSL);
+						set_reply(Reply_R_RSL);
 				}
 
 				Beacon_Reply_Status = 1;
@@ -383,7 +385,8 @@ int Check_Calling_Stations(int num_decoded)
 					{
 						if (new_decoded[i].RR73 == 1)
 						{
-							if (Answer_CQ[old_call_address].sequence == Seq_RSL)
+							//if (Answer_CQ[old_call_address].sequence == Seq_RSL)
+							if (Answer_CQ[old_call_address].sequence == Seq_LOCATOR)	
 								// if this is a  locator response send Beacon 73
 								set_reply(Reply_Beacon_73);
 							else
@@ -394,7 +397,8 @@ int Check_Calling_Stations(int num_decoded)
 						}
 						else
 						{
-							if (Answer_CQ[old_call_address].sequence == Seq_RSL)
+							//if (Answer_CQ[old_call_address].sequence == Seq_RSL)
+							if (Answer_CQ[old_call_address].sequence == Seq_LOCATOR)
 								// if this is a  locator response send RSL
 								set_reply(Reply_RSL);
 							else
