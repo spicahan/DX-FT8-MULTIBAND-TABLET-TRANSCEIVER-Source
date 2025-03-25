@@ -52,7 +52,7 @@ static int message_limit = 10;
 int Auto_QSO_State; // chh
 int Target_RSL;
 
-//push flag
+//3/25/Flag
 
 int ft8_decode(void)
 {
@@ -339,8 +339,8 @@ int Check_Calling_Stations(int num_decoded)
 					Station_RSL = new_decoded[i].received_snr;
 
 				if (Beacon_On == 1){
-					if(new_decoded[i].sequence == 1) set_reply(0);
-					else set_reply(1);
+					if(new_decoded[i].sequence == 2) set_reply(2);
+					else set_reply(0);
 				}
 
 				Beacon_Reply_Status = 1;
@@ -382,31 +382,22 @@ int Check_Calling_Stations(int num_decoded)
 				{
 					if (Beacon_On == 1)
 					{
-						/*
+
+
 						if (new_decoded[i].RR73 == 1)
 						{
-							if(new_decoded[i].sequence == 4) set_reply(3);
-							else set_reply(1);
+
+							if(Answer_CQ[old_call_address].sequence == 1) set_reply(1); //if this is  locator response send  Beacon 73
+							else set_reply(3);                                   // if this is a RSL response send QSO 73
 
 							Answer_CQ[old_call_address].RR73 = 1;
+
 						}
 						else {
-							if(new_decoded[i].sequence == 2) set_reply(2);
-							else set_reply(0);
-						}
-						*/
 
-						if (new_decoded[i].RR73 == 1)
-						{
-						if(Answer_CQ[old_call_address].sequence == 1) set_reply(1); //if this is normal locator sequence send normal Beacon 73
-						else set_reply(3);  // if this is a RSL sequence send QSO 73
+							if(Answer_CQ[old_call_address].sequence == 1) set_reply(0);    //if this is a  locator response send RSL
+							else set_reply(2);										 //if this is a RSL response send R_RSL
 
-						Answer_CQ[old_call_address].RR73 = 1;
-						}
-
-						else {
-						if(	Answer_CQ[old_call_address].sequence == 1) set_reply(0); //if this is a normal locator sequence send RSL
-						else set_reply(3);  //if this is a RSL sequence send R_RSL
 						}
 
 					}
@@ -421,6 +412,7 @@ int Check_Calling_Stations(int num_decoded)
 
 	return Beacon_Reply_Status;
 }
+
 
 void process_selected_Station(int stations_decoded, int TouchIndex)
 {

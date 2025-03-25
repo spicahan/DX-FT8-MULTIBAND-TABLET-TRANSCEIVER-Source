@@ -9,11 +9,13 @@
 #include "decode_ft8.h"
 #include "WF_Table.h"
 
+//3/25/Flag
+
 #define FFT_X 0
 #define FFT_Y 1
 #define FFT_W (ft8_buffer - ft8_min_bin)
 
-//flag
+
 
 int FT_8_TouchIndex;
 

@@ -40,6 +40,8 @@
 
 #include "button.h"
 
+//3/25/Flag
+
 char Station_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
 char Locator[5];		// four character locator + null terminator
 char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
@@ -147,12 +149,12 @@ void set_reply(uint16_t index)
 	uint8_t packed[K_BYTES];
 	char RSL[5];
 
+// Beware!! these lines apply to sequence numbers, not reply messages!!
 // 1. [Call] [Call] [Grid]
 // 2. [Call] [Call] [RSL]
 // 3. [Call] [Call] [R-RSL]
 // 4. [Call] [Call] [RRR|RR73|73]
 
-	//new push flag
 
 	itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
 	if (index == 0)
