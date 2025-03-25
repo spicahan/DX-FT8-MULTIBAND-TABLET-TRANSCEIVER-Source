@@ -14,9 +14,10 @@ extern int Target_RSL;
 
 typedef enum _Sequence
 {
-    Seq_Default,
+    Seq_Locator,
     Seq_RSL,
-    Seq_Locator
+    Seq_R_RSL,
+    Seq_RRR,
 } Sequence;
 
 typedef struct
