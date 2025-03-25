@@ -48,9 +48,7 @@ typedef struct
     int RSL;
     int received_RSL;
     int RR73;
-   // int sequence;
-  Sequence sequence;
-
+    Sequence sequence;
 } Calling_Station;
 
 int Check_Calling_Stations(int num_decoded);
