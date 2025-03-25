@@ -141,7 +141,7 @@ int ft8_decode(void)
 				if (validate_locator(locator) == 1)
 				{
 					strcpy(new_decoded[num_decoded].target_locator, locator);
-					new_decoded[num_decoded].sequence = Seq_Locator;
+					new_decoded[num_decoded].sequence = Seq_RSL;
 				}
 				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
 				{
@@ -162,7 +162,7 @@ int ft8_decode(void)
 					if (received_RSL < 30) // Prevents an 73 being decoded as a received RSL
 					{
 						new_decoded[num_decoded].received_snr = received_RSL;
-						new_decoded[num_decoded].sequence = Seq_RSL;
+						new_decoded[num_decoded].sequence = Seq_Locator;
 					}
 				}
 
@@ -336,7 +336,7 @@ int Check_Calling_Stations(int num_decoded)
 
 				if (Beacon_On == 1)
 				{
-					if (new_decoded[i].sequence == Seq_RSL)
+					if (new_decoded[i].sequence == Seq_Locator)
 						set_reply(Reply_R_RSL);
 					else
 						set_reply(Reply_RSL);
@@ -383,17 +383,23 @@ int Check_Calling_Stations(int num_decoded)
 					{
 						if (new_decoded[i].RR73 == 1)
 						{
-							if (Answer_CQ[old_call_address].sequence == Seq_Locator)
-								// if this is a  locator response send RSL
-								set_reply(Reply_RSL);
+							if (Answer_CQ[old_call_address].sequence == Seq_RSL)
+								// if this is a  locator response send Beacon 73
+								set_reply(Reply_Beacon_73);
 							else
 								// if this is a RSL response send QSO 73
 								set_reply(Reply_QSO_73);
+
 							Answer_CQ[old_call_address].RR73 = 1;
 						}
 						else
 						{
-							set_reply(Reply_R_RSL); // if this is a RSL response send R_RSL
+							if (Answer_CQ[old_call_address].sequence == Seq_RSL)
+								// if this is a  locator response send RSL
+								set_reply(Reply_RSL);
+							else
+								// if this is a RSL response send R_RSL
+								set_reply(Reply_R_RSL);
 						}
 					}
 
