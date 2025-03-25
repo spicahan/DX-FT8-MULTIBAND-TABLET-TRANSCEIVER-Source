@@ -335,10 +335,12 @@ int Check_Calling_Stations(int num_decoded)
 					Station_RSL = new_decoded[i].received_snr;
 
 				if (Beacon_On == 1)
+				{
 					if (new_decoded[i].sequence)
 						set_reply(Reply_R_RSL);
 					else
 						set_reply(Reply_RSL);
+				}
 
 				Beacon_Reply_Status = 1;
 
