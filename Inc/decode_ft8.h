@@ -12,6 +12,13 @@ extern int Auto_QSO_State;
 extern int Station_RSL;
 extern int Target_RSL;
 
+typedef enum _Sequence
+{
+    Seq_Default,
+    Seq_RSL,
+    Seq_Locator
+} Sequence;
+
 typedef struct
 {
     char call_to[14]; // call also be 'CQ'
@@ -24,7 +31,7 @@ typedef struct
     char target_locator[7];
     int slot;
     int RR73;
-    uint8_t sequence;
+    Sequence sequence;
 } Decode;
 
 typedef struct
