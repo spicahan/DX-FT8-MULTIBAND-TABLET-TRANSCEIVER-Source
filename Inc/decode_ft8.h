@@ -16,8 +16,6 @@ typedef enum _Sequence
 {
     Seq_RSL = 0,
     Seq_Locator
-    //Seq_R_RSL,
-    //Seq_RRR,
 } Sequence;
 
 typedef struct

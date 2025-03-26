@@ -17,7 +17,7 @@ extern char Target_Call[10];   // same as Station_Call
 extern char Target_Locator[5]; // same as Locator
 extern int Target_RSL;
 
-#define MESSAGE_SIZE 26
+#define MESSAGE_SIZE 28
 
 extern char reply_message[MESSAGE_SIZE];
 extern char reply_message_list[MESSAGE_SIZE][8];
@@ -33,10 +33,18 @@ void clear_reply_message_box(void);
 typedef enum _ReplyID
 {
     Reply_RSL,
-    Reply_Beacon_73,
     Reply_R_RSL,
+    Reply_Beacon_73,
     Reply_QSO_73
 } ReplyID;
+
+typedef enum _QueID
+{
+    Que_Locator,
+    Que_RSL,
+    Que_73,
+    Que_Size
+} QueID;
 
 void set_reply(ReplyID index);
 void set_cq(void);
@@ -46,7 +54,7 @@ void SD_Initialize(void);
 
 void compose_messages(void);
 void clear_xmit_messages(void);
-void que_message(int index);
+void queue_message(QueID queId);
 void clear_qued_message(void);
 
 #endif /* GEN_FT8_H_ */

@@ -31,7 +31,7 @@
 
 const int kLDPC_iterations = 20;
 const int kMax_candidates = 20;
-const int kMax_decoded_messages = 20; // chhh 27 feb
+const int kMax_decoded_messages = 20;
 const unsigned int kMax_message_length = 25;
 const int kMin_score = 40; // Minimum sync score threshold for candidates
 
@@ -42,14 +42,14 @@ extern char current_QSO_receive_message[];
 extern char current_Beacon_receive_message[];
 
 static display_message display[10];
-static Decode new_decoded[25];		  // chh 27 Feb
-static Calling_Station Answer_CQ[50]; //
+static Decode new_decoded[25];
+static Calling_Station Answer_CQ[50];
 static int log_size = 50;
 
 static int num_calls; // number of unique calling stations
 static int message_limit = 10;
 
-int Auto_QSO_State; // chh
+int Auto_QSO_State;
 int Target_RSL;
 
 int ft8_decode(void)
@@ -146,7 +146,6 @@ int ft8_decode(void)
 				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
 				{
 					new_decoded[num_decoded].RR73 = 1;
-					//new_decoded[num_decoded].sequence = Seq_RRR;
 				}
 				else
 				{
@@ -162,7 +161,6 @@ int ft8_decode(void)
 					if (received_RSL < 30) // Prevents an 73 being decoded as a received RSL
 					{
 						new_decoded[num_decoded].received_snr = received_RSL;
-						//new_decoded[num_decoded].sequence = Seq_RSL;
 					}
 				}
 
@@ -337,9 +335,9 @@ int Check_Calling_Stations(int num_decoded)
 				if (Beacon_On == 1)
 				{
 					if (new_decoded[i].sequence == Seq_Locator)
-					set_reply(Reply_RSL);
+						set_reply(Reply_RSL);
 					else
-					set_reply(Reply_R_RSL);
+						set_reply(Reply_R_RSL);
 				}
 
 				Beacon_Reply_Status = 1;
@@ -383,8 +381,7 @@ int Check_Calling_Stations(int num_decoded)
 					{
 						if (new_decoded[i].RR73 == 1)
 						{
-							//if (Answer_CQ[old_call_address].sequence == Seq_RSL)
-							if (Answer_CQ[old_call_address].sequence == Seq_Locator)	
+							if (Answer_CQ[old_call_address].sequence == Seq_Locator)
 								// if this is a  locator response send Beacon 73
 								set_reply(Reply_Beacon_73);
 							else
@@ -395,7 +392,6 @@ int Check_Calling_Stations(int num_decoded)
 						}
 						else
 						{
-							//if (Answer_CQ[old_call_address].sequence == Seq_RSL)
 							if (Answer_CQ[old_call_address].sequence == Seq_Locator)
 								// if this is a  locator response send RSL
 								set_reply(Reply_RSL);
