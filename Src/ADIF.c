@@ -26,7 +26,7 @@ static unsigned num_digits(int num)
 		count = 3;
 	else if (((num >= 10) && (num < 100)) || ((num <= -1) && num > -10))
 		count = 2;
-	else if (num >= 1 && num < 10)
+	else if (num >= 0 && num < 10)
 		count = 1;
 	return count;
 }
