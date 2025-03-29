@@ -745,7 +745,7 @@ void executeButton(uint16_t index)
 		if (sButtonData[QRPP].state)
 		{
 			CQ_Mode_Index = 3;
-			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRPP");
+			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRP ");
 		}
 		break;
 
