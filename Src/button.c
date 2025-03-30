@@ -35,9 +35,7 @@ int Free_Index;
 int AGC_Gain = 20;
 int Band_Minimum;
 
-extern int Auto_QSO_State;
-
-char display_frequency[] = "14.075";
+char display_frequency[7] = "14.075";
 
 const FreqStruct sBand_Data[NumBands] =
 	{
@@ -441,10 +439,10 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
-	{// button 32 CQ SOTA
-	 /*text0*/ "QRPP",
-	 /*text1*/ "QRPP",
-	 /*blank*/ "    ",
+	{// button 32 CQ QRP
+	 /*text0*/ "QRP",
+	 /*text1*/ "QRP",
+	 /*blank*/ "   ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
@@ -561,7 +559,7 @@ static void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
 
 static void update_CQFree_button()
 {
-	sButtonData[CQFree].state = 0;	
+	sButtonData[CQFree].state = 0;
 	drawButton(CQFree);
 }
 
@@ -747,7 +745,7 @@ void executeButton(uint16_t index)
 		if (sButtonData[QRPP].state)
 		{
 			CQ_Mode_Index = 3;
-			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRPP");
+			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRP ");
 		}
 		break;
 
@@ -920,7 +918,8 @@ void erase_Cal_Display(void)
 		sButtonData[button].Active = 0;
 	}
 
-	for (int button = StandardCQ; button <= FreeText2; ++button){
+	for (int button = StandardCQ; button <= FreeText2; ++button)
+	{
 		sButtonData[button].Active = 0;
 		drawButton(button);
 	}

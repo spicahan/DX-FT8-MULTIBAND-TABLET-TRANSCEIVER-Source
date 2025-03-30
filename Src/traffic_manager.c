@@ -43,7 +43,7 @@ void service_QSO_mode(int decoded_signals)
 		break;
 
 	case 1:
-		que_message(0);
+		queue_message(Que_Locator);
 		QSO_xmit = 1;
 		QSO_xmit_count++;
 		if (QSO_xmit_count == 3)
@@ -55,7 +55,7 @@ void service_QSO_mode(int decoded_signals)
 		break;
 
 	case 2:
-		que_message(1);
+		queue_message(Que_RSL);
 		QSO_xmit = 1;
 		Auto_QSO_State = 3;
 		RSL_sent++;
@@ -64,13 +64,13 @@ void service_QSO_mode(int decoded_signals)
 	case 3:
 		if (RR73_sent == 1)
 		{
-			que_message(2);
+			queue_message(Que_73);
 			QSO_xmit = 1;
 			Auto_QSO_State = 4;
 		}
 		else if (RSL_sent < 5)
 		{
-			que_message(1);
+			queue_message(Que_RSL);
 			QSO_xmit = 1;
 			RSL_sent++;
 			Auto_QSO_State = 3;

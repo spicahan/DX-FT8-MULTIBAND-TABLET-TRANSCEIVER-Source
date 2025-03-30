@@ -67,8 +67,8 @@ const char CQ[] = "CQ";
 const char SOTA[] = "SOTA";
 const char POTA[] = "POTA";
 const char QRP[] = "QRP";
-const char Beacon_seventy_three[] = "RR73";
-const char QSO_seventy_three[] = "73";
+const char Beacon_73[] = "RR73";
+const char QSO_73[] = "73";
 
 int Free_Text_Max = 0;
 static char Free_Text1[MESSAGE_SIZE];
@@ -142,22 +142,40 @@ static int in_range(int num, int min, int max)
 	return num;
 }
 
-void set_reply(uint16_t index)
+void set_reply(ReplyID replyId)
 {
 	uint8_t packed[K_BYTES];
 	char RSL[5];
 
-	if (index == 1)
+	switch (replyId)
 	{
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call,
-				Beacon_seventy_three);
+	case Reply_RSL:
+	case Reply_R_RSL:
+		// compute the RSL for use by the next 'switch'
+		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
+		break;
+	case Reply_Beacon_73:
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, Beacon_73);
+		break;
+	case Reply_QSO_73:
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, QSO_73);
+		break;
+	}
+
+	switch (replyId)
+	{
+	case Reply_RSL:
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
+		break;
+	case Reply_R_RSL:
+		sprintf(reply_message, "%s %s R%s", Target_Call, Station_Call, RSL);
+		break;
+	case Reply_Beacon_73:
+	// fall through
+	case Reply_QSO_73:
 		if (Station_RSL != 99)
 			write_ADIF_Log();
-	}
-	else
-	{
-		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
+		break;
 	}
 
 	strcpy(current_Beacon_xmit_message, reply_message);
@@ -166,7 +184,6 @@ void set_reply(uint16_t index)
 	pack77(reply_message, packed);
 	genft8(packed, tones);
 
-	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
@@ -174,40 +191,39 @@ void set_reply(uint16_t index)
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)reply_message, LEFT_MODE);
 }
 
-static char xmit_messages[3][MESSAGE_SIZE];
+static char xmit_messages[Que_Size][MESSAGE_SIZE];
 
 void compose_messages(void)
 {
 	char RSL[5];
 	itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
 
-	sprintf(xmit_messages[0], "%s %s %s", Target_Call, Station_Call, Locator);
-	sprintf(xmit_messages[1], "%s %s R%s", Target_Call, Station_Call, RSL);
-	sprintf(xmit_messages[2], "%s %s %s", Target_Call, Station_Call,
-			QSO_seventy_three);
+	sprintf(xmit_messages[Que_Locator], "%s %s %s", Target_Call, Station_Call, Locator);
+	sprintf(xmit_messages[Que_RSL], "%s %s R%s", Target_Call, Station_Call, RSL);
+	sprintf(xmit_messages[Que_73], "%s %s %s", Target_Call, Station_Call, QSO_73);
 
 	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)xmit_messages[0], LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)xmit_messages[Que_Locator], LEFT_MODE);
 }
 
-void que_message(int index)
+void queue_message(QueID queId)
 {
 	uint8_t packed[K_BYTES];
 
-	pack77(xmit_messages[index], packed);
+	const char *tx_msg = xmit_messages[queId];
+	pack77(tx_msg, packed);
 	genft8(packed, tones);
 
 	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)blank, LEFT_MODE);
-
 	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)xmit_messages[index], LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)tx_msg, LEFT_MODE);
 
-	strcpy(current_QSO_xmit_message, xmit_messages[index]);
+	strcpy(current_QSO_xmit_message, tx_msg);
 
-	if (index == 2 && Station_RSL != 99)
+	if (queId == Que_73 && Station_RSL != 99)
 		write_ADIF_Log();
 }
 

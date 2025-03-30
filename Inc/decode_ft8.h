@@ -12,11 +12,17 @@ extern int Auto_QSO_State;
 extern int Station_RSL;
 extern int Target_RSL;
 
+typedef enum _Sequence
+{
+    Seq_RSL = 0,
+    Seq_Locator
+} Sequence;
+
 typedef struct
 {
-    char call_to[14];   // call also be 'CQ'
+    char call_to[14]; // call also be 'CQ'
     char call_from[14];
-    char locator[7];    // can also be a response 'RR73' etc.
+    char locator[7]; // can also be a response 'RR73' etc.
     int freq_hz;
     int sync_score;
     int snr;
@@ -24,6 +30,7 @@ typedef struct
     char target_locator[7];
     int slot;
     int RR73;
+    Sequence sequence;
 } Decode;
 
 typedef struct
@@ -40,6 +47,7 @@ typedef struct
     int RSL;
     int received_RSL;
     int RR73;
+    Sequence sequence;
 } Calling_Station;
 
 int Check_Calling_Stations(int num_decoded);
