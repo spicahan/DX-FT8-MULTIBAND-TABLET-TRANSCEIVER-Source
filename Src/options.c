@@ -29,14 +29,23 @@ FIL MyFile;		/* File object */
 char SDPath[4]; /* SD card logical drive path */
 
 // Order must match OptionNumber in options.h
-OptionStruct s_optionsData[] = {{
-	/*Name*/ "  Band_Index ", // opt0
-	/*Init*/ _20M,  //Set default band to 20 meters for 5 Band Board Protection
-	/*Min */ 0,
-	/*Max */ 4,
-	/*Rate*/ 1,
-	/*Data*/ 0,
-}};
+OptionStruct s_optionsData[] = {
+	{
+		/*Name*/ "  Band_Index ", // opt0
+		/*Init*/ _20M,			  // Set default band to 20 meters for 5 Band Board Protection
+		/*Min */ 0,
+		/*Max */ 4,
+		/*Rate*/ 1,
+		/*Data*/ 0,
+	},
+	{
+		/*Name*/ "  Logging_State ", // opt1
+		/*Init*/ 1,					 // Logging is by default, on
+		/*Min */ 0,
+		/*Max */ 1,
+		/*Rate*/ 1,
+		/*Data*/ 0,
+	}};
 
 int16_t Options_GetValue(int optionIdx)
 {
@@ -68,7 +77,8 @@ int16_t Options_Initialize(void)
 		result = Options_WriteToMicroSD();
 	}
 
-	BandIndex = Options_GetValue(0);
+	BandIndex = Options_GetValue(OPTION_Band_Index);
+	Logging_State = Options_GetValue(OPTION_Logging_State);
 	start_freq = sBand_Data[BandIndex].Frequency;
 	show_wide(380, 0, (int)start_freq);
 
@@ -82,7 +92,6 @@ void Options_ResetToDefaults(void)
 	for (i = 0; i < NUM_OPTIONS; i++)
 	{
 		Options_SetValue(i, s_optionsData[i].Initial);
-
 	}
 }
 
@@ -94,9 +103,7 @@ int16_t Options_WriteToMicroSD(void)
 	for (i = 0; i < NUM_OPTIONS; i++)
 	{
 		if (Write_Int_MicroSD(i, Options_GetValue(i)) == 0)
-		{
 			result = 0;
-		}
 	}
 	return result;
 }

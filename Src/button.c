@@ -34,8 +34,11 @@ int Free_Index;
 
 int AGC_Gain = 20;
 int Band_Minimum;
+int Logging_State;
 
 char display_frequency[7] = "14.075";
+static const char *Logging_On  = "Logging  On";
+static const char *Logging_Off = "Logging Off";
 
 const FreqStruct sBand_Data[NumBands] =
 	{
@@ -218,8 +221,8 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 360,
-	 /*y*/ 110,
+	 /*x*/ 356,
+	 /*y*/ 92,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -230,8 +233,8 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 360,
-	 /*y*/ 70,
+	 /*x*/ 356,
+	 /*y*/ 65,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -474,6 +477,19 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*y*/ 205,
 	 /*w*/ 160,
 	 /*h*/ 30},
+
+	{// button 35
+	 /*text0*/ "Logging  On",
+	 /*text1*/ "Logging Off",
+	 /*blank*/ "           ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 240,
+	 /*y*/ 120,
+	 /*w*/ 120,
+	 /*h*/ 30},
+
 }; // end of button definition
 
 void drawButton(uint16_t button)
@@ -555,6 +571,11 @@ static void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
 	drawButton(btn3);
 	sButtonData[CQFree].text0 = (char *)button_text;
 	drawButton(CQFree);
+}
+
+static void set_button_text(int btn, const char *button_text)
+{
+	sButtonData[btn].text0 = sButtonData[btn].text1 = (char *)button_text;
 }
 
 static void update_CQFree_button()
@@ -692,8 +713,8 @@ void executeButton(uint16_t index)
 		break;
 
 	case SaveBand:
-		Options_SetValue(0, BandIndex);
-		Options_StoreValue(0);
+		Options_SetValue(OPTION_Band_Index, BandIndex);
+		Options_StoreValue(OPTION_Band_Index);
 		start_freq = sBand_Data[BandIndex].Frequency;
 		show_wide(380, 0, start_freq);
 
@@ -775,6 +796,12 @@ void executeButton(uint16_t index)
 		{
 			update_CQFree_button();
 		}
+		break;
+
+	case Logging:
+		Logging_State = Logging_State == 0 ? 1 : 0;
+		set_button_text(Logging, Logging_State ? Logging_On : Logging_Off);
+		toggle_button_state(Logging);
 		break;
 	}
 }
@@ -893,7 +920,8 @@ void setup_Cal_Display(void)
 
 	drawButton(SaveRTCDate);
 
-	for (int button = StandardCQ; button <= FreeText2; ++button)
+	set_button_text(Logging, Logging_State ? Logging_On : Logging_Off);
+	for (int button = StandardCQ; button <= Logging; ++button)
 	{
 		sButtonData[button].Active = 1;
 		drawButton(button);
@@ -906,6 +934,7 @@ void setup_Cal_Display(void)
 
 	load_RealDate();
 	display_RTC_DateEdit(RTC_Button - 20, RTC_line3 + 15);
+
 }
 
 void erase_Cal_Display(void)
@@ -918,7 +947,7 @@ void erase_Cal_Display(void)
 		sButtonData[button].Active = 0;
 	}
 
-	for (int button = StandardCQ; button <= FreeText2; ++button)
+	for (int button = StandardCQ; button <= Logging; ++button)
 	{
 		sButtonData[button].Active = 0;
 		drawButton(button);
@@ -933,6 +962,9 @@ void erase_Cal_Display(void)
 
 	sButtonData[CQFree].Active = 1;
 	drawButton(CQFree);
+
+	Options_SetValue(OPTION_Logging_State, Logging_State);
+	Options_StoreValue(OPTION_Logging_State);
 }
 
 void PTT_Out_Init(void)
