@@ -29,14 +29,14 @@ static const size_t ERROR_FLAG = 0xffffffff;
 
 // Pack a special token, a 22-bit hash code, or a valid base call
 // into a 28-bit integer.
-int32_t pack28(const char* callsign)
+int32_t pack28(const char *callsign)
 {
     return pack28s(callsign, NULL);
 }
 
 // Pack a special token, a 22-bit hash code, or a valid base call
 // into a 28-bit integer.
-int32_t pack28s(const char* callsign, int *has_suffix)
+int32_t pack28s(const char *callsign, int *has_suffix)
 {
     int32_t NTOKENS = 2063592L;
     int32_t MAX22 = 4194304L;
@@ -62,7 +62,7 @@ int32_t pack28s(const char* callsign, int *has_suffix)
             *has_suffix = 1;
         length -= 2;
     }
-    
+
     // Copy callsign intto 6 character buffer
     if (starts_with(callsign, "3DA0") && length <= 7)
     {
@@ -92,13 +92,9 @@ int32_t pack28s(const char* callsign, int *has_suffix)
 
     // Check for standard callsign
     int i0, i1, i2, i3, i4, i5;
-    if ((i0 = char_index(A1, c6[0])) >= 0 
+    if ((i0 = char_index(A1, c6[0])) >= 0
         // do not match blank
-        && (i1 = char_index(A1+1, c6[1])) >= 0
-        && (i2 = char_index(A3, c6[2])) >= 0
-        && (i3 = char_index(A4, c6[3])) >= 0
-        && (i4 = char_index(A4, c6[4])) >= 0
-        && (i5 = char_index(A4, c6[5])) >= 0)
+        && (i1 = char_index(A1 + 1, c6[1])) >= 0 && (i2 = char_index(A3, c6[2])) >= 0 && (i3 = char_index(A4, c6[3])) >= 0 && (i4 = char_index(A4, c6[4])) >= 0 && (i5 = char_index(A4, c6[5])) >= 0)
     {
         // This is a standard callsign
         int32_t n28 = i0;
@@ -112,7 +108,7 @@ int32_t pack28s(const char* callsign, int *has_suffix)
     return -1;
 }
 
-static uint16_t packgrid(const char* grid4)
+static uint16_t packgrid(const char *grid4)
 {
     uint16_t MAXGRID4 = 32400;
 
@@ -131,10 +127,7 @@ static uint16_t packgrid(const char* grid4)
         return MAXGRID4 + 4;
 
     // Check for standard 4 letter grid
-    if (in_range(grid4[0], 'A', 'R') 
-        && in_range(grid4[1], 'A', 'R')
-        && is_digit(grid4[2]) 
-        && is_digit(grid4[3]))
+    if (in_range(grid4[0], 'A', 'R') && in_range(grid4[1], 'A', 'R') && is_digit(grid4[2]) && is_digit(grid4[3]))
     {
         uint16_t igrid4 = (grid4[0] - 'A');
         igrid4 = igrid4 * 18 + (grid4[1] - 'A');
@@ -164,7 +157,7 @@ static uint16_t packgrid(const char* grid4)
 static size_t extra_arg_len(const char *arg_in, char *arg_out, size_t maxlen)
 {
     size_t len = 0;
-    while(*arg_in != ' ')
+    while (*arg_in != ' ')
     {
         char ch = *arg_in++;
         if (ch >= 'A' && ch <= 'Z')
@@ -184,7 +177,7 @@ static size_t extra_arg_len(const char *arg_in, char *arg_out, size_t maxlen)
 }
 
 // Pack Type 1 (Standard 77-bit message) and Type 2 (ditto, with a "/P" call)
-int pack77_1(const char* msg, uint8_t* b77)
+int pack77_1(const char *msg, uint8_t *b77)
 {
     int32_t n28a = -1, n28b = 0;
     if (memcmp(msg, CQ_, sizeof(CQ_)) == 0)
@@ -210,7 +203,7 @@ int pack77_1(const char* msg, uint8_t* b77)
         size_t len = extra_arg_len(msg, extra_arg, sizeof(extra_arg) - 1);
         if (len == ERROR_FLAG)
             return -1;
-        else if (len > 0) 
+        else if (len > 0)
         {
             msg += len + 1;
             n28a = 0;
@@ -226,11 +219,11 @@ int pack77_1(const char* msg, uint8_t* b77)
     if (n28a < 0)
     {
         n28a = pack28s(msg, &first_has_suffix);
-        const char* s1 = strchr(msg, ' ');
+        const char *s1 = strchr(msg, ' ');
         if (s1 == 0)
             return -1;
 
-        n28b = pack28s(++s1, &second_has_suffix);  // second call
+        n28b = pack28s(++s1, &second_has_suffix); // second call
         s1 = strchr(s1, ' ');
         if (s1 != 0)
             s1++;
@@ -238,7 +231,7 @@ int pack77_1(const char* msg, uint8_t* b77)
     }
     else
     {
-        n28b = pack28s(msg, &second_has_suffix);  // second call
+        n28b = pack28s(msg, &second_has_suffix); // second call
         const char *s1 = strchr(msg, ' ');
         if (s1 != 0)
             s1++;
@@ -282,7 +275,7 @@ int pack77_1(const char* msg, uint8_t* b77)
     return 0;
 }
 
-static int packtext77(const char* text, uint8_t* b77)
+static int packtext77(const char *text, uint8_t *b77)
 {
     size_t length = strlen(text);
 
@@ -351,7 +344,7 @@ static int packtext77(const char* text, uint8_t* b77)
     return 0;
 }
 
-int pack77(const char* msg, uint8_t* c77)
+int pack77(const char *msg, uint8_t *c77)
 {
     // Check Type 1 (Standard 77-bit message) or Type 2, with optional "/P"
     if (pack77_1(msg, c77) == 0)
