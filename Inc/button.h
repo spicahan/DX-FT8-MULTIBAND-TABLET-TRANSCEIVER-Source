@@ -111,8 +111,9 @@ enum ButtonIds
 	QRPP,
 	FreeText1,
 	FreeText2,
-	Logging,
-	NumButtons = 36
+	LoggingMsg,
+	LoggingOnOff,
+	NumButtons = 37
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
