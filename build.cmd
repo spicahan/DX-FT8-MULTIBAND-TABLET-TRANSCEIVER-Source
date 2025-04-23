@@ -157,6 +157,6 @@ del *.o
 
 arm-none-eabi-size Katy.elf 
 arm-none-eabi-objdump -h -S Katy.elf > "Katy.list"
-arm-none-eabi-objcopy -O binary Katy.elf "Katy.bin"
+arm-none-eabi-objcopy -O ihex Katy.elf "Katy.hex"
 
 endlocal
