@@ -124,7 +124,7 @@ extern int QSO_Fix;
 extern uint16_t start_freq;
 extern int BandIndex;
 extern int Band_Minimum;
-extern const FreqStruct sBand_Data[NumBands];
+extern FreqStruct sBand_Data[NumBands];
 extern int AGC_Gain;
 extern int Logging_State;
 

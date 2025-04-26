@@ -40,7 +40,7 @@ char display_frequency[7] = "14.075";
 static const char *Logging_On = "On ";
 static const char *Logging_Off = "Off";
 
-const FreqStruct sBand_Data[NumBands] =
+FreqStruct sBand_Data[NumBands] =
 	{
 		{// 40,
 		 7074, "7.074"},

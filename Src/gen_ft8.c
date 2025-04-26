@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "pack.h"
 #include "encode.h"
@@ -17,11 +18,8 @@
 
 #include "gen_ft8.h"
 
-#include <stdio.h>
-
 #include "ff.h"		/* Declarations of FatFs API */
 #include "diskio.h" /* Declarations of device I/O functions */
-#include "stdio.h"
 #include "stm32746g_discovery_sd.h"
 #include "stm32746g_discovery.h"
 
@@ -31,7 +29,6 @@
 #include "sd_diskio.h"
 
 #include "arm_math.h"
-#include <string.h>
 #include "decode_ft8.h"
 #include "Display.h"
 #include "log_file.h"
@@ -39,6 +36,8 @@
 #include "ADIF.h"
 
 #include "button.h"
+#include "ini.h"
+#include "memory.h"
 
 char Station_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
 char Locator[5];		// four character locator + null terminator
@@ -49,6 +48,7 @@ int Station_RSL;
 char reply_message[MESSAGE_SIZE];
 char reply_message_list[MESSAGE_SIZE][8];
 int reply_message_count;
+struct Arena *heap;
 
 const int display_start_x = 240;
 const int display_start_y = 240;
@@ -260,75 +260,180 @@ static void set_text(char *text, const char *source, int field_id)
 }
 
 static const char *delimiters = ":;,";
+/**
+ * Pointer to the current high watermark of the heap usage
+ */
+static uint8_t *__sbrk_heap_end = NULL;
+
+void *_sbrk(ptrdiff_t incr)
+{
+  extern uint8_t _end; /* Symbol defined in the linker script */
+  extern uint8_t _estack; /* Symbol defined in the linker script */
+  extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
+  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
+  const uint8_t *max_heap = (uint8_t *)stack_limit;
+  uint8_t *prev_heap_end;
+
+  /* Initialize heap end at first call */
+  if (NULL == __sbrk_heap_end)
+  {
+    __sbrk_heap_end = &_end;
+  }
+
+  /* Protect heap from growing into the reserved MSP stack */
+  if (__sbrk_heap_end + incr > max_heap)
+  {
+    return (void *)-1;
+  }
+
+  prev_heap_end = __sbrk_heap_end;
+  __sbrk_heap_end += incr;
+
+  return (void *)prev_heap_end;
+}
+
+static void validate_call()
+{
+	for (size_t i = 0; i < strlen(Station_Call); ++i)
+	{
+		if (!isprint((int)Station_Call[i]))
+		{
+			Station_Call[0] = 0;
+			break;
+		}
+	}
+}
+
+static int setup_locator(const char *locator_part)
+{
+	size_t i = strlen(locator_part);
+	int result = i > 0 && i < sizeof(Locator) ? 1 : 0;
+	if (result != 0)
+		set_text(Locator, locator_part, -1);
+	return result;
+}
+
+static int setup_free_text(const char *free_text_part, int field_id)
+{
+	int result = 0;
+	size_t i = strlen(free_text_part);
+	switch(field_id)
+	{
+	case FreeText1:
+		result = i < sizeof(Free_Text1) ? 1 : 0 ;
+		if (i > 0 && result != 0)
+			set_text(Free_Text1, free_text_part, field_id);
+		break;
+	case FreeText2:
+		result = i < sizeof(Free_Text2) ? 1 : 0 ;
+		if (i > 0 && result != 0)
+			set_text(Free_Text2, free_text_part, field_id);
+		break;
+	}
+	return result;
+}
 
 void Read_Station_File(void)
 {
 	uint16_t result = 0;
-	char read_buffer[128];
+	Station_Call[0] = 0;
+	Locator[0] = 0;
+	Free_Text1[0] = 0;
+	Free_Text2[0] = 0;
+
+	heap = create_arena(32768, _sbrk(32768));
 
 	f_mount(&FS, SDPath, 1);
 	if (f_open(&fil, "StationData.txt", FA_OPEN_ALWAYS | FA_READ) == FR_OK)
 	{
-		char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
-		memset(read_buffer, 0, sizeof(read_buffer));
-		f_lseek(&fil, 0);
-		f_gets(read_buffer, sizeof(read_buffer), &fil);
-
-		Station_Call[0] = 0;
-		call_part = strtok(read_buffer, delimiters);
-		if (call_part != NULL)
-			locator_part = strtok(NULL, delimiters);
-		if (locator_part != NULL)
-			free_text1_part = strtok(NULL, delimiters);
-		if (free_text1_part != NULL)
-			free_text2_part = strtok(NULL, delimiters);
-
-		if (call_part != NULL)
+		const size_t buffer_size = 256;
+		char *read_buffer = arena_alloc(heap, buffer_size);
+		if (read_buffer != NULL)
 		{
-			size_t i = strlen(call_part);
-			result = i > 0 && i < sizeof(Station_Call) ? 1 : 0;
-			if (result != 0)
+			char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
+			memset(read_buffer, 0, buffer_size);
+			f_lseek(&fil, 0);
+			f_gets(read_buffer, sizeof(read_buffer), &fil);
+
+			call_part = strtok(read_buffer, delimiters);
+			if (call_part != NULL)
+				locator_part = strtok(NULL, delimiters);
+			if (locator_part != NULL)
+				free_text1_part = strtok(NULL, delimiters);
+			if (free_text1_part != NULL)
+				free_text2_part = strtok(NULL, delimiters);
+
+			if (call_part != NULL)
 			{
-				strcpy(Station_Call, call_part);
-				for (i = 0; i < strlen(Station_Call); ++i)
+				size_t i = strlen(call_part);
+				result = i > 0 && i < sizeof(Station_Call) ? 1 : 0;
+				if (result != 0)
 				{
-					if (!isprint((int)Station_Call[i]))
-					{
-						Station_Call[0] = 0;
-						break;
-					}
+					strcpy(Station_Call, call_part);
+					validate_call();
 				}
 			}
-		}
 
-		Locator[0] = 0;
-		if (result != 0 && locator_part != NULL)
+			if (result != 0 && locator_part != NULL)
+			{
+				result = setup_locator(locator_part);
+			}
+
+			if (result != 0 && free_text1_part != NULL)
+			{
+				result = setup_free_text(free_text1_part, FreeText1);
+			}
+
+			if (result != 0 && free_text2_part != NULL)
+			{
+				result = setup_free_text(free_text2_part, FreeText2);
+			}
+
+			f_close(&fil);
+			arena_dealloc(heap, read_buffer, buffer_size);
+		}
+	}
+	else
+	{
+		FILINFO filInfo = {0};
+		if (f_stat("StationData.ini", &filInfo) == FR_OK &&
+			f_open(&fil, "StationData.ini", FA_OPEN_ALWAYS | FA_READ) == FR_OK)
 		{
-			size_t i = strlen(locator_part);
-			result = i > 0 && i < sizeof(Locator) ? 1 : 0;
-			if (result != 0)
-				set_text(Locator, locator_part, -1);
-		}
+			void *data = arena_alloc(heap, filInfo.fsize);
+			if (data != NULL)
+			{
+				unsigned int bytes_read = 0;
+				if (f_read(&fil, data, filInfo.fsize, &bytes_read) == FR_OK)
+				{
+					ini_data_t *ini_data = arena_alloc(heap, sizeof(ini_data_t));
+					if (ini_data != NULL)
+					{
+						parse_ini(data, bytes_read, ini_data);
+						const ini_section_t *section = get_ini_section(ini_data, "Station");
+						if (section != NULL)
+						{
+							const char *station = get_ini_value_from_section(section, "Call");
+							if (station != NULL)
+							{
+								strncpy(Station_Call, station, sizeof(Station_Call));
+								validate_call();
+							}
 
-		Free_Text1[0] = 0;
-		if (result != 0 && free_text1_part != NULL)
-		{
-			size_t i = strlen(free_text1_part);
-			result = i < sizeof(Free_Text1) ? 1 : 0;
-			if (i > 0 && result != 0)
-				set_text(Free_Text1, free_text1_part, FreeText1);
-		}
+							const char *locator = get_ini_value_from_section(section, "Locator");
+							if (locator != NULL)
+							{
+								setup_locator(locator);
+							}
+						}
 
-		Free_Text2[0] = 0;
-		if (result != 0 && free_text2_part != NULL)
-		{
-			size_t i = strlen(free_text2_part);
-			result = i < sizeof(Free_Text2) ? 1 : 0;
-			if (i > 0 && result != 0)
-				set_text(Free_Text2, free_text2_part, FreeText2);
-		}
+						arena_dealloc(heap, ini_data, sizeof(ini_data));
+					}
+				}
 
-		f_close(&fil);
+				arena_dealloc(heap, data, filInfo.fsize);
+				f_close(&fil);
+			}
+		}
 	}
 }
 
