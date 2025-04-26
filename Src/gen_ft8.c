@@ -346,7 +346,7 @@ void Read_Station_File(void)
 			{
 				char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
 				f_lseek(&fil, 0);
-				f_gets(read_buffer, sizeof(read_buffer), &fil);
+				f_gets(read_buffer, filInfo.fsize, &fil);
 
 				call_part = strtok(read_buffer, delimiters);
 				if (call_part != NULL)
