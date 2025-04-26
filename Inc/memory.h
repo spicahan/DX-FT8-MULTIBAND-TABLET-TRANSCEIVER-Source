@@ -12,6 +12,8 @@ struct Arena
     struct FreeBlock *free_list;
 };
 
+void *_sbrk(ptrdiff_t incr);
+
 struct Arena *create_arena(size_t size, void *block);
 
 void *arena_alloc(struct Arena *arena, size_t size);

@@ -127,6 +127,7 @@ extern int Band_Minimum;
 extern FreqStruct sBand_Data[NumBands];
 extern int AGC_Gain;
 extern int Logging_State;
+extern char display_frequency[7];
 
 void drawButton(uint16_t button);
 void checkButton(void);

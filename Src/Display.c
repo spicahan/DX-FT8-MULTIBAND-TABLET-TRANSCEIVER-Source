@@ -32,7 +32,6 @@ static uint8_t WF_Bfr[FFT_H * FFT_W];
 
 char current_QSO_receive_message[];
 char current_QSO_xmit_message[];
-
 const int max_log_messages = 8;
 display_message log_messages[8];
 
@@ -211,7 +210,9 @@ void setup_display(void)
 
 	if (strlen(Station_Call) == 0 || strlen(Locator) == 0)
 	{
-		BSP_LCD_DisplayStringAt(0, 180, (const uint8_t *)"Invalid Call or Locator", LEFT_MODE);
+		char buffer[256];
+		sprintf(buffer, "Invalid Call '%s' or Locator '%s'", Station_Call, Locator);
+		BSP_LCD_DisplayStringAt(0, 180, (const uint8_t *)buffer, LEFT_MODE);
 	}
 	else
 	{

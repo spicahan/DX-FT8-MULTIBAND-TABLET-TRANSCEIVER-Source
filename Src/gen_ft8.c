@@ -59,6 +59,7 @@ static uint8_t isInitialized = 0;
 /* Fatfs structure */
 static FATFS FS;
 static FIL fil;
+static FIL fil2;
 
 static char blank[19];
 static uint8_t blank_initialised = 0;
@@ -260,37 +261,6 @@ static void set_text(char *text, const char *source, int field_id)
 }
 
 static const char *delimiters = ":;,";
-/**
- * Pointer to the current high watermark of the heap usage
- */
-static uint8_t *__sbrk_heap_end = NULL;
-
-void *_sbrk(ptrdiff_t incr)
-{
-	extern uint8_t _end;			 /* Symbol defined in the linker script */
-	extern uint8_t _estack;			 /* Symbol defined in the linker script */
-	extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
-	const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
-	const uint8_t *max_heap = (uint8_t *)stack_limit;
-	uint8_t *prev_heap_end;
-
-	/* Initialize heap end at first call */
-	if (NULL == __sbrk_heap_end)
-	{
-		__sbrk_heap_end = &_end;
-	}
-
-	/* Protect heap from growing into the reserved MSP stack */
-	if (__sbrk_heap_end + incr > max_heap)
-	{
-		return (void *)-1;
-	}
-
-	prev_heap_end = __sbrk_heap_end;
-	__sbrk_heap_end += incr;
-
-	return (void *)prev_heap_end;
-}
 
 static void validate_call()
 {
@@ -341,9 +311,13 @@ static int setup_free_text(const char *free_text_part, int field_id)
 		if (i > 0 && result != 0)
 			set_text(Free_Text2, free_text_part, field_id);
 		break;
+	default:
+		result = 1;
 	}
 	return result;
 }
+
+#define min(a, b) ((a) < (b)) ? (a) : (b)
 
 void Read_Station_File(void)
 {
@@ -355,19 +329,22 @@ void Read_Station_File(void)
 
 	const size_t memory_size = 32768;
 	void *mem = _sbrk(memory_size);
-	if (mem != (void*)-1)
+	if (mem != NULL)
 	{
 		heap = create_arena(memory_size, mem);
 
 		f_mount(&FS, SDPath, 1);
-		if (f_open(&fil, "StationData.txt", FA_OPEN_ALWAYS | FA_READ) == FR_OK)
+
+		FILINFO filInfo = {0};
+		const char *data_file_name = "StationData.txt";
+
+		if (f_stat(data_file_name, &filInfo) == FR_OK &&
+			f_open(&fil, data_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 		{
-			const size_t buffer_size = 256;
-			char *read_buffer = arena_alloc(heap, buffer_size);
+			char *read_buffer = arena_alloc(heap, filInfo.fsize);
 			if (read_buffer != NULL)
 			{
 				char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
-				memset(read_buffer, 0, buffer_size);
 				f_lseek(&fil, 0);
 				f_gets(read_buffer, sizeof(read_buffer), &fil);
 
@@ -399,27 +376,30 @@ void Read_Station_File(void)
 					result = setup_free_text(free_text2_part, FreeText2);
 				}
 
-				f_close(&fil);
-				arena_dealloc(heap, read_buffer, buffer_size);
+				arena_dealloc(heap, read_buffer, filInfo.fsize);
 			}
+
+			f_close(&fil);
 		}
 		else
 		{
 			const char *ini_file_name = "StationData.ini";
 			FILINFO filInfo = {0};
 			if (f_stat(ini_file_name, &filInfo) == FR_OK &&
-				f_open(&fil, ini_file_name, FA_OPEN_ALWAYS | FA_READ) == FR_OK)
+				f_open(&fil2, ini_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 			{
-				void *data = arena_alloc(heap, filInfo.fsize);
-				if (data != NULL)
+				char *read_buffer = arena_alloc(heap, filInfo.fsize);
+				if (read_buffer != NULL)
 				{
-					unsigned int bytes_read = 0;
-					if (f_read(&fil, data, filInfo.fsize, &bytes_read) == FR_OK)
+					f_lseek(&fil2, 0);
+
+					unsigned bytes_read;
+					if (f_read(&fil2, read_buffer, filInfo.fsize, &bytes_read) == FR_OK)
 					{
 						ini_data_t *ini_data = arena_alloc(heap, sizeof(ini_data_t));
 						if (ini_data != NULL)
 						{
-							parse_ini(data, bytes_read, ini_data);
+							parse_ini(read_buffer, bytes_read, ini_data);
 
 							const ini_section_t *section = get_ini_section(ini_data, "Station");
 							if (section != NULL)
@@ -437,13 +417,58 @@ void Read_Station_File(void)
 								}
 							}
 
+							section = get_ini_section(ini_data, "FreeText");
+							if (section != NULL)
+							{
+								const char *free_text = get_ini_value_from_section(section, "1");
+								if (free_text != NULL)
+								{
+									result = setup_free_text(free_text, FreeText1);
+								}
+
+								free_text = get_ini_value_from_section(section, "2");
+								if (free_text != NULL)
+								{
+									result = setup_free_text(free_text, FreeText2);
+								}
+							}
+
+							section = get_ini_section(ini_data, "BandData");
+							if (section != NULL)
+							{
+								// see BandIndex
+								const char *bands[NumBands+1] = { "40", "30", "20", "17", "15", "12", "10", NULL };
+								int idx = _40M;
+								for (const char *band = *bands; band != NULL; ++band, ++idx)
+								{
+									const char *band_data = get_ini_value_from_section(section, band);
+									if (band_data != NULL)
+									{
+										size_t band_data_size = strlen(band_data) + 1;
+										char *ptr = sBand_Data[idx].display = arena_alloc(heap, band_data_size);
+										if (ptr == NULL)
+											break;
+
+										memcpy(ptr, band_data, band_data_size);
+										if (idx == _20M)
+										{
+											memcpy(display_frequency, band_data, min(sizeof(display_frequency), band_data_size));
+										}
+
+										sBand_Data[idx].Frequency = atof(band_data);
+									}
+								}
+
+							}
+
 							arena_dealloc(heap, ini_data, sizeof(ini_data));
 						}
 					}
 
-					arena_dealloc(heap, data, filInfo.fsize);
-					f_close(&fil);
+					arena_dealloc(heap, read_buffer, filInfo.fsize);
 				}
+
+				f_close(&fil2);
 			}
 		}
 	}

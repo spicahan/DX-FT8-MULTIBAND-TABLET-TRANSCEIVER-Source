@@ -2,6 +2,8 @@
 #ifndef INI_H_
 #define INI_H_
 
+#include <stdbool.h>
+
 // Define a maximum size for strings and the INI structure
 #define MAX_SECTION_NAME_LENGTH 32
 #define MAX_KEY_LENGTH 32
