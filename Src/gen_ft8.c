@@ -228,7 +228,7 @@ void queue_message(QueID queId)
 		write_ADIF_Log();
 }
 
-void clear_qued_message(void)
+void clear_queued_message(void)
 {
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
@@ -276,43 +276,54 @@ static void validate_call()
 
 static int setup_station_call(const char *call_part)
 {
-	size_t i = strlen(call_part);
-	int result = i > 0 && i < sizeof(Station_Call) ? 1 : 0;
-	if (result != 0)
+	int result = 0;
+	if (call_part != NULL)
 	{
-		strcpy(Station_Call, call_part);
-		validate_call();
+		size_t i = strlen(call_part);
+		result = i > 0 && i < sizeof(Station_Call) ? 1 : 0;
+		if (result != 0)
+		{
+			strcpy(Station_Call, call_part);
+			validate_call();
+		}
 	}
 	return result;
 }
 
 static int setup_locator(const char *locator_part)
 {
-	size_t i = strlen(locator_part);
-	int result = i > 0 && i < sizeof(Locator) ? 1 : 0;
-	if (result != 0)
-		set_text(Locator, locator_part, -1);
+	int result = 0;
+	if (locator_part != NULL)
+	{
+		size_t i = strlen(locator_part);
+		result = i > 0 && i < sizeof(Locator) ? 1 : 0;
+		if (result != 0)
+			set_text(Locator, locator_part, -1);
+	}
 	return result;
 }
 
-static int setup_free_text(const char *free_text_part, int field_id)
+static int setup_free_text(const char *free_text, int field_id)
 {
 	int result = 0;
-	size_t i = strlen(free_text_part);
-	switch (field_id)
+	if (free_text != NULL)
 	{
-	case FreeText1:
-		result = i < sizeof(Free_Text1) ? 1 : 0;
-		if (i > 0 && result != 0)
-			set_text(Free_Text1, free_text_part, field_id);
-		break;
-	case FreeText2:
-		result = i < sizeof(Free_Text2) ? 1 : 0;
-		if (i > 0 && result != 0)
-			set_text(Free_Text2, free_text_part, field_id);
-		break;
-	default:
-		result = 1;
+		size_t i = strlen(free_text);
+		switch (field_id)
+		{
+		case FreeText1:
+			result = i < sizeof(Free_Text1) ? 1 : 0;
+			if (i > 0 && result != 0)
+				set_text(Free_Text1, free_text, field_id);
+			break;
+		case FreeText2:
+			result = i < sizeof(Free_Text2) ? 1 : 0;
+			if (i > 0 && result != 0)
+				set_text(Free_Text2, free_text, field_id);
+			break;
+		default:
+			result = 1;
+		}
 	}
 	return result;
 }
@@ -321,7 +332,6 @@ static int setup_free_text(const char *free_text_part, int field_id)
 
 void Read_Station_File(void)
 {
-	uint16_t result = 0;
 	Station_Call[0] = 0;
 	Locator[0] = 0;
 	Free_Text1[0] = 0;
@@ -356,25 +366,10 @@ void Read_Station_File(void)
 				if (free_text1_part != NULL)
 					free_text2_part = strtok(NULL, delimiters);
 
-				if (call_part != NULL)
-				{
-					result = setup_station_call(call_part);
-				}
-
-				if (result != 0 && locator_part != NULL)
-				{
-					result = setup_locator(locator_part);
-				}
-
-				if (result != 0 && free_text1_part != NULL)
-				{
-					result = setup_free_text(free_text1_part, FreeText1);
-				}
-
-				if (result != 0 && free_text2_part != NULL)
-				{
-					result = setup_free_text(free_text2_part, FreeText2);
-				}
+				setup_station_call(call_part);
+				setup_locator(locator_part);
+				setup_free_text(free_text1_part, FreeText1);
+				setup_free_text(free_text2_part, FreeText2);
 
 				arena_dealloc(heap, read_buffer, filInfo.fsize);
 			}
@@ -404,44 +399,25 @@ void Read_Station_File(void)
 							const ini_section_t *section = get_ini_section(ini_data, "Station");
 							if (section != NULL)
 							{
-								const char *station = get_ini_value_from_section(section, "Call");
-								if (station != NULL)
-								{
-									setup_station_call(station);
-								}
-
-								const char *locator = get_ini_value_from_section(section, "Locator");
-								if (locator != NULL)
-								{
-									setup_locator(locator);
-								}
+								setup_station_call(get_ini_value_from_section(section, "Call"));
+								setup_locator(get_ini_value_from_section(section, "Locator"));
 							}
 
 							section = get_ini_section(ini_data, "FreeText");
 							if (section != NULL)
 							{
-								const char *free_text = get_ini_value_from_section(section, "1");
-								if (free_text != NULL)
-								{
-									result = setup_free_text(free_text, FreeText1);
-								}
-
-								free_text = get_ini_value_from_section(section, "2");
-								if (free_text != NULL)
-								{
-									result = setup_free_text(free_text, FreeText2);
-								}
+								setup_free_text(get_ini_value_from_section(section, "1"), FreeText1);
+								setup_free_text(get_ini_value_from_section(section, "2"), FreeText2);
 							}
 
 							section = get_ini_section(ini_data, "BandData");
 							if (section != NULL)
 							{
 								// see BandIndex
-								const char *bands[NumBands+1] = { "40", "30", "20", "17", "15", "12", "10", NULL };
-								int idx = _40M;
-								for (const char *band = *bands; band != NULL; ++band, ++idx)
+								const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
+								for (int idx = _40M; idx <= _10M; ++idx)
 								{
-									const char *band_data = get_ini_value_from_section(section, band);
+								    const char *band_data = get_ini_value_from_section(section, bands[idx]);
 									if (band_data != NULL)
 									{
 										size_t band_data_size = strlen(band_data) + 1;
@@ -455,10 +431,9 @@ void Read_Station_File(void)
 											memcpy(display_frequency, band_data, min(sizeof(display_frequency), band_data_size));
 										}
 
-										sBand_Data[idx].Frequency = atof(band_data);
+										sBand_Data[idx].Frequency = (uint16_t)(atof(band_data)*1000);
 									}
 								}
-
 							}
 
 							arena_dealloc(heap, ini_data, sizeof(ini_data));

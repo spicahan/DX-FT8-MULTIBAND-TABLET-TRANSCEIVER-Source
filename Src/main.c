@@ -182,7 +182,7 @@ int main(void)
 							receive_sequence();
 							ft8_xmit_delay = 0;
 							if (Beacon_On == 0)
-								clear_qued_message();
+								clear_queued_message();
 						}
 					}
 					else

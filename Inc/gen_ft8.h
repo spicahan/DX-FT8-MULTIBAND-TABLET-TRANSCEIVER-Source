@@ -55,6 +55,6 @@ void SD_Initialize(void);
 void compose_messages(void);
 void clear_xmit_messages(void);
 void queue_message(QueID queId);
-void clear_qued_message(void);
+void clear_queued_message(void);
 
 #endif /* GEN_FT8_H_ */
