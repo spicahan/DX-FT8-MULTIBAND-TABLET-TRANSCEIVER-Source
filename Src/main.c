@@ -29,12 +29,13 @@
 #include "main.h"
 #include "stm32f7xx_hal_rcc.h"
 #include "stm32746g_discovery_ts.h"
-#include "arm_math.h"
 #include "stm32746g_discovery_lcd.h"
+#include "stm32f7xx_hal_tim.h"
+#include "arm_math.h"
+
 #include "SDR_Audio.h"
 #include "Display.h"
 #include "Process_DSP.h"
-#include "stm32f7xx_hal_tim.h"
 #include "Codec_Gains.h"
 #include "button.h"
 
@@ -92,7 +93,7 @@ int main(void)
 	CPU_CACHE_Enable();
 
 	HAL_Init();
-
+	
 	/* Configure the System clock to have a frequency of 200 MHz */
 	SystemClock_Config();
 

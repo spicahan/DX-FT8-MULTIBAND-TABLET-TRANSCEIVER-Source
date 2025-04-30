@@ -13,7 +13,7 @@ struct FreeBlock
 
 static uint8_t *__sbrk_heap_end = NULL;
 
-void *_sbrk(ptrdiff_t incr)
+void* _sbrk(ptrdiff_t incr)
 {
   extern uint8_t _end; /* Symbol defined in the linker script */
   extern uint8_t _estack; /* Symbol defined in the linker script */
@@ -39,7 +39,6 @@ void *_sbrk(ptrdiff_t incr)
 
   return (void *)prev_heap_end;
 }
-
 
 struct Arena *create_arena(size_t size, void *block)
 {
