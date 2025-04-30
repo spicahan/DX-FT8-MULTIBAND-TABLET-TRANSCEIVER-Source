@@ -330,6 +330,8 @@ static int setup_free_text(const char *free_text, int field_id)
 
 #define min(a, b) ((a) < (b)) ? (a) : (b)
 
+extern uint8_t _ssdram; /* Symbol defined in the linker script */
+
 void Read_Station_File(void)
 {
 	Station_Call[0] = 0;
@@ -338,7 +340,7 @@ void Read_Station_File(void)
 	Free_Text2[0] = 0;
 
 	const size_t memory_size = 8 * 1024 * 1024;
-	void *mem = (void *)0xC0000000U;
+	void *mem = (void *)&_ssdram;
 	heap = create_arena(memory_size, mem);
 
 	f_mount(&FS, SDPath, 1);
