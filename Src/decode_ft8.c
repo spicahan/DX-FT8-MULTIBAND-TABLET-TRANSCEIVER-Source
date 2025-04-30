@@ -319,20 +319,20 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					update_Beacon_log_display(0);
 				else
 					update_log_display(0);
 
 				strcpy(Target_Call, call_from);
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					Target_RSL = new_decoded[i].snr;
 
 				if (new_decoded[i].received_snr != 99)
 					Station_RSL = new_decoded[i].received_snr;
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 				{
 					if (new_decoded[i].sequence == Seq_Locator)
 						set_reply(Reply_RSL);
@@ -357,7 +357,7 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					update_Beacon_log_display(0);
 				else
 					update_log_display(0);
@@ -377,7 +377,7 @@ int Check_Calling_Stations(int num_decoded)
 
 				if (Answer_CQ[old_call_address].RR73 == 0)
 				{
-					if (Beacon_On == 1)
+					if (Beacon_On)
 					{
 						if (new_decoded[i].RR73 == 1)
 						{

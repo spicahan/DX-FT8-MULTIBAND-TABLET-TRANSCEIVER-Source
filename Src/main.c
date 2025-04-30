@@ -93,7 +93,7 @@ int main(void)
 	CPU_CACHE_Enable();
 
 	HAL_Init();
-	
+
 	/* Configure the System clock to have a frequency of 200 MHz */
 	SystemClock_Config();
 
@@ -154,15 +154,17 @@ int main(void)
 
 	while (1)
 	{
-		if (DSP_Flag == 1)
+		if (DSP_Flag)
 		{
 			I2S2_RX_ProcessBuffer(buff_offset);
 
-			if (xmit_flag == 1)
+			if (xmit_flag)
 			{
-				if (ft8_xmit_delay >= 20)
+				// Start sending FT8 messages about 0.1 to 0.5 seconds into the time slot
+				// to match the observed behavior.
+				if (ft8_xmit_delay >= 28)
 				{
-					if (Tune_On == 0)
+					if (!Tune_On)
 					{
 						if (ft8_xmit_counter < 79)
 						{
@@ -182,7 +184,7 @@ int main(void)
 							ft8_receive_sequence();
 							receive_sequence();
 							ft8_xmit_delay = 0;
-							if (Beacon_On == 0)
+							if (!Beacon_On)
 								clear_queued_message();
 						}
 					}
@@ -193,16 +195,14 @@ int main(void)
 				}
 				else
 				{
-					ft8_xmit_delay++;
-
-					if (ft8_xmit_delay == 16)
+					if (++ft8_xmit_delay == 16)
 						output_enable(SI5351_CLK0, 1);
 				}
 			}
 
 			display_RealTime(100, 240);
 
-			if (Tune_On == 1)
+			if (Tune_On)
 			{
 				display_Real_Date(0, 240);
 			}
@@ -210,7 +210,7 @@ int main(void)
 			DSP_Flag = 0;
 		}
 
-		if (decode_flag == 1 && Tune_On == 0 && xmit_flag == 0)
+		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			// toggle the slot state
 			slot_state = (slot_state == 0) ? 1 : 0;
@@ -220,10 +220,9 @@ int main(void)
 			if (master_decoded > 0)
 			{
 				display_messages(master_decoded);
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					service_Beacon_mode(master_decoded);
 				else
-				if (Beacon_On == 0)
 					service_QSO_mode(master_decoded);
 			}
 
@@ -233,7 +232,7 @@ int main(void)
 		if (FT_8_counter > 0 && FT_8_counter < 90)
 			Process_Touch();
 
-		if (Tune_On == 0 && FT8_Touch_Flag == 1 && Beacon_On == 0)
+		if (!Tune_On && FT8_Touch_Flag && !Beacon_On)
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
 
 		update_synchronization();
