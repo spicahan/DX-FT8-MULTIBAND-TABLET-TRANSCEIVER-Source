@@ -456,6 +456,9 @@ void clear_reply_message_box(void)
 
 void SD_Initialize(void)
 {
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_FillRect(0, 0, 480, 272);
+
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_RED);
 
