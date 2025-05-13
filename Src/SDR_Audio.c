@@ -85,16 +85,6 @@ void transfer_buffers(void)
 	}
 }
 
-void clear_buffers(void)
-{
-	for (int j = 0; j < BUFFERSIZE / 4; j++)
-	{
-		int index = buff_offset + j * 2;
-		out_buff[index] = 0;
-		out_buff[index + 1] = 0;
-	}
-}
-
 void BSP_AUDIO_IN_TransferComplete_CallBack(void)
 {
 	buff_offset = BUFFERSIZE / 2;
