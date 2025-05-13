@@ -351,21 +351,25 @@ void Display_WF(void)
 		WF_Bfr[byte_count_to_last_line + x] = (ft8_marker) ? marker_line_colour_index : FFT_Buffer[x + ft8_min_bin];
 	}
 
-	// draw the waterfall
-	// Draw from the bottom to the top
+	// Draw the waterfall from the bottom to the top
 	uint8_t *ptr = &WF_Bfr[byte_count_to_last_line];
 	for (int y = FFT_H - 1; y >= 0; y--)
 	{
 		for (int x = 0; x < FFT_W; x++)
 		{
-			BSP_LCD_DrawPixel(x, y, WFPalette[*ptr++]);
+			// Each FFT datum is 6.25hz, the transmit bandwidth is 50Hz (= 8 pixels)
+			if ((x == cursor) || (x == cursor + 8))
+			{
+				BSP_LCD_DrawPixel(x, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
+			}
+			else
+			{
+				BSP_LCD_DrawPixel(x, y, WFPalette[*ptr]);
+			}
+			ptr++;
 		}
 
 		ptr -= (FFT_W * 2);
-
-		BSP_LCD_DrawPixel(cursor, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
-		// Each FFT datum is 6.25hz, the transmit bandwidth is 50Hz (= 8 pixels)
-		BSP_LCD_DrawPixel(cursor + 8, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
 	}
 
 	if (!ft8_marker && Auto_Sync)
