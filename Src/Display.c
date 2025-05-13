@@ -19,7 +19,7 @@
 
 int FT_8_TouchIndex;
 
-uint16_t cursor;
+uint16_t cursor = 192;
 char rtc_date_string[9];
 char rtc_time_string[9];
 int decode_flag;

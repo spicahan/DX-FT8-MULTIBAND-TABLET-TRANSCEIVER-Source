@@ -344,6 +344,7 @@ int Check_Calling_Stations(int num_decoded)
 
 				strcpy(Answer_CQ[num_calls].call, call_from);
 				strcpy(Answer_CQ[num_calls].locator, new_decoded[i].target_locator);
+
 				Answer_CQ[num_calls].RSL = Target_RSL;
 				Answer_CQ[num_calls].received_RSL = Station_RSL;
 				Answer_CQ[num_calls].sequence = new_decoded[i].sequence;
@@ -411,9 +412,9 @@ int Check_Calling_Stations(int num_decoded)
 	return Beacon_Reply_Status;
 }
 
-void process_selected_Station(int stations_decoded, int TouchIndex)
+void process_selected_Station(int num_decoded, int TouchIndex)
 {
-	if (stations_decoded > 0 && TouchIndex <= stations_decoded)
+	if (num_decoded > 0 && TouchIndex <= num_decoded)
 	{
 		strcpy(Target_Call, new_decoded[TouchIndex].call_from);
 		strcpy(Target_Locator, new_decoded[TouchIndex].target_locator);

@@ -50,16 +50,13 @@
 
 #include "options.h"
 
-TIM_HandleTypeDef hTim2;
 uint32_t current_time, start_time, ft8_time;
 
-int master_decoded;
 int QSO_xmit;
 int Xmit_DSP_counter;
 int slot_state = 0;
 int target_slot;
 int target_freq;
-int slot_number;
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -126,29 +123,17 @@ int main(void)
 
 	start_Si5351();
 
-	cursor = 192; // 1500 Hz
 	Set_Cursor_Frequency();
 	show_variable(400, 25, (int)NCO_Frequency);
-
 	show_short(667, 255, AGC_Gain);
-
-	HAL_Delay(1);
-
-	Xmit_Mode = 0;
-
-	HAL_Delay(10);
-
-	start_duplex(0);
+	start_duplex();
 	HAL_Delay(10);
 	set_codec_input_gain();
 	HAL_Delay(10);
 	receive_sequence();
 	HAL_Delay(10);
-	Set_HP_Gain(30);
-	HAL_Delay(10);
-
+	Set_Headphone_Gain(30);
 	Init_Log_File();
-
 	FT8_Sync();
 	HAL_Delay(10);
 
@@ -166,14 +151,11 @@ int main(void)
 				{
 					if (!Tune_On)
 					{
-						if (ft8_xmit_counter < 79)
+						if ((ft8_xmit_counter < 79) && (Xmit_DSP_counter % 4 == 0))
 						{
-							if (Xmit_DSP_counter % 4 == 0)
-							{
-								ft8_shift = ft8_hz * (double)tones[ft8_xmit_counter];
-								set_FT8_Tone(tones[ft8_xmit_counter]);
-								ft8_xmit_counter++;
-							}
+							ft8_shift = ft8_hz * (double)tones[ft8_xmit_counter];
+							set_FT8_Tone(tones[ft8_xmit_counter]);
+							ft8_xmit_counter++;
 						}
 
 						Xmit_DSP_counter++;
@@ -210,20 +192,21 @@ int main(void)
 			DSP_Flag = 0;
 		}
 
+		int num_decoded = 0;
 		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			// toggle the slot state
 			slot_state = (slot_state == 0) ? 1 : 0;
 			clear_decoded_messages();
 
-			master_decoded = ft8_decode();
-			if (master_decoded > 0)
+			num_decoded = ft8_decode();
+			if (num_decoded > 0)
 			{
-				display_messages(master_decoded);
+				display_messages(num_decoded);
 				if (Beacon_On)
-					service_Beacon_mode(master_decoded);
+					service_Beacon_mode(num_decoded);
 				else
-					service_QSO_mode(master_decoded);
+					service_QSO_mode(num_decoded);
 			}
 
 			decode_flag = 0;
@@ -233,7 +216,7 @@ int main(void)
 			Process_Touch();
 
 		if (!Tune_On && FT8_Touch_Flag && !Beacon_On)
-			process_selected_Station(master_decoded, FT_8_TouchIndex);
+			process_selected_Station(num_decoded, FT_8_TouchIndex);
 
 		update_synchronization();
 	}
