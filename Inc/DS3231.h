@@ -10,7 +10,8 @@
 
 #include "arm_math.h"
 
-typedef struct {
+typedef struct
+{
 	const char *Name;
 	const unsigned char Minimum;
 	const unsigned char Maximum;
@@ -18,9 +19,6 @@ typedef struct {
 } RTCStruct;
 
 extern RTCStruct s_RTC_Data[];
-
-extern char edit_date_string[9];
-extern char edit_time_string[9];
 
 #define DS3231_Address              0x68
 
@@ -54,7 +52,8 @@ extern char edit_time_string[9];
 
 extern int RTC_Set_Flag;
 
-enum days_of_week {
+enum days_of_week
+{
 	SUN = 1, MON, TUE, WED, THU, FRI, SAT
 };
 

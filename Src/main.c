@@ -249,13 +249,6 @@ static void HID_InitApplication(void)
 }
 
 /**
- * @brief  User Process
- * @param  phost: Host Handle
- * @param  id: Host Library user message ID
- * @retval None
- */
-
-/**
  * @brief This function provides accurate delay (in milliseconds) based
  *        on SysTick counter flag.
  * @note This function is declared as __weak to be overwritten in case of other
@@ -266,7 +259,7 @@ static void HID_InitApplication(void)
 
 void HAL_Delay(__IO uint32_t Delay)
 {
-	while (Delay)
+	while (Delay != 0)
 	{
 		if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
 		{

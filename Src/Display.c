@@ -9,13 +9,9 @@
 #include "decode_ft8.h"
 #include "WF_Table.h"
 
-//3/25/Flag
-
 #define FFT_X 0
 #define FFT_Y 1
 #define FFT_W (ft8_buffer - ft8_min_bin)
-
-
 
 int FT_8_TouchIndex;
 
@@ -30,8 +26,8 @@ const int log_width = 230;
 
 static uint8_t WF_Bfr[FFT_H * FFT_W];
 
-char current_QSO_receive_message[];
-char current_QSO_xmit_message[];
+char current_QSO_receive_message[40];
+char current_QSO_xmit_message[40];
 const int max_log_messages = 8;
 display_message log_messages[8];
 
@@ -52,7 +48,7 @@ void update_log_display(int mode)
 			   current_QSO_receive_message);
 		log_messages[max_log_messages - 1].text_color = 0;
 	}
-	else if (mode == 1)
+	else
 	{
 		strcpy(log_messages[max_log_messages - 1].message,
 			   current_QSO_xmit_message);
@@ -105,7 +101,7 @@ void update_Beacon_log_display(int mode)
 			   current_Beacon_receive_message);
 		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 0;
 	}
-	else if (mode == 1)
+	else
 	{
 		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message,
 			   current_Beacon_xmit_message);
@@ -120,7 +116,7 @@ void update_Beacon_log_display(int mode)
 	{
 		if (Beacon_log_messages[i].text_color == 0)
 			BSP_LCD_SetTextColor(LCD_COLOR_RED);
-		else if (Beacon_log_messages[i].text_color == 1)
+		else
 			BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 
 		BSP_LCD_DisplayStringAt(log_start, 40 + i * 20,
@@ -172,7 +168,7 @@ void show_UTC_time(uint16_t x, uint16_t y, int utc_hours, int utc_minutes,
 
 	if (color == 0)
 		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	else if (color == 1)
+	else
 		BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 
 	BSP_LCD_DisplayStringAt(x, y, (const uint8_t *)rtc_time_string, LEFT_MODE);
