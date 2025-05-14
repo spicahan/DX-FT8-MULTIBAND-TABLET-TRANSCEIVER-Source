@@ -56,10 +56,12 @@ typedef struct
 
 } ButtonStruct;
 
+#define BAND_DATA_SIZE 10
+
 typedef struct
 {
 	uint16_t Frequency;
-	char *display;
+	char display[BAND_DATA_SIZE];
 } FreqStruct;
 
 enum BandIndex
@@ -127,7 +129,7 @@ extern int Band_Minimum;
 extern FreqStruct sBand_Data[NumBands];
 extern int AGC_Gain;
 extern int Logging_State;
-extern char display_frequency[7];
+extern char display_frequency[BAND_DATA_SIZE];
 
 void drawButton(uint16_t button);
 void checkButton(void);

@@ -37,7 +37,6 @@
 
 #include "button.h"
 #include "ini.h"
-#include "memory.h"
 
 char Station_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
 char Locator[5];		// four character locator + null terminator
@@ -48,7 +47,6 @@ int Station_RSL;
 char reply_message[MESSAGE_SIZE];
 char reply_message_list[MESSAGE_SIZE][8];
 int reply_message_count;
-struct Arena *heap;
 
 const int display_start_x = 240;
 const int display_start_y = 240;
@@ -339,10 +337,6 @@ void Read_Station_File(void)
 	Free_Text1[0] = 0;
 	Free_Text2[0] = 0;
 
-	const size_t memory_size = 8 * 1024 * 1024;
-	void *mem = (void *)&_ssdram;
-	heap = create_arena(memory_size, mem);
-
 	f_mount(&FS, SDPath, 1);
 
 	FILINFO filInfo = {0};
@@ -351,29 +345,23 @@ void Read_Station_File(void)
 	if (f_stat(data_file_name, &filInfo) == FR_OK &&
 		f_open(&fil, data_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 	{
-		char *read_buffer = arena_alloc(heap, filInfo.fsize);
-		if (read_buffer != NULL)
-		{
-			char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
-			f_lseek(&fil, 0);
-			f_gets(read_buffer, filInfo.fsize, &fil);
+		char read_buffer[filInfo.fsize];
+		char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
+		f_lseek(&fil, 0);
+		f_gets(read_buffer, filInfo.fsize, &fil);
 
-			call_part = strtok(read_buffer, delimiters);
-			if (call_part != NULL)
-				locator_part = strtok(NULL, delimiters);
-			if (locator_part != NULL)
-				free_text1_part = strtok(NULL, delimiters);
-			if (free_text1_part != NULL)
-				free_text2_part = strtok(NULL, delimiters);
+		call_part = strtok(read_buffer, delimiters);
+		if (call_part != NULL)
+			locator_part = strtok(NULL, delimiters);
+		if (locator_part != NULL)
+			free_text1_part = strtok(NULL, delimiters);
+		if (free_text1_part != NULL)
+			free_text2_part = strtok(NULL, delimiters);
 
-			setup_station_call(call_part);
-			setup_locator(locator_part);
-			setup_free_text(free_text1_part, FreeText1);
-			setup_free_text(free_text2_part, FreeText2);
-
-			arena_dealloc(heap, read_buffer, filInfo.fsize);
-		}
-
+		setup_station_call(call_part);
+		setup_locator(locator_part);
+		setup_free_text(free_text1_part, FreeText1);
+		setup_free_text(free_text2_part, FreeText2);
 		f_close(&fil);
 	}
 	else
@@ -383,64 +371,48 @@ void Read_Station_File(void)
 		if (f_stat(ini_file_name, &filInfo) == FR_OK &&
 			f_open(&fil2, ini_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 		{
-			char *read_buffer = arena_alloc(heap, filInfo.fsize);
-			if (read_buffer != NULL)
+			char read_buffer[filInfo.fsize];
+			f_lseek(&fil2, 0);
+
+			unsigned bytes_read;
+			if (f_read(&fil2, read_buffer, filInfo.fsize, &bytes_read) == FR_OK)
 			{
-				f_lseek(&fil2, 0);
+				ini_data_t ini_data;
+				parse_ini(read_buffer, bytes_read, &ini_data);
 
-				unsigned bytes_read;
-				if (f_read(&fil2, read_buffer, filInfo.fsize, &bytes_read) == FR_OK)
+				const ini_section_t *section = get_ini_section(&ini_data, "Station");
+				if (section != NULL)
 				{
-					ini_data_t *ini_data = arena_alloc(heap, sizeof(ini_data_t));
-					if (ini_data != NULL)
-					{
-						parse_ini(read_buffer, bytes_read, ini_data);
-
-						const ini_section_t *section = get_ini_section(ini_data, "Station");
-						if (section != NULL)
-						{
-							setup_station_call(get_ini_value_from_section(section, "Call"));
-							setup_locator(get_ini_value_from_section(section, "Locator"));
-						}
-
-						section = get_ini_section(ini_data, "FreeText");
-						if (section != NULL)
-						{
-							setup_free_text(get_ini_value_from_section(section, "1"), FreeText1);
-							setup_free_text(get_ini_value_from_section(section, "2"), FreeText2);
-						}
-
-						section = get_ini_section(ini_data, "BandData");
-						if (section != NULL)
-						{
-							// see BandIndex
-							const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
-							for (int idx = _40M; idx <= _10M; ++idx)
-							{
-								const char *band_data = get_ini_value_from_section(section, bands[idx]);
-								if (band_data != NULL)
-								{
-									size_t band_data_size = strlen(band_data) + 1;
-									char *ptr = sBand_Data[idx].display = arena_alloc(heap, band_data_size);
-									if (ptr == NULL)
-										break;
-
-									memcpy(ptr, band_data, band_data_size);
-									if (idx == _20M)
-									{
-										memcpy(display_frequency, band_data, min(sizeof(display_frequency), band_data_size));
-									}
-
-									sBand_Data[idx].Frequency = (uint16_t)(atof(band_data) * 1000);
-								}
-							}
-						}
-
-						arena_dealloc(heap, ini_data, sizeof(ini_data));
-					}
+					setup_station_call(get_ini_value_from_section(section, "Call"));
+					setup_locator(get_ini_value_from_section(section, "Locator"));
 				}
 
-				arena_dealloc(heap, read_buffer, filInfo.fsize);
+				section = get_ini_section(&ini_data, "FreeText");
+				if (section != NULL)
+				{
+					setup_free_text(get_ini_value_from_section(section, "1"), FreeText1);
+					setup_free_text(get_ini_value_from_section(section, "2"), FreeText2);
+				}
+
+				section = get_ini_section(&ini_data, "BandData");
+				if (section != NULL)
+				{
+					// see BandIndex
+					static const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
+					for (int idx = _40M; idx <= _10M; ++idx)
+					{
+						const char *band_data = get_ini_value_from_section(section, bands[idx]);
+						if (band_data != NULL)
+						{
+							size_t band_data_size = strlen(band_data) + 1;
+							if (band_data_size < BAND_DATA_SIZE)
+							{
+								sBand_Data[idx].Frequency = (uint16_t)(atof(band_data) * 1000);
+								memcpy(sBand_Data[idx].display, band_data, band_data_size);
+							}
+						}
+					}
+				}
 			}
 
 			f_close(&fil2);

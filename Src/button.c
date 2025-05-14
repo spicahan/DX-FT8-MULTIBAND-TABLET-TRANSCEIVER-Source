@@ -36,7 +36,7 @@ int AGC_Gain = 20;
 int Band_Minimum;
 int Logging_State;
 
-char display_frequency[7] = "14.075";
+char display_frequency[BAND_DATA_SIZE] = "14.075";
 static const char *Logging_On = "On ";
 static const char *Logging_Off = "Off";
 

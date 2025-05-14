@@ -48,7 +48,7 @@ static void copy_and_trim(char *dest, const char *src, size_t len)
     str_trim(dest);
 }
 
-void parse_ini(const char *buffer, int buffer_len, ini_data_t *ini_data)
+void parse_ini(const char *buffer, size_t buffer_len, ini_data_t *ini_data)
 {
     ini_data->num_sections = 0;
     int current_section = -1;
@@ -125,17 +125,12 @@ void parse_ini(const char *buffer, int buffer_len, ini_data_t *ini_data)
 
 const char *get_ini_value(const ini_data_t *ini_data, const char *section_name, const char *entry_key)
 {
-    for (int i = 0; i < ini_data->num_sections; i++)
+    for (unsigned int i = 0; i < ini_data->num_sections; i++)
     {
         const ini_section_t *section = ini_data->sections + i;
         if (section->present && strcmp(section->name, section_name) == 0)
         {
-            for (int j = 0; j < section->num_entries; j++)
-            {
-                const ini_entry_t *entry = section->entries + j;
-                if (entry->present && strcmp(entry->key, entry_key) == 0)
-                    return entry->value;
-            }
+			return get_ini_value_from_section(section, entry_key);
         }
     }
     return NULL;
@@ -143,7 +138,7 @@ const char *get_ini_value(const ini_data_t *ini_data, const char *section_name, 
 
 const ini_section_t *get_ini_section(const ini_data_t *ini_data, const char *section_name)
 {
-    for (int i = 0; i < ini_data->num_sections; i++)
+    for (unsigned int i = 0; i < ini_data->num_sections; i++)
     {
         const ini_section_t *section = ini_data->sections + i;
         if (section->present && strcmp(section->name, section_name) == 0)
@@ -156,7 +151,7 @@ const ini_section_t *get_ini_section(const ini_data_t *ini_data, const char *sec
 
 const char *get_ini_value_from_section(const ini_section_t *section, const char *entry_key)
 {
-    for (int j = 0; j < section->num_entries; j++)
+    for (unsigned int j = 0; j < section->num_entries; j++)
     {
         const ini_entry_t *entry = section->entries + j;
         if (entry->present && strcmp(entry->key, entry_key) == 0)

@@ -2,8 +2,6 @@
 #ifndef INI_H_
 #define INI_H_
 
-#include <stdbool.h>
-
 // Define a maximum size for strings and the INI structure
 #define MAX_SECTION_NAME_LENGTH 32
 #define MAX_KEY_LENGTH 32
@@ -25,7 +23,7 @@ typedef struct
 {
     char name[MAX_SECTION_NAME_LENGTH];
     ini_entry_t entries[MAX_KEYS_PER_SECTION];
-    int num_entries;
+    unsigned int num_entries;
     bool present;
 } ini_section_t;
 
@@ -33,10 +31,10 @@ typedef struct
 typedef struct
 {
     ini_section_t sections[MAX_SECTIONS];
-    int num_sections;
+    unsigned int num_sections;
 } ini_data_t;
 
-void parse_ini(const char *buffer, int buffer_len, ini_data_t *ini_data);
+void parse_ini(const char *buffer, size_t buffer_len, ini_data_t *ini_data);
 const char *get_ini_value(const ini_data_t *ini_data, const char *section_name, const char *entry_key);
 const ini_section_t *get_ini_section(const ini_data_t *ini_data, const char *section_name);
 const char *get_ini_value_from_section(const ini_section_t *section, const char *entry_key);
