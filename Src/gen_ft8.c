@@ -326,12 +326,13 @@ static int setup_free_text(const char *free_text, int field_id)
 	return result;
 }
 
-#define min(a, b) ((a) < (b)) ? (a) : (b)
-
 extern uint8_t _ssdram; /* Symbol defined in the linker script */
 
 void Read_Station_File(void)
 {
+	static const char *data_file_name = "StationData.txt";
+ 	static const char *ini_file_name  = "StationData.ini";
+
 	Station_Call[0] = 0;
 	Locator[0] = 0;
 	Free_Text1[0] = 0;
@@ -340,8 +341,6 @@ void Read_Station_File(void)
 	f_mount(&FS, SDPath, 1);
 
 	FILINFO filInfo = {0};
-	const char *data_file_name = "StationData.txt";
-
 	if (f_stat(data_file_name, &filInfo) == FR_OK &&
 		f_open(&fil, data_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 	{
@@ -366,8 +365,6 @@ void Read_Station_File(void)
 	}
 	else
 	{
-		const char *ini_file_name = "StationData.ini";
-		FILINFO filInfo = {0};
 		if (f_stat(ini_file_name, &filInfo) == FR_OK &&
 			f_open(&fil2, ini_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 		{
