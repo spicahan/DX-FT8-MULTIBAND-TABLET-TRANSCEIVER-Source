@@ -34,10 +34,9 @@ double ft8_shift;
 #define PI2 6.2831853071795864765
 #define KCONV 10430.37835 // 		4096*16/PI2
 
-const double LO_Freq = 10000;
-const int Sample_Frequency = 32000;
+static const double LO_Freq = 10000;
+static const int Sample_Frequency = 32000;
 
-static float x_NCOphzinc;
 static q15_t USB_Out[BUFFERSIZE / 4];
 static q15_t LSB_Out[BUFFERSIZE / 4];
 static q15_t in_buff[BUFFERSIZE];
@@ -105,19 +104,18 @@ void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
 {
 }
 
-static int frame_counter;
-static float m_RMSConstant = 1.0 / 65485.0;
+static const float RMSConstant = 1.0 / 65485.0;
+static const long NCOphzinc = (long)(KCONV * (PI2 * LO_Freq / Sample_Frequency));
 
 void I2S2_RX_ProcessBuffer(uint16_t offset)
 {
 	static long NCO_phz = 0;
-
-	x_NCOphzinc = (PI2 * LO_Freq / Sample_Frequency);
+	static int frame_counter = 0;
 
 	for (int i = 0; i < BUFFERSIZE / 4; i++)
 	{
-		NCO_phz += (long)(KCONV * x_NCOphzinc);
-		float temp = (q15_t)Sine_table[(NCO_phz >> 4) & 0xFFF] * m_RMSConstant;
+		NCO_phz += NCOphzinc;
+		float temp = (q15_t)Sine_table[(NCO_phz >> 4) & 0xFFF] * RMSConstant;
 		int index = i * 2 + offset;
 		FIR_I_In[i] = (q15_t)(temp * in_buff[index]);
 		FIR_Q_In[i] = (q15_t)(temp * in_buff[index + 1]);
@@ -131,14 +129,18 @@ void I2S2_RX_ProcessBuffer(uint16_t offset)
 		USB_Out[i] = FIR_I_Out[i] - FIR_Q_Out[i];
 		LSB_Out[i] = FIR_I_Out[i] + FIR_Q_Out[i];
 
-		if ((frame_counter < 4) && (i % 5 == 0))
+		if (frame_counter < 4)
 		{
-			FT8_Data[i / 5 + frame_counter * 256] = USB_Out[i];
+			div_t d = div(i, 5);
+			if (d.rem == 0)
+			{
+				FT8_Data[d.quot + frame_counter * 256] = USB_Out[i];
+			}
 		}
 
 		int index = i * 2 + offset;
-		out_buff[index] = (int16_t)USB_Out[i];
-		out_buff[index + 1] = (int16_t)LSB_Out[i];
+		out_buff[index] = USB_Out[i];
+		out_buff[index + 1] = LSB_Out[i];
 	}
 
 	if (++frame_counter == 4)
