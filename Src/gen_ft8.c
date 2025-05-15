@@ -44,8 +44,8 @@ char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P 
 char Target_Locator[5]; // four character locator  + null terminator
 int Station_RSL;
 
-char reply_message[MESSAGE_SIZE];
-char reply_message_list[MESSAGE_SIZE][8];
+char reply_message[REPLY_MESSAGE_SIZE];
+char reply_message_list[REPLY_MESSAGE_SIZE][8];
 int reply_message_count;
 
 const int display_start_x = 240;
