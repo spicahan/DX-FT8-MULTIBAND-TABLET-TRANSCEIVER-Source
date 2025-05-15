@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 // Returns 1 if an odd number of bits are set in x, zero otherwise
-uint8_t parity8(uint8_t x) {
+static uint8_t parity8(uint8_t x) {
 	x ^= x >> 4;    // a b c d ae bf cg dh
 	x ^= x >> 2;    // a b ac bd cae dbf aecg bfdh
 	x ^= x >> 1;    // a ab bac acbd bdcae caedbf aecgbfdh
@@ -140,6 +140,7 @@ void genft8(const uint8_t *payload, uint8_t *itone) {
 
 		if (codeword[i_byte] & mask)
 			bits3 |= 4;
+			
 		if (0 == (mask >>= 1)) {
 			mask = 0x80;
 			i_byte++;

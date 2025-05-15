@@ -25,7 +25,5 @@ void encode174(const uint8_t *message, uint8_t *codeword);
 // [IN] num_bits - number of bits in the sequence
 uint16_t crc(uint8_t *message, int num_bits);
 
-void set_cq(void);
-
 #endif // ENCODE_H_
 

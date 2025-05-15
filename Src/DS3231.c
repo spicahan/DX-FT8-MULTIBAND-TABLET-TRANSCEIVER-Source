@@ -12,14 +12,14 @@
 #include "options.h"
 #include "log_file.h"
 
-char log_rtc_time_string[13];
-char log_rtc_date_string[13];
+char log_rtc_time_string[RTC_STRING_SIZE];
+char log_rtc_date_string[RTC_STRING_SIZE];
 
 static unsigned char rtc_hour, rtc_minute, rtc_second, rtc_dow, rtc_date, rtc_month,
 		rtc_year;
 static short rtc_ampm;
 
-char file_name_string[24];
+char file_name_string[FILENAME_STRING_SIZE];
 
 RTCStruct s_RTC_Data[] = { {
 /*Name*/"  Day ", //opt0
@@ -77,10 +77,8 @@ void DS3231_Write(unsigned char address, unsigned char value) {
 }
 
 void DS3231_init(void) {
-
 	DS3231_Write(controlREG, 0x00);
 	DS3231_Write(statusREG, 0x08);
-
 }
 
 void getTime(unsigned char *p3, unsigned char *p2, unsigned char *p1, short *p0,
@@ -236,7 +234,6 @@ void make_Real_Date(void) {
 void make_File_Name(void) {
 
 	make_Real_Date();
-
 	sprintf(file_name_string, "%s.adi", log_rtc_date_string);
 }
 

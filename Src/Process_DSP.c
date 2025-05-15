@@ -18,8 +18,8 @@
 
 double NCO_Frequency;
 int ft8_flag, FT_8_counter, ft8_marker;
-uint8_t FFT_Buffer[ft8_buffer];
-uint8_t export_fft_power[ft8_msg_samples * ft8_buffer * 4];
+uint8_t FFT_Buffer[ft8_buffer_size];
+uint8_t export_fft_power[ft8_msg_samples * ft8_buffer_size * 4];
 
 q15_t FIR_State_I[NUM_FIR_COEF + (BUFFERSIZE / 4) - 1];
 q15_t FIR_State_Q[NUM_FIR_COEF + (BUFFERSIZE / 4) - 1];
@@ -71,7 +71,7 @@ void init_DSP(void)
 	{
 		window[i] = ft_blackman_i(i, FFT_SIZE);
 	}
-	offset_step = (int)ft8_buffer * 4;
+	offset_step = (int)ft8_buffer_size * 4;
 }
 
 void process_FT8_FFT(void)
@@ -83,12 +83,12 @@ void process_FT8_FFT(void)
 		extract_signal[i + 2 * input_gulp_size] = FT8_Data[i];
 	}
 
-	if (ft8_flag == 1)
+	if (ft8_flag)
 	{
 		int offset = offset_step * FT_8_counter;
 		extract_power(offset);
 
-		for (int k = 0; k < ft8_buffer; k++)
+		for (int k = 0; k < ft8_buffer_size; k++)
 		{
 			FFT_Buffer[k] = export_fft_power[k + offset] / 4;
 		}
@@ -125,10 +125,11 @@ void extract_power(int offset)
 		// Loop over two possible frequency bin offsets (for averaging)
 		for (int freq_sub = 0; freq_sub < 2; ++freq_sub)
 		{
-			for (int j = 0; j < ft8_buffer; ++j)
+			for (int k = 0; k < ft8_buffer_size; ++k)
 			{
-				float db1 = mag_db[j * 2 + freq_sub];
-				float db2 = mag_db[j * 2 + freq_sub + 1];
+				int mag_offset = k * 2 + freq_sub;
+				float db1 = mag_db[mag_offset];
+				float db2 = mag_db[mag_offset + 1];
 				float db = (db1 + db2) / 2;
 
 				int scaled = (int)(db);

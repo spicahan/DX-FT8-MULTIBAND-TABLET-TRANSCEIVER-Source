@@ -14,22 +14,23 @@
 #define FFT_W (ft8_buffer - ft8_min_bin)
 
 int FT_8_TouchIndex;
-
 uint16_t cursor = 192;
-char rtc_date_string[9];
-char rtc_time_string[9];
 int decode_flag;
 int FT8_Touch_Flag;
+char current_QSO_receive_message[MESSAGE_SIZE];
+char current_QSO_xmit_message[MESSAGE_SIZE];
 
 const int log_start = 240;
 const int log_width = 230;
 
 static uint8_t WF_Bfr[FFT_H * FFT_W];
 
-char current_QSO_receive_message[40];
-char current_QSO_xmit_message[40];
-const int max_log_messages = 8;
-display_message log_messages[8];
+#define RTC_STRING_SIZE 9
+static char rtc_date_string[RTC_STRING_SIZE];
+static char rtc_time_string[RTC_STRING_SIZE];
+
+static const int max_log_messages = 8;
+static display_message log_messages[max_log_messages];
 
 static char blank[21];
 static uint8_t blank_initialised = 0;
@@ -74,38 +75,35 @@ void update_log_display(int mode)
 
 void clear_log_messages(void)
 {
-	string_init(blank, sizeof(blank), &blank_initialised,' ');
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 
 	for (int i = 0; i < max_log_messages; i++)
 		strcpy(log_messages[i].message, blank);
 }
 
-char current_Beacon_receive_message[40];
-char current_Beacon_xmit_message[40];
-int max_Beacon_log_messages = 10;
-display_message Beacon_log_messages[10];
+char current_Beacon_receive_message[MESSAGE_SIZE];
+char current_Beacon_xmit_message[MESSAGE_SIZE];
+
+static const int max_Beacon_log_messages = 10;
+static display_message Beacon_log_messages[max_Beacon_log_messages];
 
 void update_Beacon_log_display(int mode)
 {
 	for (int i = 0; i < max_Beacon_log_messages - 1; i++)
 	{
-		strcpy(Beacon_log_messages[i].message,
-			   Beacon_log_messages[i + 1].message);
-		Beacon_log_messages[i].text_color =
-			Beacon_log_messages[i + 1].text_color;
+		strcpy(Beacon_log_messages[i].message, Beacon_log_messages[i + 1].message);
+		Beacon_log_messages[i].text_color = Beacon_log_messages[i + 1].text_color;
 	}
 
-	if (mode == 0)
+	if (mode)
 	{
-		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message,
-			   current_Beacon_receive_message);
-		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 0;
+		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message, current_Beacon_xmit_message);
+		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 1;
 	}
 	else
 	{
-		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message,
-			   current_Beacon_xmit_message);
-		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 1;
+		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message, current_Beacon_receive_message);
+		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 0;
 	}
 
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);

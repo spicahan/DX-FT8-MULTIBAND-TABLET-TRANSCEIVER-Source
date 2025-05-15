@@ -22,7 +22,6 @@ const int ADC_DVC_Off = 90;
 
 #define FT8_TONE_SPACING 625
 
-int CQ_State;
 int Beacon_State;
 
 int RSL_sent;
@@ -32,7 +31,7 @@ int RR73_sent;
 void service_QSO_mode(int decoded_signals)
 {
 	int receive_status = Check_Calling_Stations(decoded_signals);
-	if (receive_status == 1 && Auto_QSO_State != 2 && RSL_sent == 0)
+	if (receive_status && Auto_QSO_State != 2 && !RSL_sent)
 	{
 		Auto_QSO_State = 2;
 	}
@@ -45,8 +44,7 @@ void service_QSO_mode(int decoded_signals)
 	case 1:
 		queue_message(Que_Locator);
 		QSO_xmit = 1;
-		QSO_xmit_count++;
-		if (QSO_xmit_count == 3)
+		if (++QSO_xmit_count == 3)
 		{
 			Auto_QSO_State = 0;
 			QSO_xmit_count = 0;
@@ -62,7 +60,7 @@ void service_QSO_mode(int decoded_signals)
 		break;
 
 	case 3:
-		if (RR73_sent == 1)
+		if (RR73_sent)
 		{
 			queue_message(Que_73);
 			QSO_xmit = 1;
@@ -92,12 +90,11 @@ void service_Beacon_mode(int decoded_signals)
 	switch (Beacon_State)
 	{
 	case 0:
-
 		break;
 
 	case 1:
 		receive_status = Check_Calling_Stations(decoded_signals);
-		if (receive_status == 1)
+		if (receive_status)
 		{
 			setup_to_transmit_on_next_DSP_Flag();
 		}
@@ -112,7 +109,7 @@ void service_Beacon_mode(int decoded_signals)
 
 	case 2:
 		receive_status = Check_Calling_Stations(decoded_signals);
-		if (receive_status == 1)
+		if (receive_status)
 		{
 			setup_to_transmit_on_next_DSP_Flag();
 		}
@@ -137,8 +134,6 @@ void terminate_QSO(void)
 	receive_sequence();
 	xmit_flag = 0;
 }
-
-uint64_t F_Long, F_FT8, F_Receive;
 
 void ft8_transmit_sequence(void)
 {
@@ -171,6 +166,8 @@ void tune_Off_sequence(void)
 	Set_ADC_DVC(ADC_DVC_Gain);
 }
 
+static uint64_t F_Long;
+
 void set_Xmit_Freq(void)
 {
 	F_Long = ((start_freq * 1000ULL + (uint16_t)NCO_Frequency) * 100ULL);
@@ -179,12 +176,12 @@ void set_Xmit_Freq(void)
 
 void set_FT8_Tone(uint8_t ft8_tone)
 {
-	F_FT8 = F_Long + (uint64_t)ft8_tone * FT8_TONE_SPACING;
+	uint64_t F_FT8 = F_Long + (uint64_t)ft8_tone * FT8_TONE_SPACING;
 	set_freq(F_FT8, SI5351_CLK0);
 }
 
 void set_Rcvr_Freq(void)
 {
-	F_Receive = ((start_freq * 1000ULL - 10000ULL) * 100ULL * 4ULL);
+	uint64_t F_Receive = ((start_freq * 1000ULL - 10000ULL) * 100ULL * 4ULL);
 	set_freq(F_Receive, SI5351_CLK1);
 }

@@ -697,7 +697,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case FreqUp:
-		if (cursor < (ft8_buffer - ft8_min_bin - 8))
+		if (cursor < (ft8_buffer_size - ft8_min_bin - 8))
 		{
 			// limits highest NCO frequency to (3875 - 50)hz
 			cursor++;

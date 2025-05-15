@@ -15,7 +15,7 @@ typedef struct
 	const char *Name;
 	const unsigned char Minimum;
 	const unsigned char Maximum;
-	char data;
+	int8_t data;
 } RTCStruct;
 
 extern RTCStruct s_RTC_Data[];
@@ -52,18 +52,12 @@ extern RTCStruct s_RTC_Data[];
 
 extern int RTC_Set_Flag;
 
-enum days_of_week
-{
-	SUN = 1, MON, TUE, WED, THU, FRI, SAT
-};
+#define RTC_STRING_SIZE 13
+#define FILENAME_STRING_SIZE 24
 
-extern char log_rtc_time_string[13];
-extern char log_rtc_date_string[13];
-extern char file_name_string[24];
-
-unsigned char bcd_to_decimal(unsigned char d);
-unsigned char decimal_to_bcd(unsigned char d);
-unsigned char DS3231_Read(unsigned char address);
+extern char log_rtc_time_string[RTC_STRING_SIZE];
+extern char log_rtc_date_string[RTC_STRING_SIZE];
+extern char file_name_string[FILENAME_STRING_SIZE];
 
 void DS3231_Write(unsigned char address, unsigned char value);
 void DS3231_init(void);
@@ -71,8 +65,6 @@ void getTime(unsigned char *hour, unsigned char *minute, unsigned char *second,
 		short *am_pm, short hour_format);
 void getDate(unsigned char *day_of_week, unsigned char *date,
 		unsigned char *month, unsigned char *year);
-float getTemp(void);
-void format_time(int value, char *result, char zeros);
 
 void RTC_setTime(unsigned char hSet, unsigned char mSet, unsigned char sSet,
 		short am_pm_state, short hour_format);
@@ -81,10 +73,6 @@ void RTC_setDate(unsigned char daySet, unsigned char dateSet,
 
 void display_RealTime(int x, int y);
 void display_Real_Date(int x, int y);
-void sync_RTC(void);
-
-void set_RTC_Item(int item, int16_t value);
-void sync_FT8_Time(void);
 
 void make_Real_Time(void);
 void make_Real_Date(void);
@@ -93,7 +81,6 @@ void make_File_Name(void);
 void load_RealTime(void);
 void display_RTC_TimeEdit(int x, int y);
 void display_RTC_DateEdit(int x, int y);
-void RTC_SetValue(int Idx, char newValue);
 void set_RTC_to_TimeEdit(void);
 void set_RTC_to_DateEdit(void);
 

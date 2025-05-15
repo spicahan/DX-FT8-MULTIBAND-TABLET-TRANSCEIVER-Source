@@ -38,9 +38,6 @@
 #define RTC_Button 100
 #define RTC_Add 180
 
-extern int Band_Minimum;
-extern int BTS_Status;
-
 typedef struct
 {
 	char *text0;

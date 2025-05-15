@@ -39,7 +39,6 @@ static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
 extern char current_QSO_receive_message[];
-extern char current_Beacon_receive_message[];
 
 static display_message display[10];
 static Decode new_decoded[25];
@@ -57,7 +56,7 @@ int ft8_decode(void)
 	// Find top candidates by Costas sync score and localize them in time and frequency
 	Candidate candidate_list[kMax_candidates];
 
-	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer, kCostas_map, kMax_candidates, candidate_list, kMin_score);
+	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer_size, kCostas_map, kMax_candidates, candidate_list, kMin_score);
 	char decoded[kMax_decoded_messages][kMax_message_length];
 
 	const float fsk_dev = 6.25f; // tone deviation in Hz and symbol rate
@@ -71,7 +70,7 @@ int ft8_decode(void)
 		float freq_hz = ((float)cand.freq_offset + (float)cand.freq_sub / 2.0f) * fsk_dev;
 
 		float log174[N];
-		extract_likelihood(export_fft_power, ft8_buffer, cand, kGray_map, log174);
+		extract_likelihood(export_fft_power, ft8_buffer_size, cand, kGray_map, log174);
 
 		// bp_decode() produces better decodes, uses way less memory
 		uint8_t plain[N];
@@ -363,7 +362,7 @@ int Check_Calling_Stations(int num_decoded)
 				else
 					update_log_display(0);
 
-				if (new_decoded[i].RR73 == 1)
+				if (new_decoded[i].RR73)
 					RR73_sent = 1;
 
 				strcpy(Target_Call, Answer_CQ[old_call_address].call);
@@ -376,12 +375,11 @@ int Check_Calling_Stations(int num_decoded)
 				else
 					Station_RSL = Answer_CQ[old_call_address].received_RSL;
 
-				if (Answer_CQ[old_call_address].RR73 == 0)
+				if (!Answer_CQ[old_call_address].RR73)
 				{
 					if (Beacon_On)
 					{
-						// if the RR73 is pending or set
-						if (new_decoded[i].RR73 > 0)
+						if (new_decoded[i].RR73)
 						{
 							if (Answer_CQ[old_call_address].sequence == Seq_Locator)
 								// if this is a  locator response send Beacon 73
