@@ -146,19 +146,10 @@ void set_reply(ReplyID replyId)
 	uint8_t packed[K_BYTES];
 	char RSL[5];
 
-	switch (replyId)
+	if (replyId == Reply_RSL || replyId == Reply_R_RSL)
 	{
-	case Reply_RSL:
-	case Reply_R_RSL:
 		// compute the RSL for use by the next 'switch'
 		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
-		break;
-	case Reply_Beacon_73:
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, Beacon_73);
-		break;
-	case Reply_QSO_73:
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, QSO_73);
-		break;
 	}
 
 	switch (replyId)
@@ -170,10 +161,10 @@ void set_reply(ReplyID replyId)
 		sprintf(reply_message, "%s %s R%s", Target_Call, Station_Call, RSL);
 		break;
 	case Reply_Beacon_73:
-	// fall through
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, Beacon_73);
+		break;
 	case Reply_QSO_73:
-		if (Station_RSL != 99)
-			write_ADIF_Log();
+		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, QSO_73);
 		break;
 	}
 

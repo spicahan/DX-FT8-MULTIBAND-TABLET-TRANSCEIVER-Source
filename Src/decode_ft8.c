@@ -153,7 +153,7 @@ int ft8_decode(void)
 					if (*ptr == 'R')
 					{
 						ptr++;
-						new_decoded[num_decoded].RR73 = 1;
+						new_decoded[num_decoded].RR73 = 2; // RR73 pending state
 						new_decoded[num_decoded].sequence = Seq_Locator;
 					}
 
@@ -380,7 +380,8 @@ int Check_Calling_Stations(int num_decoded)
 				{
 					if (Beacon_On)
 					{
-						if (new_decoded[i].RR73 == 1)
+						// if the RR73 is pending or set
+						if (new_decoded[i].RR73 > 0)
 						{
 							if (Answer_CQ[old_call_address].sequence == Seq_Locator)
 								// if this is a  locator response send Beacon 73
@@ -389,7 +390,11 @@ int Check_Calling_Stations(int num_decoded)
 								// if this is a RSL response send QSO 73
 								set_reply(Reply_QSO_73);
 
-							Answer_CQ[old_call_address].RR73 = 1;
+							if (new_decoded[i].RR73 == 1)
+							{
+								Answer_CQ[old_call_address].RR73 = 1;
+								write_ADIF_Log();
+							}
 						}
 						else
 						{
