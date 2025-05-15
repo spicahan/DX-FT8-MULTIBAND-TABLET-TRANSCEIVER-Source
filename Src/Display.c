@@ -29,11 +29,11 @@ static uint8_t WF_Bfr[FFT_H * FFT_W];
 static char rtc_date_string[RTC_STRING_SIZE];
 static char rtc_time_string[RTC_STRING_SIZE];
 
-
 #define MAX_LOG_MESSAGES 8
 static display_message log_messages[MAX_LOG_MESSAGES];
 
-static char blank[21];
+#define MAX_BLANK_SIZE 21
+static char blank[MAX_BLANK_SIZE];
 static uint8_t blank_initialised = 0;
 
 void update_log_display(int mode)

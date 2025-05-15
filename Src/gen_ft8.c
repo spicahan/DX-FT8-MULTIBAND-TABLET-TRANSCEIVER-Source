@@ -38,10 +38,10 @@
 #include "button.h"
 #include "ini.h"
 
-char Station_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
-char Locator[5];		// four character locator + null terminator
-char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
-char Target_Locator[5]; // four character locator  + null terminator
+char Station_Call[CALLSIGN_SIZE];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
+char Locator[LOCATOR_SIZE];		// four character locator + null terminator
+char Target_Call[CALLSIGN_SIZE];	// seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
+char Target_Locator[LOCATOR_SIZE]; // four character locator  + null terminator
 int Station_RSL;
 
 char reply_message[REPLY_MESSAGE_SIZE];
