@@ -52,6 +52,7 @@
 
 uint32_t current_time, start_time, ft8_time;
 
+int master_decoded;
 int QSO_xmit;
 int Xmit_DSP_counter;
 int slot_state = 0;
@@ -192,21 +193,21 @@ int main(void)
 			DSP_Flag = 0;
 		}
 
-		int num_decoded = 0;
+		//int num_decoded = 0;
 		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			// toggle the slot state
 			slot_state = (slot_state == 0) ? 1 : 0;
 			clear_decoded_messages();
 
-			num_decoded = ft8_decode();
-			if (num_decoded > 0)
+			master_decoded = ft8_decode();
+			if (master_decoded > 0)
 			{
-				display_messages(num_decoded);
+				display_messages(master_decoded);
 				if (Beacon_On)
-					service_Beacon_mode(num_decoded);
+					service_Beacon_mode(master_decoded);
 				else
-					service_QSO_mode(num_decoded);
+					service_QSO_mode(master_decoded);
 			}
 
 			decode_flag = 0;
@@ -216,7 +217,8 @@ int main(void)
 			Process_Touch();
 
 		if (!Tune_On && FT8_Touch_Flag && !Beacon_On)
-			process_selected_Station(num_decoded, FT_8_TouchIndex);
+			process_selected_Station(master_decoded, FT_8_TouchIndex);
+
 
 		update_synchronization();
 	}
