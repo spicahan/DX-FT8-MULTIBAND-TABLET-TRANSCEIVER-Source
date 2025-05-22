@@ -450,3 +450,19 @@ void SD_Initialize(void)
 		}
 	}
 }
+
+// Needed by autoseq_engine
+void queue_custom_text(const char *tx_msg)
+{
+	uint8_t packed[K_BYTES];
+
+	pack77(tx_msg, packed);
+	genft8(packed, tones);
+
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
+	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)blank, LEFT_MODE);
+	BSP_LCD_SetTextColor(LCD_COLOR_RED);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)tx_msg, LEFT_MODE);
+}

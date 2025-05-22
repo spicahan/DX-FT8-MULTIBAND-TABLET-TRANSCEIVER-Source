@@ -4,10 +4,15 @@
 #define __MAIN_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "stdio.h"
+#include <stdio.h>
 
+#ifdef HOST_HAL_MOCK
+#include "host_mocks.h"
+#else
 #include "stm32746g_discovery.h"
 #include "stm32f7xx_hal.h"
+#endif
+void _debug(const char *txt);
 
 #define NoOp  __NOP()
 

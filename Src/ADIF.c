@@ -15,7 +15,11 @@
 #include <string.h>
 #include <stdio.h>
 #include "log_file.h"
+#ifndef HOST_HAL_MOCK
 #include "button.h"
+#else
+#include "host_mocks.h"
+#endif
 
 static unsigned num_digits(int num)
 {

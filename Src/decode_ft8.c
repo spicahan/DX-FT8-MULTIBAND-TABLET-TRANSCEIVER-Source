@@ -41,7 +41,7 @@ static int strindex(const char s[], const char t[]);
 extern char current_QSO_receive_message[];
 
 static display_message display[10];
-static Decode new_decoded[25];
+Decode new_decoded[25];
 static Calling_Station Answer_CQ[50];
 static int log_size = 50;
 
@@ -153,7 +153,7 @@ int ft8_decode(void)
 					{
 						ptr++;
 						new_decoded[num_decoded].RR73 = 2; // RR73 pending state
-						new_decoded[num_decoded].sequence = Seq_Locator;
+						new_decoded[num_decoded].sequence = Seq_RSL;
 					}
 
 					received_RSL = atoi(ptr);
@@ -226,12 +226,12 @@ static int validate_locator(const char locator[])
 	uint8_t A1, A2, N1, N2;
 	uint8_t test = 0;
 
-	A1 = locator[0] - 65;
-	A2 = locator[1] - 65;
-	N1 = locator[2] - 48;
-	N2 = locator[3] - 48;
+	A1 = locator[0] - 65; // 'A'
+	A2 = locator[1] - 65; // 'A'
+	N1 = locator[2] - 48; // '0'
+	N2 = locator[3] - 48; // '0'
 
-	if (A1 <= 17)
+	if (A1 <= 17) // 'R'
 		test++;
 	if (A2 > 0 && A2 < 17)
 		test++; // block RR73 Arctic and Antarctica

@@ -27,6 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#ifndef HOST_HAL_MOCK
 #include "stm32f7xx_hal_rcc.h"
 #include "stm32746g_discovery_ts.h"
 #include "stm32746g_discovery_lcd.h"
@@ -34,37 +35,45 @@
 #include "arm_math.h"
 
 #include "SDR_Audio.h"
-#include "Display.h"
 #include "Process_DSP.h"
 #include "Codec_Gains.h"
 #include "button.h"
 
-#include "decode_ft8.h"
-#include "gen_ft8.h"
 #include "log_file.h"
-#include "traffic_manager.h"
-#include "button.h"
+#include "autoseq_engine.h"
 #include "DS3231.h"
 
 #include "SiLabs.h"
 
 #include "options.h"
+#endif
+
+#include "autoseq_engine.h"
+#include "constants.h"
+#include "decode_ft8.h"
+#include "gen_ft8.h"
+#include "Display.h"
+#include "traffic_manager.h"
 
 uint32_t current_time, start_time, ft8_time;
 
-int QSO_xmit;
+int QSO_xmit = 0;
 int Xmit_DSP_counter;
 int target_slot;
 int target_freq;
 int slot_state = 0;
 
-static int master_decoded = 0;
+// Autoseq TX text buffer
+char autoseq_txbuf[40];
 
+static int master_decoded = 0;
+#ifndef HOST_HAL_MOCK
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 static void CPU_CACHE_Enable(void);
 static void HID_InitApplication(void);
+#endif
 
 static void update_synchronization(void)
 {
@@ -81,6 +90,7 @@ static void update_synchronization(void)
 		if (QSO_xmit && target_slot == slot_state)
 		{
 			setup_to_transmit_on_next_DSP_Flag();
+			autoseq_tick();
 			update_log_display(1);
 			QSO_xmit = 0;
 		}
@@ -89,6 +99,7 @@ static void update_synchronization(void)
 
 int main(void)
 {
+#ifndef HOST_HAL_MOCK
 	CPU_CACHE_Enable();
 
 	HAL_Init();
@@ -138,6 +149,10 @@ int main(void)
 	Init_Log_File();
 	FT8_Sync();
 	HAL_Delay(10);
+#endif
+
+	autoseq_init(Station_Call, Locator);
+
 
 	while (1)
 	{
@@ -191,39 +206,97 @@ int main(void)
 				display_Real_Date(0, 240);
 			}
 
+#ifndef HOST_HAL_MOCK
 			DSP_Flag = 0;
+#endif
 		}
 
 		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			// toggle the slot state
-			slot_state = (slot_state == 0) ? 1 : 0;
+#ifdef HOST_HAL_MOCK
+			printf("\n----------------------------------------\n");
+			printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
+#endif
+			slot_state ^= 1;
 			clear_decoded_messages();
 
 			master_decoded = ft8_decode();
+			// TODO refactor with the retry logic below
+			QSO_xmit = 0;
 			if (master_decoded > 0)
 			{
 				display_messages(master_decoded);
-				if (Beacon_On)
-					service_Beacon_mode(master_decoded);
-				else
-					service_QSO_mode(master_decoded);
+			}
+			for (int i = 0; i < master_decoded; i++) {
+				// TX is (potentially) necessary
+				if (autoseq_on_decode(&new_decoded[i])) {
+					// Fetch TX msg
+					if (autoseq_get_next_tx(autoseq_txbuf))
+					{
+						_debug("QSO_xmit,rspnd");
+						queue_custom_text(autoseq_txbuf);
+						QSO_xmit = 1;
+						break;
+					}
+				}
 			}
 
 			decode_flag = 0;
+			// No valid response has received to advance auto sequencing.
+			// Check TX retry is needed?
+			// Yes => QSO_xmit = True;
+			// No  => check in beacon mode?
+			//       Yes => start_cq, QSO_xmit = True;
+			//       No  => QSO_xmit = False;
+			if (!QSO_xmit) {
+				// Check if retry is necessary
+				if (autoseq_get_next_tx(autoseq_txbuf)) {
+					queue_custom_text(autoseq_txbuf);
+					_debug("QSO_xmit,retry");
+					QSO_xmit = 1;
+				} else if(Beacon_On) {
+					autoseq_start_cq();
+					autoseq_get_next_tx(autoseq_txbuf);
+					queue_custom_text(autoseq_txbuf);
+					_debug("QSO_xmit,CQ...");
+					QSO_xmit = 1;
+				}
+			}
 		} // end of servicing FT_Decode
+
+		// No TX required by retrying or auto-sequencing
+		// Check if touch happened
+#ifdef HOST_HAL_MOCK
+		static bool touched = false;
+		if (!touched && master_decoded &&
+			(new_decoded[0].call_to[0] == 'C') &&
+			(new_decoded[0].call_to[1] == 'Q'))
+		{
+			printf("\nSimulating selecting the first decoded message...\n");
+			FT8_Touch_Flag = 1;
+			touched = true;
+		}
+#endif
 
 		if (FT_8_counter > 0 && FT_8_counter < 90)
 			Process_Touch();
 
-		if (!Tune_On && FT8_Touch_Flag && !Beacon_On)
+		if (!Tune_On && FT8_Touch_Flag && !Beacon_On) {
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
+			autoseq_start_reply(&new_decoded[FT_8_TouchIndex]);
+			autoseq_get_next_tx(autoseq_txbuf);
+			queue_custom_text(autoseq_txbuf);
+			QSO_xmit = 1;
+			FT8_Touch_Flag = 0;
+		}
 
 
 		update_synchronization();
 	}
 }
 
+#ifndef HOST_HAL_MOCK
 /**
  * @brief  HID application Init
  * @param  None
@@ -368,5 +441,18 @@ static void CPU_CACHE_Enable(void)
 	/* Enable D-Cache */
 	SCB_EnableDCache();
 }
+
+// show debug text on LCD
+void _debug(const char *txt) {
+	return;
+	const int display_start_x = 240;
+	const int display_start_y = 240;
+	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, (const uint8_t *)"", LEFT_MODE);
+	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, (const uint8_t *)txt, LEFT_MODE);
+}
+#endif
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

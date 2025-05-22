@@ -8,9 +8,6 @@
 #ifndef GEN_FT8_H_
 #define GEN_FT8_H_
 
-#include <math.h>
-#include "arm_math.h"
-
 #define CALLSIGN_SIZE 10
 #define LOCATOR_SIZE 5
 

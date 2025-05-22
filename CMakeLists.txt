@@ -82,6 +82,14 @@ add_executable(Katy.elf
   ${SRC_SOURCES}
 )
 
+# --- Compile Src/*.c with -O0 to make debugging easier
+set_source_files_properties(
+    Src/main.c
+    # ${SRC_SOURCES}
+    PROPERTIES
+        COMPILE_OPTIONS "-O0"    # or COMPILE_FLAGS "-O0" on <3.3
+)
+
 # -----------------------------------------------------------------------------
 # Linker script & options (mirror build.sh)
 # -----------------------------------------------------------------------------

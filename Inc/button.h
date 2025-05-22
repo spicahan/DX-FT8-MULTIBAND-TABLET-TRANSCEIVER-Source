@@ -8,7 +8,6 @@
 #ifndef BUTTON_H_
 #define BUTTON_H_
 
-#include "arm_math.h"
 #include "fonts.h"
 
 #define line0 10

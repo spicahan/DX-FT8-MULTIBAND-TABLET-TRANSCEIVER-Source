@@ -8,7 +8,7 @@
 #ifndef DS3231_H_
 #define DS3231_H_
 
-#include "arm_math.h"
+#include <stdint.h>
 
 typedef struct
 {

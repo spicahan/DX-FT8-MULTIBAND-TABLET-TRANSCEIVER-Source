@@ -8,7 +8,7 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-#include	"arm_math.h"
+#include <stdint.h>
 
 #define FFT_H  40
 #define FFT_Resolution 6.25  //8000/2/1280

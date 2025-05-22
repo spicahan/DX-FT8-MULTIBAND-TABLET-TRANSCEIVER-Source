@@ -50,6 +50,8 @@ typedef struct
     Sequence sequence;
 } Calling_Station;
 
+extern Decode new_decoded[];
+
 int Check_Calling_Stations(int num_decoded);
 void display_messages(int decoded_messages);
 void process_selected_Station(int num_decoded, int TouchIndex);
@@ -57,5 +59,6 @@ void clear_log_stored_data(void);
 void set_QSO_Xmit_Freq(int freq);
 void clear_decoded_messages(void);
 void string_init(char *string, int size, uint8_t *is_initialised, char character);
+void queue_custom_text(const char *plain_text);   /* needed by autoseq_engine */
 
 #endif /* DECODE_FT8_H_ */
