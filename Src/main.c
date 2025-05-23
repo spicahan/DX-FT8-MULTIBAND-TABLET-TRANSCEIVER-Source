@@ -58,7 +58,7 @@ int target_slot;
 int target_freq;
 int slot_state = 0;
 
-static int master_decoded; = 0
+static int master_decoded = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -78,7 +78,7 @@ static void update_synchronization(void)
 		ft8_marker = 1;
 		decode_flag = 0;
 
-		if (QSO_xmit == 1 && target_slot == slot_state)
+		if (QSO_xmit && target_slot == slot_state)
 		{
 			setup_to_transmit_on_next_DSP_Flag();
 			update_log_display(1);
