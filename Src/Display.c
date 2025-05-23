@@ -9,39 +9,36 @@
 #include "decode_ft8.h"
 #include "WF_Table.h"
 
-//3/25/Flag
-
 #define FFT_X 0
 #define FFT_Y 1
-#define FFT_W (ft8_buffer - ft8_min_bin)
-
-
+#define FFT_W (ft8_buffer_size - ft8_min_bin)
 
 int FT_8_TouchIndex;
-
-uint16_t cursor;
-char rtc_date_string[9];
-char rtc_time_string[9];
+uint16_t cursor = 192;
 int decode_flag;
 int FT8_Touch_Flag;
+char current_QSO_receive_message[MESSAGE_SIZE];
+char current_QSO_xmit_message[MESSAGE_SIZE];
 
 const int log_start = 240;
 const int log_width = 230;
 
 static uint8_t WF_Bfr[FFT_H * FFT_W];
 
-char current_QSO_receive_message[];
-char current_QSO_xmit_message[];
+#define RTC_STRING_SIZE 9
+static char rtc_date_string[RTC_STRING_SIZE];
+static char rtc_time_string[RTC_STRING_SIZE];
 
-const int max_log_messages = 8;
-display_message log_messages[8];
+#define MAX_LOG_MESSAGES 8
+static display_message log_messages[MAX_LOG_MESSAGES];
 
-static char blank[21];
+#define MAX_BLANK_SIZE 21
+static char blank[MAX_BLANK_SIZE];
 static uint8_t blank_initialised = 0;
 
 void update_log_display(int mode)
 {
-	for (int i = 0; i < max_log_messages - 1; i++)
+	for (int i = 0; i < MAX_LOG_MESSAGES - 1; i++)
 	{
 		strcpy(log_messages[i].message, log_messages[i + 1].message);
 		log_messages[i].text_color = log_messages[i + 1].text_color;
@@ -49,15 +46,15 @@ void update_log_display(int mode)
 
 	if (mode == 0)
 	{
-		strcpy(log_messages[max_log_messages - 1].message,
+		strcpy(log_messages[MAX_LOG_MESSAGES - 1].message,
 			   current_QSO_receive_message);
-		log_messages[max_log_messages - 1].text_color = 0;
+		log_messages[MAX_LOG_MESSAGES - 1].text_color = 0;
 	}
-	else if (mode == 1)
+	else
 	{
-		strcpy(log_messages[max_log_messages - 1].message,
+		strcpy(log_messages[MAX_LOG_MESSAGES - 1].message,
 			   current_QSO_xmit_message);
-		log_messages[max_log_messages - 1].text_color = 1;
+		log_messages[MAX_LOG_MESSAGES - 1].text_color = 1;
 	}
 
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
@@ -65,7 +62,7 @@ void update_log_display(int mode)
 
 	BSP_LCD_SetFont(&Font16);
 
-	for (int i = 0; i < max_log_messages; i++)
+	for (int i = 0; i < MAX_LOG_MESSAGES; i++)
 	{
 		if (log_messages[i].text_color == 0)
 			BSP_LCD_SetTextColor(LCD_COLOR_RED);
@@ -79,49 +76,46 @@ void update_log_display(int mode)
 
 void clear_log_messages(void)
 {
-	string_init(blank, sizeof(blank), &blank_initialised,' ');
+	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 
-	for (int i = 0; i < max_log_messages; i++)
+	for (int i = 0; i < MAX_LOG_MESSAGES; i++)
 		strcpy(log_messages[i].message, blank);
 }
 
-char current_Beacon_receive_message[40];
-char current_Beacon_xmit_message[40];
-int max_Beacon_log_messages = 10;
-display_message Beacon_log_messages[10];
+char current_Beacon_receive_message[MESSAGE_SIZE];
+char current_Beacon_xmit_message[MESSAGE_SIZE];
+
+#define MAX_BEACON_LOG_MESSAGES 8
+static display_message Beacon_log_messages[MAX_BEACON_LOG_MESSAGES];
 
 void update_Beacon_log_display(int mode)
 {
-	for (int i = 0; i < max_Beacon_log_messages - 1; i++)
+	for (int i = 0; i < MAX_BEACON_LOG_MESSAGES - 1; i++)
 	{
-		strcpy(Beacon_log_messages[i].message,
-			   Beacon_log_messages[i + 1].message);
-		Beacon_log_messages[i].text_color =
-			Beacon_log_messages[i + 1].text_color;
+		strcpy(Beacon_log_messages[i].message, Beacon_log_messages[i + 1].message);
+		Beacon_log_messages[i].text_color = Beacon_log_messages[i + 1].text_color;
 	}
 
-	if (mode == 0)
+	if (mode)
 	{
-		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message,
-			   current_Beacon_receive_message);
-		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 0;
+		strcpy(Beacon_log_messages[MAX_BEACON_LOG_MESSAGES - 1].message, current_Beacon_xmit_message);
+		Beacon_log_messages[MAX_BEACON_LOG_MESSAGES - 1].text_color = 1;
 	}
-	else if (mode == 1)
+	else
 	{
-		strcpy(Beacon_log_messages[max_Beacon_log_messages - 1].message,
-			   current_Beacon_xmit_message);
-		Beacon_log_messages[max_Beacon_log_messages - 1].text_color = 1;
+		strcpy(Beacon_log_messages[MAX_BEACON_LOG_MESSAGES - 1].message, current_Beacon_receive_message);
+		Beacon_log_messages[MAX_BEACON_LOG_MESSAGES - 1].text_color = 0;
 	}
 
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(log_start, 40, log_width, 200);
 	BSP_LCD_SetFont(&Font16);
 
-	for (int i = 0; i < max_Beacon_log_messages; i++)
+	for (int i = 0; i < MAX_BEACON_LOG_MESSAGES; i++)
 	{
 		if (Beacon_log_messages[i].text_color == 0)
 			BSP_LCD_SetTextColor(LCD_COLOR_RED);
-		else if (Beacon_log_messages[i].text_color == 1)
+		else
 			BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 
 		BSP_LCD_DisplayStringAt(log_start, 40 + i * 20,
@@ -133,7 +127,7 @@ void clear_Beacon_log_messages(void)
 {
 	string_init(blank, sizeof(blank), &blank_initialised, ' ');
 
-	for (int i = 0; i < max_Beacon_log_messages; i++)
+	for (int i = 0; i < MAX_BEACON_LOG_MESSAGES; i++)
 		strcpy(Beacon_log_messages[i].message, blank);
 }
 
@@ -173,7 +167,7 @@ void show_UTC_time(uint16_t x, uint16_t y, int utc_hours, int utc_minutes,
 
 	if (color == 0)
 		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	else if (color == 1)
+	else
 		BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 
 	BSP_LCD_DisplayStringAt(x, y, (const uint8_t *)rtc_time_string, LEFT_MODE);
@@ -200,7 +194,7 @@ void setup_display(void)
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9.4", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: V1.9.5", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
 	BSP_LCD_DisplayStringAt(50, 160,
@@ -211,7 +205,9 @@ void setup_display(void)
 
 	if (strlen(Station_Call) == 0 || strlen(Locator) == 0)
 	{
-		BSP_LCD_DisplayStringAt(0, 180, (const uint8_t *)"Invalid Call or Locator", LEFT_MODE);
+		char buffer[256];
+		sprintf(buffer, "Invalid Call '%s' or Locator '%s'", Station_Call, Locator);
+		BSP_LCD_DisplayStringAt(0, 180, (const uint8_t *)buffer, LEFT_MODE);
 	}
 	else
 	{
@@ -354,21 +350,25 @@ void Display_WF(void)
 		WF_Bfr[byte_count_to_last_line + x] = (ft8_marker) ? marker_line_colour_index : FFT_Buffer[x + ft8_min_bin];
 	}
 
-	// draw the waterfall
-	// Draw from the bottom to the top
+	// Draw the waterfall from the bottom to the top
 	uint8_t *ptr = &WF_Bfr[byte_count_to_last_line];
 	for (int y = FFT_H - 1; y >= 0; y--)
 	{
 		for (int x = 0; x < FFT_W; x++)
 		{
-			BSP_LCD_DrawPixel(x, y, WFPalette[*ptr++]);
+			// Each FFT datum is 6.25hz, the transmit bandwidth is 50Hz (= 8 pixels)
+			if ((x == cursor) || (x == cursor + 8))
+			{
+				BSP_LCD_DrawPixel(x, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
+			}
+			else
+			{
+				BSP_LCD_DrawPixel(x, y, WFPalette[*ptr]);
+			}
+			ptr++;
 		}
 
 		ptr -= (FFT_W * 2);
-
-		BSP_LCD_DrawPixel(cursor, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
-		// Each FFT datum is 6.25hz, the transmit bandwidth is 50Hz (= 8 pixels)
-		BSP_LCD_DrawPixel(cursor + 8, y, xmit_flag ? LCD_COLOR_RED : LCD_COLOR_LIGHTGRAY);
 	}
 
 	if (!ft8_marker && Auto_Sync)

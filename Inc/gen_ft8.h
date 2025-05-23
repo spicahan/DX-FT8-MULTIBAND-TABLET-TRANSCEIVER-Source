@@ -11,16 +11,19 @@
 #include <math.h>
 #include "arm_math.h"
 
-extern char Station_Call[10];  // seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
-extern char Locator[5];        // four character locator  + /0
-extern char Target_Call[10];   // same as Station_Call
-extern char Target_Locator[5]; // same as Locator
+#define CALLSIGN_SIZE 10
+#define LOCATOR_SIZE 5
+
+extern char Station_Call[CALLSIGN_SIZE];  // seven character call sign (e.g. 3DA0XYZ) + optional /P + null terminator
+extern char Locator[LOCATOR_SIZE];        // four character locator  + /0
+extern char Target_Call[CALLSIGN_SIZE];   // same as Station_Call
+extern char Target_Locator[LOCATOR_SIZE]; // same as Locator
 extern int Target_RSL;
 
-#define MESSAGE_SIZE 28
+#define REPLY_MESSAGE_SIZE 28
 
-extern char reply_message[MESSAGE_SIZE];
-extern char reply_message_list[MESSAGE_SIZE][8];
+extern char reply_message[REPLY_MESSAGE_SIZE];
+extern char reply_message_list[REPLY_MESSAGE_SIZE][8];
 extern int reply_message_count;
 
 extern char SDPath[4]; /* SD card logical drive path */
@@ -55,6 +58,6 @@ void SD_Initialize(void);
 void compose_messages(void);
 void clear_xmit_messages(void);
 void queue_message(QueID queId);
-void clear_qued_message(void);
+void clear_queued_message(void);
 
 #endif /* GEN_FT8_H_ */

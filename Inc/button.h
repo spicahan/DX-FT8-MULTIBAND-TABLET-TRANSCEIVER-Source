@@ -38,9 +38,6 @@
 #define RTC_Button 100
 #define RTC_Add 180
 
-extern int Band_Minimum;
-extern int BTS_Status;
-
 typedef struct
 {
 	char *text0;
@@ -56,10 +53,12 @@ typedef struct
 
 } ButtonStruct;
 
+#define BAND_DATA_SIZE 10
+
 typedef struct
 {
 	uint16_t Frequency;
-	char *display;
+	char display[BAND_DATA_SIZE];
 } FreqStruct;
 
 enum BandIndex
@@ -111,8 +110,9 @@ enum ButtonIds
 	QRPP,
 	FreeText1,
 	FreeText2,
-	Logging,
-	NumButtons = 36
+	LoggingMsg,
+	LoggingOnOff,
+	NumButtons = 37
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -123,9 +123,10 @@ extern int QSO_Fix;
 extern uint16_t start_freq;
 extern int BandIndex;
 extern int Band_Minimum;
-extern const FreqStruct sBand_Data[NumBands];
+extern FreqStruct sBand_Data[NumBands];
 extern int AGC_Gain;
 extern int Logging_State;
+extern char display_frequency[BAND_DATA_SIZE];
 
 void drawButton(uint16_t button);
 void checkButton(void);

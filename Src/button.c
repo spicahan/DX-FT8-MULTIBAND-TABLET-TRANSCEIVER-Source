@@ -36,11 +36,11 @@ int AGC_Gain = 20;
 int Band_Minimum;
 int Logging_State;
 
-char display_frequency[7] = "14.075";
-static const char *Logging_On  = "Logging  On";
-static const char *Logging_Off = "Logging Off";
+char display_frequency[BAND_DATA_SIZE] = "14.075";
+static const char *Logging_On = "On ";
+static const char *Logging_Off = "Off";
 
-const FreqStruct sBand_Data[NumBands] =
+FreqStruct sBand_Data[NumBands] =
 	{
 		{// 40,
 		 7074, "7.074"},
@@ -478,16 +478,28 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ 160,
 	 /*h*/ 30},
 
-	{// button 35
-	 /*text0*/ "Logging  On",
-	 /*text1*/ "Logging Off",
-	 /*blank*/ "           ",
+	{// button 35 Logging
+	 /*text0*/ "Logging",
+	 /*text1*/ "Logging",
+	 /*blank*/ "       ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 240,
 	 /*y*/ 120,
-	 /*w*/ 120,
+	 /*w*/ 90,
+	 /*h*/ 30},
+
+	{// button 36 Logging On/Off
+	 /*text0*/ " On",
+	 /*text1*/ "Off",
+	 /*blank*/ "   ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 330,
+	 /*y*/ 120,
+	 /*w*/ 20,
 	 /*h*/ 30},
 
 }; // end of button definition
@@ -685,7 +697,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case FreqUp:
-		if (cursor < (ft8_buffer - ft8_min_bin - 8))
+		if (cursor < (ft8_buffer_size - ft8_min_bin - 8))
 		{
 			// limits highest NCO frequency to (3875 - 50)hz
 			cursor++;
@@ -798,10 +810,14 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case Logging:
+	case LoggingMsg:
+	case LoggingOnOff:
 		Logging_State = Logging_State == 0 ? 1 : 0;
-		set_button_text(Logging, Logging_State ? Logging_On : Logging_Off);
-		toggle_button_state(Logging);
+		set_button_text(LoggingOnOff, Logging_State ? Logging_On : Logging_Off);
+		sButtonData[LoggingMsg].state = 0;
+		drawButton(LoggingMsg);
+		sButtonData[LoggingOnOff].state = Logging_State;
+		drawButton(LoggingOnOff);
 		break;
 	}
 }
@@ -920,8 +936,8 @@ void setup_Cal_Display(void)
 
 	drawButton(SaveRTCDate);
 
-	set_button_text(Logging, Logging_State ? Logging_On : Logging_Off);
-	for (int button = StandardCQ; button <= Logging; ++button)
+	set_button_text(LoggingOnOff, Logging_State ? Logging_On : Logging_Off);
+	for (int button = StandardCQ; button < NumButtons; ++button)
 	{
 		sButtonData[button].Active = 1;
 		drawButton(button);
@@ -934,7 +950,6 @@ void setup_Cal_Display(void)
 
 	load_RealDate();
 	display_RTC_DateEdit(RTC_Button - 20, RTC_line3 + 15);
-
 }
 
 void erase_Cal_Display(void)
@@ -942,12 +957,12 @@ void erase_Cal_Display(void)
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, FFT_H, 480, 201);
 
-	for (int button = BandDown; button < NumButtons; button++)
+	for (int button = BandDown; button < StandardCQ; button++)
 	{
 		sButtonData[button].Active = 0;
 	}
 
-	for (int button = StandardCQ; button <= Logging; ++button)
+	for (int button = StandardCQ; button < NumButtons; ++button)
 	{
 		sButtonData[button].Active = 0;
 		drawButton(button);

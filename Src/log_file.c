@@ -37,44 +37,40 @@
 #include "DS3231.h"
 
 /* Fatfs structure */
-FATFS FS;
-FIL LogFile;
+static FATFS FS;
+static FIL LogFile;
 
 void Init_Log_File(void)
 {
 	make_File_Name();
-	HAL_Delay(1);
 	Open_Log_File();
 }
 
 void Open_Log_File(void)
 {
 	f_mount(&FS, "SD:", 1);
-	if (f_open(&LogFile, file_name_string,
-			   FA_OPEN_ALWAYS | FA_WRITE | FA_OPEN_APPEND) == FR_OK)
+	if ((f_open(&LogFile, file_name_string,
+				FA_OPEN_ALWAYS | FA_WRITE | FA_OPEN_APPEND) == FR_OK) &&
+		(f_size(&LogFile) == 0))
 	{
-
-		if (f_size(&LogFile) == 0)
-		{
-			f_lseek(&LogFile, f_size(&LogFile));
-			f_puts("ADIF EXPORT", &LogFile);
-			f_puts("\n", &LogFile);
-			f_puts("<eoh>", &LogFile);
-			f_puts("\n", &LogFile);
-		}
+		f_lseek(&LogFile, f_size(&LogFile));
+		f_puts("ADIF EXPORT", &LogFile);
+		f_puts("\n", &LogFile);
+		f_puts("<eoh>", &LogFile);
+		f_puts("\n", &LogFile);
 	}
 
 	f_close(&LogFile);
 }
 
-void Write_Log_Data(char *ch)
+void Write_Log_Data(const char *str)
 {
 	f_mount(&FS, "SD:", 1);
 	if (f_open(&LogFile, file_name_string,
 			   FA_OPEN_ALWAYS | FA_WRITE | FA_OPEN_APPEND) == FR_OK)
 	{
 		f_lseek(&LogFile, f_size(&LogFile));
-		f_puts(ch, &LogFile);
+		f_puts(str, &LogFile);
 		f_puts("\n", &LogFile);
 	}
 

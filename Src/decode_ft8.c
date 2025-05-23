@@ -39,7 +39,6 @@ static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
 extern char current_QSO_receive_message[];
-extern char current_Beacon_receive_message[];
 
 static display_message display[10];
 static Decode new_decoded[25];
@@ -57,7 +56,7 @@ int ft8_decode(void)
 	// Find top candidates by Costas sync score and localize them in time and frequency
 	Candidate candidate_list[kMax_candidates];
 
-	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer, kCostas_map, kMax_candidates, candidate_list, kMin_score);
+	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer_size, kCostas_map, kMax_candidates, candidate_list, kMin_score);
 	char decoded[kMax_decoded_messages][kMax_message_length];
 
 	const float fsk_dev = 6.25f; // tone deviation in Hz and symbol rate
@@ -71,7 +70,7 @@ int ft8_decode(void)
 		float freq_hz = ((float)cand.freq_offset + (float)cand.freq_sub / 2.0f) * fsk_dev;
 
 		float log174[N];
-		extract_likelihood(export_fft_power, ft8_buffer, cand, kGray_map, log174);
+		extract_likelihood(export_fft_power, ft8_buffer_size, cand, kGray_map, log174);
 
 		// bp_decode() produces better decodes, uses way less memory
 		uint8_t plain[N];
@@ -153,7 +152,7 @@ int ft8_decode(void)
 					if (*ptr == 'R')
 					{
 						ptr++;
-						new_decoded[num_decoded].RR73 = 1;
+						new_decoded[num_decoded].RR73 = 2; // RR73 pending state
 						new_decoded[num_decoded].sequence = Seq_Locator;
 					}
 
@@ -319,20 +318,20 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					update_Beacon_log_display(0);
 				else
 					update_log_display(0);
 
 				strcpy(Target_Call, call_from);
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					Target_RSL = new_decoded[i].snr;
 
 				if (new_decoded[i].received_snr != 99)
 					Station_RSL = new_decoded[i].received_snr;
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 				{
 					if (new_decoded[i].sequence == Seq_Locator)
 						set_reply(Reply_RSL);
@@ -344,6 +343,7 @@ int Check_Calling_Stations(int num_decoded)
 
 				strcpy(Answer_CQ[num_calls].call, call_from);
 				strcpy(Answer_CQ[num_calls].locator, new_decoded[i].target_locator);
+
 				Answer_CQ[num_calls].RSL = Target_RSL;
 				Answer_CQ[num_calls].received_RSL = Station_RSL;
 				Answer_CQ[num_calls].sequence = new_decoded[i].sequence;
@@ -357,12 +357,12 @@ int Check_Calling_Stations(int num_decoded)
 				sprintf(current_Beacon_receive_message, "%s %s %s", call_to, call_from, locator);
 				strcpy(current_QSO_receive_message, current_Beacon_receive_message);
 
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					update_Beacon_log_display(0);
 				else
 					update_log_display(0);
 
-				if (new_decoded[i].RR73 == 1)
+				if (new_decoded[i].RR73)
 					RR73_sent = 1;
 
 				strcpy(Target_Call, Answer_CQ[old_call_address].call);
@@ -375,11 +375,11 @@ int Check_Calling_Stations(int num_decoded)
 				else
 					Station_RSL = Answer_CQ[old_call_address].received_RSL;
 
-				if (Answer_CQ[old_call_address].RR73 == 0)
+				if (!Answer_CQ[old_call_address].RR73)
 				{
-					if (Beacon_On == 1)
+					if (Beacon_On)
 					{
-						if (new_decoded[i].RR73 == 1)
+						if (new_decoded[i].RR73)
 						{
 							if (Answer_CQ[old_call_address].sequence == Seq_Locator)
 								// if this is a  locator response send Beacon 73
@@ -388,7 +388,11 @@ int Check_Calling_Stations(int num_decoded)
 								// if this is a RSL response send QSO 73
 								set_reply(Reply_QSO_73);
 
-							Answer_CQ[old_call_address].RR73 = 1;
+							if (new_decoded[i].RR73 == 1)
+							{
+								Answer_CQ[old_call_address].RR73 = 1;
+								write_ADIF_Log();
+							}
 						}
 						else
 						{
@@ -411,9 +415,9 @@ int Check_Calling_Stations(int num_decoded)
 	return Beacon_Reply_Status;
 }
 
-void process_selected_Station(int stations_decoded, int TouchIndex)
+void process_selected_Station(int num_decoded, int TouchIndex)
 {
-	if (stations_decoded > 0 && TouchIndex <= stations_decoded)
+	if (num_decoded > 0 && TouchIndex <= num_decoded)
 	{
 		strcpy(Target_Call, new_decoded[TouchIndex].call_from);
 		strcpy(Target_Locator, new_decoded[TouchIndex].target_locator);

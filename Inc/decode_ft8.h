@@ -52,7 +52,7 @@ typedef struct
 
 int Check_Calling_Stations(int num_decoded);
 void display_messages(int decoded_messages);
-void process_selected_Station(int stations_decoded, int TouchIndex);
+void process_selected_Station(int num_decoded, int TouchIndex);
 void clear_log_stored_data(void);
 void set_QSO_Xmit_Freq(int freq);
 void clear_decoded_messages(void);

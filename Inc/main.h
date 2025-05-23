@@ -11,7 +11,7 @@
 
 #define NoOp  __NOP()
 
-extern uint32_t current_time, start_time, ft8_time;
+extern uint32_t start_time, ft8_time;
 
 extern int QSO_xmit;
 extern int Xmit_DSP_counter;

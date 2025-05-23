@@ -1,7 +1,7 @@
 # !/bin/bash
 set -e
 
-export PATH=/opt/st/stm32cubeide_1.16.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.linux64_1.1.0.202410170702/tools/bin:$PATH
+export PATH=/opt/st/stm32cubeide_1.16.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.linux64_1.1.0.202411081344/tools/bin:$PATH
 
 if [ -f *.o ]; then
     rm *.o
@@ -142,11 +142,12 @@ arm-none-eabi-gcc Src/SiLabs.c -IDrivers/BSP/STM32746G_DISCOVERY -IUtilities -ID
 arm-none-eabi-gcc Src/Sine_table.c -IDrivers/BSP/STM32746G_DISCOVERY -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers/CMSIS/Include -IDrivers/CMSIS/Device/ST/STM32F7xx/Include -IDrivers/STM32F7xx_HAL_Driver/Inc -IDrivers/BSP/STM32746G-Discovery -IDrivers/BSP/Common -IUtilities/Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
 arm-none-eabi-gcc Src/stm32f7xx_it.c -IDrivers/BSP/STM32746G_DISCOVERY -IDrivers/BSP/wm8994/ -IUtilities -IDrivers/BSP/rk043fn48h/ -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers/CMSIS/Include -IDrivers/CMSIS/Device/ST/STM32F7xx/Include -IDrivers/STM32F7xx_HAL_Driver/Inc -IDrivers/BSP/STM32746G-Discovery -IDrivers/BSP/Common -IUtilities/Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
 arm-none-eabi-gcc Src/traffic_manager.c -IFT8_library -IUtilities -IDrivers/BSP/STM32746G_DISCOVERY -IDrivers/BSP/rk043fn48h/ -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers/CMSIS/Include -IDrivers/CMSIS/Device/ST/STM32F7xx/Include -IDrivers/STM32F7xx_HAL_Driver/Inc -IDrivers/BSP/STM32746G-Discovery -IDrivers/BSP/Common -IUtilities/Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
+arm-none-eabi-gcc Src/ini.c -IFT8_library -IUtilities -IDrivers/BSP/STM32746G_DISCOVERY -IDrivers/BSP/rk043fn48h/ -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers/CMSIS/Include -IDrivers/CMSIS/Device/ST/STM32F7xx/Include -IDrivers/STM32F7xx_HAL_Driver/Inc -IDrivers/BSP/STM32746G-Discovery -IDrivers/BSP/Common -IUtilities/Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
 
 arm-none-eabi-gcc -o "Katy.elf" *.o -Wall -Wextra -mcpu=cortex-m7 -T"STM32F746NGHx_FLASH.ld" --specs=nosys.specs -Wl,-Map="Katy.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 
 arm-none-eabi-size Katy.elf 
 arm-none-eabi-objdump -h -S Katy.elf > "Katy.list"
-arm-none-eabi-objcopy -O binary Katy.elf "Katy.bin"
+arm-none-eabi-objcopy -O ihex Katy.elf "Katy.hex"
 
 rm *.o

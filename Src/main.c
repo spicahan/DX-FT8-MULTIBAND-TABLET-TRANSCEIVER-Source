@@ -29,12 +29,13 @@
 #include "main.h"
 #include "stm32f7xx_hal_rcc.h"
 #include "stm32746g_discovery_ts.h"
-#include "arm_math.h"
 #include "stm32746g_discovery_lcd.h"
+#include "stm32f7xx_hal_tim.h"
+#include "arm_math.h"
+
 #include "SDR_Audio.h"
 #include "Display.h"
 #include "Process_DSP.h"
-#include "stm32f7xx_hal_tim.h"
 #include "Codec_Gains.h"
 #include "button.h"
 
@@ -49,16 +50,15 @@
 
 #include "options.h"
 
-TIM_HandleTypeDef hTim2;
 uint32_t current_time, start_time, ft8_time;
 
-int master_decoded;
 int QSO_xmit;
 int Xmit_DSP_counter;
-int slot_state = 0;
 int target_slot;
 int target_freq;
-int slot_number;
+int slot_state = 0;
+
+static int master_decoded; = 0
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -125,52 +125,39 @@ int main(void)
 
 	start_Si5351();
 
-	cursor = 192; // 1500 Hz
 	Set_Cursor_Frequency();
 	show_variable(400, 25, (int)NCO_Frequency);
-
 	show_short(667, 255, AGC_Gain);
-
-	HAL_Delay(1);
-
-	Xmit_Mode = 0;
-
-	HAL_Delay(10);
-
-	start_duplex(0);
+	start_duplex();
 	HAL_Delay(10);
 	set_codec_input_gain();
 	HAL_Delay(10);
 	receive_sequence();
 	HAL_Delay(10);
-	Set_HP_Gain(30);
-	HAL_Delay(10);
-
+	Set_Headphone_Gain(30);
 	Init_Log_File();
-
 	FT8_Sync();
 	HAL_Delay(10);
 
 	while (1)
 	{
-		if (DSP_Flag == 1)
+		if (DSP_Flag)
 		{
 			I2S2_RX_ProcessBuffer(buff_offset);
 
-			if (xmit_flag == 1)
+			if (xmit_flag)
 			{
-				if (ft8_xmit_delay >= 20)
+				// Start sending FT8 messages about 0.1 to 0.5 seconds into the time slot
+				// to match the observed behavior.
+				if (ft8_xmit_delay >= 28)
 				{
-					if (Tune_On == 0)
+					if (!Tune_On)
 					{
-						if (ft8_xmit_counter < 79)
+						if ((ft8_xmit_counter < 79) && (Xmit_DSP_counter % 4 == 0))
 						{
-							if (Xmit_DSP_counter % 4 == 0)
-							{
-								ft8_shift = ft8_hz * (double)tones[ft8_xmit_counter];
-								set_FT8_Tone(tones[ft8_xmit_counter]);
-								ft8_xmit_counter++;
-							}
+							ft8_shift = ft8_hz * (double)tones[ft8_xmit_counter];
+							set_FT8_Tone(tones[ft8_xmit_counter]);
+							ft8_xmit_counter++;
 						}
 
 						Xmit_DSP_counter++;
@@ -181,8 +168,8 @@ int main(void)
 							ft8_receive_sequence();
 							receive_sequence();
 							ft8_xmit_delay = 0;
-							if (Beacon_On == 0)
-								clear_qued_message();
+							if (!Beacon_On)
+								clear_queued_message();
 						}
 					}
 					else
@@ -192,16 +179,14 @@ int main(void)
 				}
 				else
 				{
-					ft8_xmit_delay++;
-
-					if (ft8_xmit_delay == 16)
+					if (++ft8_xmit_delay == 16)
 						output_enable(SI5351_CLK0, 1);
 				}
 			}
 
 			display_RealTime(100, 240);
 
-			if (Tune_On == 1)
+			if (Tune_On)
 			{
 				display_Real_Date(0, 240);
 			}
@@ -209,7 +194,7 @@ int main(void)
 			DSP_Flag = 0;
 		}
 
-		if (decode_flag == 1 && Tune_On == 0 && xmit_flag == 0)
+		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			// toggle the slot state
 			slot_state = (slot_state == 0) ? 1 : 0;
@@ -219,10 +204,9 @@ int main(void)
 			if (master_decoded > 0)
 			{
 				display_messages(master_decoded);
-				if (Beacon_On == 1)
+				if (Beacon_On)
 					service_Beacon_mode(master_decoded);
 				else
-				if (Beacon_On == 0)
 					service_QSO_mode(master_decoded);
 			}
 
@@ -232,8 +216,9 @@ int main(void)
 		if (FT_8_counter > 0 && FT_8_counter < 90)
 			Process_Touch();
 
-		if (Tune_On == 0 && FT8_Touch_Flag == 1 && Beacon_On == 0)
+		if (!Tune_On && FT8_Touch_Flag && !Beacon_On)
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
+
 
 		update_synchronization();
 	}
@@ -266,13 +251,6 @@ static void HID_InitApplication(void)
 }
 
 /**
- * @brief  User Process
- * @param  phost: Host Handle
- * @param  id: Host Library user message ID
- * @retval None
- */
-
-/**
  * @brief This function provides accurate delay (in milliseconds) based
  *        on SysTick counter flag.
  * @note This function is declared as __weak to be overwritten in case of other
@@ -283,7 +261,7 @@ static void HID_InitApplication(void)
 
 void HAL_Delay(__IO uint32_t Delay)
 {
-	while (Delay)
+	while (Delay != 0)
 	{
 		if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
 		{

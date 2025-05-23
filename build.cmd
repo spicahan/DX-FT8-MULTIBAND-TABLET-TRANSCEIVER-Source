@@ -1,8 +1,8 @@
 setlocal
 
-if not exist "d:\ST\STM32CubeIDE_1.16.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin\arm-none-eabi-gcc.exe" goto usepio
+if not exist "D:\ST\STM32CubeIDE_1.16.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344\tools\bin\arm-none-eabi-gcc.exe" goto usepio
 
-set PATH=d:\ST\STM32CubeIDE_1.16.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin\;%PATH%
+set PATH=D:\ST\STM32CubeIDE_1.16.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344\tools\bin\;%PATH%
 
 goto setupdone
 :usepio
@@ -148,6 +148,7 @@ arm-none-eabi-gcc Src\SiLabs.c -IDrivers\BSP\STM32746G_DISCOVERY -IUtilities -ID
 arm-none-eabi-gcc Src\Sine_table.c -IDrivers\BSP\STM32746G_DISCOVERY -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers\CMSIS\Include -IDrivers\CMSIS\Device\ST\STM32F7xx\Include -IDrivers\STM32F7xx_HAL_Driver\Inc -IDrivers\BSP\STM32746G-Discovery -IDrivers\BSP\Common -IUtilities\Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
 arm-none-eabi-gcc Src\stm32f7xx_it.c -IDrivers\BSP\STM32746G_DISCOVERY -IDrivers\BSP\wm8994\ -IUtilities -IDrivers\BSP\rk043fn48h\ -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers\CMSIS\Include -IDrivers\CMSIS\Device\ST\STM32F7xx\Include -IDrivers\STM32F7xx_HAL_Driver\Inc -IDrivers\BSP\STM32746G-Discovery -IDrivers\BSP\Common -IUtilities\Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
 arm-none-eabi-gcc Src\traffic_manager.c -IFT8_library -IUtilities -IDrivers\BSP\STM32746G_DISCOVERY -IDrivers\BSP\rk043fn48h\ -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers\CMSIS\Include -IDrivers\CMSIS\Device\ST\STM32F7xx\Include -IDrivers\STM32F7xx_HAL_Driver\Inc -IDrivers\BSP\STM32746G-Discovery -IDrivers\BSP\Common -IUtilities\Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
+arm-none-eabi-gcc Src\ini.c -IFT8_library -IUtilities -IDrivers\BSP\STM32746G_DISCOVERY -IDrivers\BSP\rk043fn48h\ -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32F746xx -DUSE_STM32746G_DISCO -DUSE_IOEXPANDER -c -IInc -IDrivers\CMSIS\Include -IDrivers\CMSIS\Device\ST\STM32F7xx\Include -IDrivers\STM32F7xx_HAL_Driver\Inc -IDrivers\BSP\STM32746G-Discovery -IDrivers\BSP\Common -IUtilities\Fonts -Os -ffunction-sections  --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wall -Wextra
 
 dir /w/b *.o > objfiles
 arm-none-eabi-gcc -o "Katy.elf" @objfiles -Wall -Wextra -mcpu=cortex-m7 -T"STM32F746NGHx_FLASH.ld" --specs=nosys.specs -Wl,-Map="Katy.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
@@ -156,6 +157,6 @@ del *.o
 
 arm-none-eabi-size Katy.elf 
 arm-none-eabi-objdump -h -S Katy.elf > "Katy.list"
-arm-none-eabi-objcopy -O binary Katy.elf "Katy.bin"
+arm-none-eabi-objcopy -O ihex Katy.elf "Katy.hex"
 
 endlocal

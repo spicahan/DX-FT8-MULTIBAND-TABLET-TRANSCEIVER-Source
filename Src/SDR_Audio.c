@@ -20,151 +20,132 @@ q15_t FIR_I_In[BUFFERSIZE / 4];
 q15_t FIR_Q_In[BUFFERSIZE / 4];
 q15_t FIR_I_Out[BUFFERSIZE / 4];
 q15_t FIR_Q_Out[BUFFERSIZE / 4];
-q15_t USB_Out[BUFFERSIZE / 4];
-q15_t LSB_Out[BUFFERSIZE / 4];
-q15_t in_buff[BUFFERSIZE];
 
 q15_t FT8_Data[2048 / 2];
-q15_t out_buff[BUFFERSIZE];
 
 uint16_t buff_offset;
 
-float x_NCOphzinc;
-
 int DSP_Flag;
-int Xmit_Mode;
-int xmit_flag, ft8_xmit_counter, ft8_xmit_flag, ft8_xmit_delay;
+int Xmit_Mode = 0;
+int xmit_flag, ft8_xmit_counter, ft8_xmit_delay;
 
 double ft8_shift;
 
 #define PI2 6.2831853071795864765
-#define KCONV 10430.37835              // 		4096*16/PI2
+#define KCONV 10430.37835 // 		4096*16/PI2
 
-double LO_Freq = 10000;
-float Sample_Frequency = 32000.0;
+static const double LO_Freq = 10000;
+static const int Sample_Frequency = 32000;
 
-void start_audio_I2C(void) {
+static q15_t USB_Out[BUFFERSIZE / 4];
+static q15_t LSB_Out[BUFFERSIZE / 4];
+static q15_t in_buff[BUFFERSIZE];
+static q15_t out_buff[BUFFERSIZE];
+
+void start_audio_I2C(void)
+{
 	AUDIO_IO_Init();
 }
 
-void clear_Output_Buffers(void);
-
-void clear_Output_Buffers(void) {
-	int i;
-	for (i = 0; i < BUFFERSIZE; i++)
-		out_buff[i] = 0;
+void clear_Output_Buffers(void)
+{
+	memset(out_buff, 0, BUFFERSIZE * sizeof(q15_t));
 }
 
-uint32_t hope;
-
-void start_codec(void) {
-	hope = wm8994_Reset(AUDIO_I2C_ADDRESS);
+void start_codec(void)
+{
+	uint32_t rc = wm8994_Reset(AUDIO_I2C_ADDRESS);
 	HAL_Delay(100);
-	hope = wm8994_Init(AUDIO_I2C_ADDRESS,
-			INPUT_DEVICE_INPUT_LINE_1 | OUTPUT_DEVICE_BOTH, 70,
-			(uint32_t) 16000);
+	rc = wm8994_Init(AUDIO_I2C_ADDRESS,
+					 INPUT_DEVICE_INPUT_LINE_1 | OUTPUT_DEVICE_BOTH, 70,
+					 Sample_Frequency / 2);
+	(void)rc;
 	HAL_Delay(100);
 }
 
-void start_duplex(int mode) {
-	//note, somehow there is a sneak path for setting the codec frequency see wmcodec for reference
+void start_duplex(void)
+{
+	// note, somehow there is a sneak path for setting the codec frequency see wmcodec for reference
 
-	HAL_Delay(10);
 	clear_Output_Buffers();
-	if (mode == 0)
-		BSP_AUDIO_IN_OUT_Init(INPUT_DEVICE_INPUT_LINE_1, OUTPUT_DEVICE_BOTH, 70,
-				32000);
-	else
-		BSP_AUDIO_IN_OUT_Init(INPUT_DEVICE_INPUT_LINE_1, OUTPUT_DEVICE_BOTH, 70,
-				8000);
-
-	BSP_AUDIO_IN_Record((uint16_t*) &in_buff, BUFFERSIZE);
-
-	BSP_AUDIO_OUT_Play((uint16_t*) &out_buff, 2 * BUFFERSIZE);
-
-
+	BSP_AUDIO_IN_OUT_Init(INPUT_DEVICE_INPUT_LINE_1, OUTPUT_DEVICE_BOTH, 70, Sample_Frequency);
+	BSP_AUDIO_IN_Record((uint16_t *)&in_buff, BUFFERSIZE);
+	BSP_AUDIO_OUT_Play((uint16_t *)&out_buff, 2 * BUFFERSIZE);
 	NoOp;
-
 }
 
-void transfer_buffers(void) {
-	int j;
-	for (j = 0; j < BUFFERSIZE / 4; j++) {
-		out_buff[buff_offset + j * 2] = in_buff[buff_offset + j * 2];
-
-		out_buff[buff_offset + j * 2 + 1] = in_buff[buff_offset + j * 2 + 1];
-
+void transfer_buffers(void)
+{
+	for (int j = 0; j < BUFFERSIZE / 4; j++)
+	{
+		int index = buff_offset + j * 2;
+		out_buff[index] = in_buff[index];
+		out_buff[index + 1] = in_buff[index + 1];
 	}
 }
 
-void clear_buffers(void) {
-	int j;
-	for (j = 0; j < BUFFERSIZE / 4; j++) {
-		out_buff[buff_offset + j * 2] = 0;
-		out_buff[buff_offset + j * 2 + 1] = 0;
-	}
-}
-
-void BSP_AUDIO_IN_TransferComplete_CallBack(void) {
+void BSP_AUDIO_IN_TransferComplete_CallBack(void)
+{
 	buff_offset = BUFFERSIZE / 2;
 	DSP_Flag = 1;
 }
 
-void BSP_AUDIO_IN_HalfTransfer_CallBack(void) {
+void BSP_AUDIO_IN_HalfTransfer_CallBack(void)
+{
 	buff_offset = 0;
 	DSP_Flag = 1;
 }
 
-void BSP_AUDIO_OUT_TransferComplete_CallBack(void) {
+void BSP_AUDIO_OUT_TransferComplete_CallBack(void)
+{
 }
 
-void BSP_AUDIO_OUT_HalfTransfer_CallBack(void) {
+void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
+{
 }
 
-int frame_counter;
-float m_RMSConstant = 1.0 /65485.0;
+static const float RMSConstant = 1.0 / 65485.0;
+static const long NCOphzinc = (long)(KCONV * (PI2 * LO_Freq / Sample_Frequency));
 
-void I2S2_RX_ProcessBuffer(uint16_t offset) {
+void I2S2_RX_ProcessBuffer(uint16_t offset)
+{
+	static long NCO_phz = 0;
+	static int frame_counter = 0;
 
-	static q15_t TX_I;
-	static long NCO_phz;
-
-	x_NCOphzinc = (PI2 * LO_Freq / (double) Sample_Frequency);
-
-	for (int i = 0; i < BUFFERSIZE / 4; i++) {
-		NCO_phz += (long) (KCONV * (x_NCOphzinc));
-		TX_I = (Sine_table[(NCO_phz >> 4) & 0xFFF]);
-		
-		FIR_I_In[i] = (q15_t) ((float) TX_I * (float) in_buff[i * 2 + offset] * m_RMSConstant);
-		FIR_Q_In[i] = (q15_t) ((float) TX_I * (float) in_buff[i * 2 + 1 + offset] * m_RMSConstant);
-
+	for (int i = 0; i < BUFFERSIZE / 4; i++)
+	{
+		NCO_phz += NCOphzinc;
+		float temp = (q15_t)Sine_table[(NCO_phz >> 4) & 0xFFF] * RMSConstant;
+		int index = i * 2 + offset;
+		FIR_I_In[i] = (q15_t)(temp * in_buff[index]);
+		FIR_Q_In[i] = (q15_t)(temp * in_buff[index + 1]);
 	}
 
 	Process_FIR_I_32K();
 	Process_FIR_Q_32K();
 
-	for (int i = 0; i < BUFFERSIZE / 4; i++) {
-
+	for (int i = 0; i < BUFFERSIZE / 4; i++)
+	{
 		USB_Out[i] = FIR_I_Out[i] - FIR_Q_Out[i];
 		LSB_Out[i] = FIR_I_Out[i] + FIR_Q_Out[i];
 
-		if (frame_counter < 4) {
-
-			if (i % 5 == 0)
-				FT8_Data[i / 5 + frame_counter * 256] = USB_Out[i];
+		if (frame_counter < 4)
+		{
+			div_t d = div(i, 5);
+			if (d.rem == 0)
+			{
+				FT8_Data[d.quot + frame_counter * 256] = USB_Out[i];
+			}
 		}
 
-		out_buff[i * 2 + offset] = (int16_t) USB_Out[i];
-		out_buff[i * 2 + 1 + offset] = (int16_t) LSB_Out[i];
-
+		int index = i * 2 + offset;
+		out_buff[index] = USB_Out[i];
+		out_buff[index + 1] = LSB_Out[i];
 	}
 
-	frame_counter++;
-
-	if (frame_counter == 4) {
+	if (++frame_counter == 4)
+	{
 		process_FT8_FFT();
 		frame_counter = 0;
 	}
-
 }
-
