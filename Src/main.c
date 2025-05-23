@@ -52,12 +52,13 @@
 
 uint32_t current_time, start_time, ft8_time;
 
-int master_decoded;
 int QSO_xmit;
 int Xmit_DSP_counter;
-int slot_state = 0;
 int target_slot;
 int target_freq;
+int slot_state = 0;
+
+static int master_decoded; = 0
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -193,7 +194,6 @@ int main(void)
 			DSP_Flag = 0;
 		}
 
-		//int num_decoded = 0;
 		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			// toggle the slot state
