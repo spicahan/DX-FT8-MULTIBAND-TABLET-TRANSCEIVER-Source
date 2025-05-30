@@ -370,12 +370,11 @@ int Check_Calling_Stations(int num_decoded)
 
 				Target_RSL = Answer_CQ[old_call_address].RSL;
 
-				if (new_decoded[i].received_snr != 99) {
-					Station_RSL = new_decoded[i].received_snr;
-					Answer_CQ[old_call_address].received_RSL = Station_RSL;
-				}
-				else
-					Station_RSL = Answer_CQ[old_call_address].received_RSL;
+				if (new_decoded[i].received_snr != 99)
+					Answer_CQ[old_call_address].received_RSL = new_decoded[i].received_snr;
+
+				Station_RSL = Answer_CQ[old_call_address].received_RSL;
+
 
 				if (!Answer_CQ[old_call_address].RR73)
 				{
