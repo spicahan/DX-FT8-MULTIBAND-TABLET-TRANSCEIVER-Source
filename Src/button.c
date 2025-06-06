@@ -30,11 +30,11 @@ uint16_t start_freq;
 int BandIndex;
 int QSO_Fix;
 int CQ_Mode_Index;
-int Free_Index;
-
-int AGC_Gain = 20;
 int Band_Minimum;
 int Logging_State;
+
+int Free_Index = 0;
+int AGC_Gain = 20;
 
 char display_frequency[BAND_DATA_SIZE] = "14.075";
 static const char *Logging_On = "On ";
