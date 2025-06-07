@@ -8,11 +8,19 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "main.h"
 #include "host_mocks.h"
 #include "decode_ft8.h"
 #include "autoseq_engine.h"
 #include "ADIF.h"
+
+// From Process_DSP.h
+#define ft8_msg_samples 91
+
+// Forward declaration
+void advance_mock_tick(uint32_t ms);
+void init_mock_timing(void);
 
 #define TX_ON_EVEN false
 int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -41,20 +49,44 @@ char current_Beacon_receive_message[40];
 char current_Beacon_xmit_message[40];
 char current_QSO_xmit_message[40];
 
+// FT8 timing variables from main.c 
+extern uint32_t current_time, start_time, ft8_time;
+extern int target_slot;
+
 void I2S2_RX_ProcessBuffer(uint16_t offset) {
-	if (xmit_flag == 1) {
-		printf("t");
-		ft8_xmit_counter += 26; // After 3x becomes 79
-	} else {
-		printf("r");
-	}
-    fflush(stdout);
-    static int count = 0;
-    if (++count % 3 == 0) {
-        decode_flag = 1;
+    static int frame_counter = 0;
+    
+    // Initialize timing on first call
+    init_mock_timing();
+    
+    // Simulate frame processing (matches real SDR_Audio.c:146-150)
+    if (++frame_counter == 4) {
+        // process_FT8_FFT() would be called here in real code
+		FT_8_counter++;
+        frame_counter = 0;
     }
-    // TODO mock the actual audio processing interval
-    usleep(100000); // 100ms
+    
+    if (xmit_flag == 1) {
+		if (Xmit_DSP_counter % 80 == 1) {
+			printf("t");
+		}
+    } else {
+		if (frame_counter == 0 && FT_8_counter % 20 == 0) {
+			printf("r");
+		}
+    }
+    
+    fflush(stdout);
+    
+    // Advance mock time by ~40ms (matches 32kHz sample rate, 1280 samples)
+    advance_mock_tick(40);
+    
+	if (FT_8_counter == ft8_msg_samples) { 
+		decode_flag = 1;
+	}
+    
+    // Simulate real audio processing timing
+    usleep(400); // 0.4ms so 100X faster
 }
 
 void Process_Touch(void) {}
@@ -208,6 +240,15 @@ void process_selected_Station(int stations_decoded, int TouchIndex)
 	FT8_Touch_Flag = 0;
 }
 
+// Initialize FT8 timing for mock
+static bool timing_initialized = false;
+void init_mock_timing(void) {
+    if (!timing_initialized) {
+        start_time = HAL_GetTick();
+        timing_initialized = true;
+    }
+}
+
 // Needed by autoseq_engine
 static char queued_msg[40];
 void queue_custom_text(const char *tx_msg) {
@@ -231,11 +272,17 @@ WEAK void MX_RTC_Init(void) {}
 WEAK void MX_FMC_Init(void) {}
 // Add other MX_*_Init() as needed
 
-// Simple SysTick & tick counter
+// Enhanced SysTick & tick counter for FT8 timing
 static uint32_t mock_tick = 0;
+static uint32_t mock_tick_increment = 0;
+
+// Called by I2S2_RX_ProcessBuffer to advance time
+void advance_mock_tick(uint32_t ms) {
+    mock_tick_increment += ms;
+}
 
 WEAK uint32_t HAL_GetTick(void) {
-    return mock_tick;
+    return mock_tick + mock_tick_increment;
 }
 
 WEAK void HAL_Delay(uint32_t ms) {
@@ -320,11 +367,8 @@ WEAK void setup_to_transmit_on_next_DSP_Flag(void) {
 	printf("Transmitting: %s\n", queued_msg);
 	Xmit_DSP_counter = 0;
 	ft8_xmit_counter = 0;
-	ft8_xmit_delay = 28;
-	// xmit_sequence();
-	// ft8_transmit_sequence();
+	ft8_xmit_delay = 0;  // Start transmission immediately for testing
 	xmit_flag = 1;
-	// Xmit_DSP_counter = 0;
 }
 
 void _debug(const char *txt) {
