@@ -66,7 +66,6 @@ typedef struct {
     char dxgrid[7];
 
     int  snr_tx;              /* SNR we report to DX (‑dB) */
-    int  snr_rx;              /* Our SNR reported by DX (‑dB) */
     int  retry_counter;
     int  retry_limit;
     // TODO eliminate
@@ -160,8 +159,7 @@ bool autoseq_on_decode(const Decode *msg)
 
     // Populating Target_Call
     strncpy(Target_Call, msg->call_from, sizeof(Target_Call));
-    if (rcvd_msg_type == TX1) {
-    }
+
     // Populating Station_RSL
     if (rcvd_msg_type == TX2 || rcvd_msg_type == TX3) {
         Station_RSL = msg->received_snr;

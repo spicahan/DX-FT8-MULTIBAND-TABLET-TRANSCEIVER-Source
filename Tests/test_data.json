@@ -1,0 +1,103 @@
+{
+  "config": {
+    "MY_CALLSIGN": "N6HAN",
+    "MY_GRID": "CM87",
+    "DX_CALLSIGN": "AG6AQ", 
+    "DX_GRID": "CM97",
+    "TX_ON_EVEN": false,
+    "Beacon_On": 1
+  },
+  "periods": [
+    {
+      "messages": []
+    },
+    {
+      "messages": []
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "${DX_CALLSIGN}",
+          "locator": "${DX_GRID}",
+          "sequence": 1,
+          "snr": -10,
+          "received_snr": 99
+        },
+        {
+          "call_to": "${MY_CALLSIGN}", 
+          "call_from": "N6LN",
+          "locator": "DM03",
+          "sequence": 1,
+          "snr": 0,
+          "received_snr": 99
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "N6LN", 
+          "locator": "DM03",
+          "sequence": 1,
+          "snr": 0,
+          "received_snr": 99
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "N6LN",
+          "locator": "DM03", 
+          "sequence": 1,
+          "snr": 0,
+          "received_snr": 99
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "N6LN",
+          "locator": "DM03",
+          "target_locator": "DM03", 
+          "sequence": 1,
+          "snr": 0,
+          "received_snr": 99
+        },
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "${DX_CALLSIGN}",
+          "locator": "R-3",
+          "sequence": 2,
+          "snr": -12,
+          "received_snr": -3
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "N6LN",
+          "locator": "DM03",
+          "sequence": 1,
+          "snr": 0,
+          "received_snr": 99
+        },
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "${DX_CALLSIGN}", 
+          "locator": "73",
+          "sequence": 2,
+          "snr": 0,
+          "received_snr": 99
+        }
+      ]
+    }
+  ]
+}
