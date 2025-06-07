@@ -128,7 +128,7 @@ int main(void)
 	Set_Cursor_Frequency();
 	show_variable(400, 25, (int)NCO_Frequency);
 	show_short(667, 255, AGC_Gain);
-	start_duplex();
+	start_duplex(0);
 	HAL_Delay(10);
 	set_codec_input_gain();
 	HAL_Delay(10);
