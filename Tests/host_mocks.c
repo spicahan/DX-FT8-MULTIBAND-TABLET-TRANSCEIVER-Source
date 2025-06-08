@@ -23,7 +23,7 @@ void init_mock_timing(void);
 
 // TX_ON_EVEN now loaded from JSON config
 int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
-int Beacon_On = 1;
+int Beacon_On = 0;
 int Xmit_Mode;
 int xmit_flag = 0, ft8_xmit_counter, ft8_xmit_flag, ft8_xmit_delay;
 int DSP_Flag = 1;
@@ -47,6 +47,9 @@ char current_QSO_receive_message[40];
 char current_Beacon_receive_message[40];
 char current_Beacon_xmit_message[40];
 char current_QSO_xmit_message[40];
+
+// gen_ft8.c
+int CQ_Mode_Index = 0;
 
 // FT8 timing variables from main.c 
 extern uint32_t current_time, start_time, ft8_time;
@@ -549,7 +552,6 @@ static void init_test_data(void) {
             strncpy(config_my_grid, test_data.config.my_grid, sizeof(config_my_grid)-1);
             strncpy(config_dx_callsign, test_data.config.dx_callsign, sizeof(config_dx_callsign)-1);
             strncpy(config_dx_grid, test_data.config.dx_grid, sizeof(config_dx_grid)-1);
-            Beacon_On = test_data.config.beacon_on;
 			target_slot = !test_data.config.tx_on_even;
         }
         
@@ -573,6 +575,13 @@ WEAK int ft8_decode(void) {
     
     // Initialize test data on first call
     init_test_data();
+
+	// Inject Beacon_On = 1 at the correct slot
+	if (test_data.config.beacon_on) {
+		if (slot_state == !test_data.config.tx_on_even) {
+            Beacon_On = 1;
+		}
+	}
     
     // If no test data loaded, return 0 (no messages)
     if (test_data.period_count == 0) {
@@ -582,7 +591,7 @@ WEAK int ft8_decode(void) {
     // Handle TX_ON_EVEN logic
     bool tx_on_even = test_data.config.tx_on_even;
     
-    if (slot_state == !tx_on_even) {
+    if (slot_state == tx_on_even) {
         return 0;
     }
     

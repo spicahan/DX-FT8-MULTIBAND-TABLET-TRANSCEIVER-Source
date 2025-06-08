@@ -62,6 +62,8 @@ int Xmit_DSP_counter;
 int target_slot;
 int target_freq;
 int slot_state = 0;
+// Used for skipping the TX slot
+int decode_bypass = 0;
 
 // Autoseq TX text buffer
 char autoseq_txbuf[40];
@@ -93,6 +95,7 @@ static void update_synchronization(void)
 			autoseq_tick();
 			update_log_display(1);
 			QSO_xmit = 0;
+			decode_bypass = 1;
 		}
 	}
 }
@@ -221,6 +224,13 @@ int main(void)
 			slot_state ^= 1;
 			clear_decoded_messages();
 
+			// Skip decoding for the TX slot and reset the flags
+			if (decode_bypass) {
+				decode_bypass = 0;
+				decode_flag = 0;
+				continue;
+			}
+
 			master_decoded = ft8_decode();
 			// TODO refactor with the retry logic below
 			QSO_xmit = 0;
@@ -256,6 +266,7 @@ int main(void)
 					_debug("QSO_xmit,retry");
 					QSO_xmit = 1;
 				} else if(Beacon_On) {
+					target_slot = slot_state;
 					autoseq_start_cq();
 					autoseq_get_next_tx(autoseq_txbuf);
 					queue_custom_text(autoseq_txbuf);

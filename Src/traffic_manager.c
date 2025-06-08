@@ -133,6 +133,7 @@ void terminate_QSO(void)
 	ft8_receive_sequence();
 	receive_sequence();
 	xmit_flag = 0;
+	ft8_xmit_delay = 0;
 }
 
 void ft8_transmit_sequence(void)
