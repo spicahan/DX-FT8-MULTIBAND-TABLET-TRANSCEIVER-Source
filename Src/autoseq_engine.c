@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 #include "autoseq_engine.h"
-#include "gen_ft8.h" // For saving Target_*
+#include "gen_ft8.h" // For accessing CQ_Mode_Index and saving Target_*
 #include "ADIF.h"    // For write_ADIF_Log()
 
 /***** Compile‑time knobs *****/
@@ -386,6 +386,7 @@ static void set_state(autoseq_state_t s, tx_msg_t first_tx, int limit)
 static void format_tx_text(tx_msg_t id, char out[40])
 {
     memset(out, 0, 40);
+    const char *cq_str = "CQ";
 
     switch (id) {
     case TX1:
@@ -414,7 +415,21 @@ static void format_tx_text(tx_msg_t id, char out[40])
         }
         break;
     case TX6:
-        snprintf(out, 40, "CQ %s %s", ctx.mycall, ctx.mygrid);
+		switch (CQ_Mode_Index)
+		{
+		case 1:
+			cq_str = "CQ SOTA";
+			break;
+		case 2:
+			cq_str = "CQ POTA";
+			break;
+		case 3:
+			cq_str = "CQ QRP";
+			break;
+        default:
+            break;
+		}
+        snprintf(out, 40, "%s %s %s", cq_str, ctx.mycall, ctx.mygrid);
         break;
     default:
         break;
