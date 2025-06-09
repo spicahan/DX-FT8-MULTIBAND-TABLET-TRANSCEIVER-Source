@@ -124,14 +124,14 @@ bool autoseq_on_decode(const Decode *msg)
             return false;
         }
     }
-    strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall));
+    strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
     ctx.snr_tx = msg->snr;
 
     // TX type of received message
     tx_msg_t rcvd_msg_type = TX_UNDEF;
     if (msg->sequence == Seq_Locator) {
         rcvd_msg_type = TX1;
-        strncpy(ctx.dxgrid, msg->locator, sizeof(ctx.dxgrid));
+        strncpy(ctx.dxgrid, msg->locator, sizeof(ctx.dxgrid) - 1);
     } else {
         if (strncmp(msg->locator, "73", 2) == 0) {
             rcvd_msg_type = TX5;
@@ -153,12 +153,12 @@ bool autoseq_on_decode(const Decode *msg)
         }
     }
 
-    char rcvd_msg_type_str[15]; // "ST: , Rcvd TXx\n"
-    snprintf(rcvd_msg_type_str, sizeof(rcvd_msg_type_str), "ST:%u, Rcvd TX%u", ctx.state, rcvd_msg_type);
+    // char rcvd_msg_type_str[15]; // "ST: , Rcvd TXx\n"
+    // snprintf(rcvd_msg_type_str, sizeof(rcvd_msg_type_str), "ST:%u, Rcvd TX%u", ctx.state, rcvd_msg_type);
     // _debug(rcvd_msg_type_str);
 
     // Populating Target_Call
-    strncpy(Target_Call, msg->call_from, sizeof(Target_Call));
+    strncpy(Target_Call, msg->call_from, sizeof(Target_Call) - 1);
 
     // Populating Station_RSL
     if (rcvd_msg_type == TX2 || rcvd_msg_type == TX3) {
@@ -171,7 +171,7 @@ bool autoseq_on_decode(const Decode *msg)
         switch (rcvd_msg_type) {
             case TX1:
                 // Populate Target_Locator
-                strncpy(Target_Locator, msg->locator, sizeof(Target_Locator));
+                strncpy(Target_Locator, msg->locator, sizeof(Target_Locator) - 1);
                 set_state(AS_REPORT, TX2, MAX_TX_RETRY);
                 return true;
             case TX2:
@@ -415,21 +415,36 @@ static void format_tx_text(tx_msg_t id, char out[40])
         }
         break;
     case TX6:
-		switch (CQ_Mode_Index)
-		{
-		case 1:
-			cq_str = "CQ SOTA";
-			break;
-		case 2:
-			cq_str = "CQ POTA";
-			break;
-		case 3:
-			cq_str = "CQ QRP";
-			break;
-        default:
-            break;
-		}
-        snprintf(out, 40, "%s %s %s", cq_str, ctx.mycall, ctx.mygrid);
+	    if (Free_Index == 0) {
+            switch (CQ_Mode_Index)
+            {
+            case 1:
+                cq_str = "CQ SOTA";
+                break;
+            case 2:
+                cq_str = "CQ POTA";
+                break;
+            case 3:
+                cq_str = "CQ QRP";
+                break;
+            default:
+                break;
+            }
+            snprintf(out, 40, "%s %s %s", cq_str, ctx.mycall, ctx.mygrid);
+        }
+        else {
+            switch (Free_Index)
+            {
+            case 1:
+                strncpy(out, Free_Text1, sizeof(Free_Text1) - 1);
+                break;
+            case 2:
+                strncpy(out, Free_Text2, sizeof(Free_Text2) - 1);
+                break;
+            default:
+                break;
+            }
+        } 
         break;
     default:
         break;

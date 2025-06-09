@@ -69,8 +69,8 @@ const char QRP[] = "QRP";
 const char Beacon_73[] = "RR73";
 const char QSO_73[] = "73";
 
-static char Free_Text1[MESSAGE_SIZE];
-static char Free_Text2[MESSAGE_SIZE];
+char Free_Text1[MESSAGE_SIZE];
+char Free_Text2[MESSAGE_SIZE];
 
 void set_cq(void)
 {

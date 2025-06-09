@@ -18,6 +18,9 @@ extern char Target_Locator[LOCATOR_SIZE]; // same as Locator
 extern int Target_RSL;
 
 #define REPLY_MESSAGE_SIZE 28
+// Copied from Display.h
+// TODO: refactor
+#define MESSAGE_SIZE 40
 
 extern char reply_message[REPLY_MESSAGE_SIZE];
 extern char reply_message_list[REPLY_MESSAGE_SIZE][8];
@@ -27,6 +30,8 @@ extern char SDPath[4]; /* SD card logical drive path */
 
 extern int CQ_Mode_Index;
 extern int Free_Index;
+extern char Free_Text1[MESSAGE_SIZE];
+extern char Free_Text2[MESSAGE_SIZE];
 
 void clear_reply_message_box(void);
 

@@ -16,6 +16,8 @@
 
 // From Process_DSP.h
 #define ft8_msg_samples 91
+// From Display.h
+#define MESSAGE_SIZE 40
 
 // Forward declaration
 void advance_mock_tick(uint32_t ms);
@@ -50,6 +52,9 @@ char current_QSO_xmit_message[40];
 
 // gen_ft8.c
 int CQ_Mode_Index = 0;
+int Free_Index = 0;
+char Free_Text1[MESSAGE_SIZE];
+char Free_Text2[MESSAGE_SIZE];
 
 // FT8 timing variables from main.c 
 extern uint32_t current_time, start_time, ft8_time;
