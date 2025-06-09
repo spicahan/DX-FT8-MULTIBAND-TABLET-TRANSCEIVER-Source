@@ -15,7 +15,6 @@
 
 int FT_8_TouchIndex;
 uint16_t cursor = 192;
-int decode_flag;
 int FT8_Touch_Flag;
 char current_QSO_receive_message[MESSAGE_SIZE];
 char current_QSO_xmit_message[MESSAGE_SIZE];

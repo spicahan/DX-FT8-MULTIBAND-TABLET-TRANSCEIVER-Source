@@ -423,7 +423,7 @@ void process_selected_Station(int num_decoded, int TouchIndex)
 		strcpy(Target_Call, new_decoded[TouchIndex].call_from);
 		strcpy(Target_Locator, new_decoded[TouchIndex].target_locator);
 		Target_RSL = new_decoded[TouchIndex].snr;
-		target_slot = new_decoded[TouchIndex].slot;
+		target_slot = new_decoded[TouchIndex].slot ^ 1;
 		target_freq = new_decoded[TouchIndex].freq_hz;
 
 		if (QSO_Fix == 1)

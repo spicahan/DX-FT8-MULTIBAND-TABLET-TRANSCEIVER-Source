@@ -88,11 +88,10 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     // Advance mock time by ~40ms (matches 32kHz sample rate, 1280 samples)
     advance_mock_tick(40);
     
-	if (FT_8_counter == ft8_msg_samples) { 
-		decode_flag = 1;
-	}
-    
-    // Simulate real audio processing timing
+	// if (FT_8_counter == ft8_msg_samples) { 
+	decode_flag = (frame_counter == 0 && (FT_8_counter == 71 || FT_8_counter == 91));
+
+	// Simulate real audio processing timing
     usleep(400); // 0.4ms so 100X faster
 }
 
@@ -576,14 +575,14 @@ static void init_test_data(void) {
 
 // Replace the real ft8_decode() to feed our test data
 WEAK int ft8_decode(void) {
-    static int slot_index = 0;
+	int slot_index = ft8_time / 30000;
     
     // Initialize test data on first call
     init_test_data();
 
 	// Inject Beacon_On = 1 at the correct slot
 	if (test_data.config.beacon_on) {
-		if (slot_state == !test_data.config.tx_on_even) {
+		if (slot_state == test_data.config.tx_on_even) {
             Beacon_On = 1;
 		}
 	}
@@ -596,7 +595,7 @@ WEAK int ft8_decode(void) {
     // Handle TX_ON_EVEN logic
     bool tx_on_even = test_data.config.tx_on_even;
     
-    if (slot_state == tx_on_even) {
+    if (slot_state != tx_on_even) {
         return 0;
     }
     
@@ -607,8 +606,6 @@ WEAK int ft8_decode(void) {
     
     // Direct array access - O(1) instead of O(N) search
     TestPeriod* current_period = &test_data.periods[slot_index];
-    
-    slot_index++;
     
     // If no messages, return 0
     if (current_period->message_count == 0) {

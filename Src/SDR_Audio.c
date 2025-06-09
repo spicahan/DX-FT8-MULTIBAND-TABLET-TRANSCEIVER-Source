@@ -5,14 +5,14 @@
  *      Author: user
  */
 
+#include <stdlib.h>
 #include "SDR_Audio.h"
 #include "stm32746g_discovery_audio.h"
 #include "wm8994.h"
 #include "stm32746g_discovery_lcd.h"
 #include "arm_math.h"
 #include "Process_DSP.h"
-#include <stdlib.h>
-
+#include "main.h" // for decode_flag
 #include "button.h"
 #include "Sine_table.h"
 
@@ -147,5 +147,8 @@ void I2S2_RX_ProcessBuffer(uint16_t offset)
 	{
 		process_FT8_FFT();
 		frame_counter = 0;
+	} else
+	{
+		decode_flag = 0; // Make sure decoding happens only after process_FT8_FFT()
 	}
 }

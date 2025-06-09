@@ -25,6 +25,7 @@ extern int Xmit_DSP_counter;
 extern int slot_state;
 extern int target_slot;
 extern int target_freq;
+extern int decode_flag;
 extern int decode_bypass;
 
 #endif /* __MAIN_H */

@@ -298,25 +298,17 @@ bool autoseq_get_next_tx(char out_text[40])
 
     /* Bump retry counter */
     if (ctx.retry_limit) {
-        if (ctx.retry_counter < ctx.retry_limit) {
-            return true;
+        if (ctx.retry_counter >= ctx.retry_limit) {
+            ctx.state = AS_SIGNOFF; /* give up */
         }
-        // Is this right?
-        ctx.state = AS_SIGNOFF; /* give up */
     }
 
-    // Is this right?
-    ctx.next_tx = TX_UNDEF;
-    ctx.logged = false;
     return true;
 }
 
 /* === Slot timer / time‑out manager === */
 void autoseq_tick(void)
 {
-    if (ctx.next_tx == TX_UNDEF || ctx.state == AS_IDLE)
-        return;
-
     switch (ctx.state) {
     case AS_REPLYING:
         if (ctx.retry_counter < ctx.retry_limit) {
@@ -356,14 +348,9 @@ void autoseq_tick(void)
         }
         break;
     case AS_SIGNOFF:
-        if (ctx.retry_counter < ctx.retry_limit) {
-            ctx.next_tx = TX5;
-            ctx.retry_counter++;
-        } else {
-            ctx.state = AS_IDLE;
-            ctx.next_tx = TX_UNDEF;
-            ctx.logged = false;
-        }
+        ctx.state = AS_IDLE;
+        ctx.next_tx = TX_UNDEF;
+        ctx.logged = false;
         break;
     default:
         break;

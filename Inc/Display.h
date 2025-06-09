@@ -15,7 +15,6 @@
 #define MESSAGE_SIZE 40
 
 extern uint16_t cursor;
-extern int decode_flag;
 extern int FT8_Touch_Flag;
 extern int FT_8_TouchIndex;
 

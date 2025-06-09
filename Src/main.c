@@ -62,6 +62,7 @@ int Xmit_DSP_counter;
 int target_slot;
 int target_freq;
 int slot_state = 0;
+int decode_flag = 0;
 // Used for skipping the TX slot
 int decode_bypass = 0;
 
@@ -84,6 +85,17 @@ static void update_synchronization(void)
 
 	if (ft8_time % 15000 <= 160 || FT_8_counter > 90)
 	{
+		if (ft8_time / 15000 % 2 != slot_state) {
+			// toggle the slot state
+#ifdef HOST_HAL_MOCK
+			printf("\n----------------------------------------\n");
+			printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
+#endif
+			slot_state ^= 1;
+			decode_bypass = 0;
+			clear_decoded_messages();
+		}
+
 		ft8_flag = 1;
 		FT_8_counter = 0;
 		ft8_marker = 1;
@@ -214,23 +226,8 @@ int main(void)
 #endif
 		}
 
-		if (decode_flag && !Tune_On && !xmit_flag)
+		if (decode_flag && !Tune_On && !xmit_flag && !decode_bypass)
 		{
-			// toggle the slot state
-#ifdef HOST_HAL_MOCK
-			printf("\n----------------------------------------\n");
-			printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
-#endif
-			slot_state ^= 1;
-			clear_decoded_messages();
-
-			// Skip decoding for the TX slot and reset the flags
-			if (decode_bypass) {
-				decode_bypass = 0;
-				decode_flag = 0;
-				continue;
-			}
-
 			master_decoded = ft8_decode();
 			// TODO refactor with the retry logic below
 			QSO_xmit = 0;
@@ -252,7 +249,6 @@ int main(void)
 				}
 			}
 
-			decode_flag = 0;
 			// No valid response has received to advance auto sequencing.
 			// Check TX retry is needed?
 			// Yes => QSO_xmit = True;
@@ -266,7 +262,7 @@ int main(void)
 					_debug("QSO_xmit,retry");
 					QSO_xmit = 1;
 				} else if(Beacon_On) {
-					target_slot = slot_state;
+					target_slot = slot_state ^ 1;
 					autoseq_start_cq();
 					autoseq_get_next_tx(autoseq_txbuf);
 					queue_custom_text(autoseq_txbuf);
