@@ -56,7 +56,7 @@ int ft8_decode(void)
 	// Find top candidates by Costas sync score and localize them in time and frequency
 	Candidate candidate_list[kMax_candidates];
 
-	int num_candidates = find_sync(export_fft_power, ft8_msg_samples, ft8_buffer_size, kCostas_map, kMax_candidates, candidate_list, kMin_score);
+	int num_candidates = find_sync(export_fft_power, FT_8_counter, ft8_buffer_size, kCostas_map, kMax_candidates, candidate_list, kMin_score);
 	char decoded[kMax_decoded_messages][kMax_message_length];
 
 	const float fsk_dev = 6.25f; // tone deviation in Hz and symbol rate

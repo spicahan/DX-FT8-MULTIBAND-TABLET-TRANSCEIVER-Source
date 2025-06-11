@@ -33,7 +33,7 @@ int find_sync(const uint8_t *power, int num_blocks, int num_bins,
 	// sync symbols we included in the score, so the score is averaged.
 	for (int alt = 0; alt < 4; ++alt) {
 		// int alt = 0;
-		for (int time_offset = -7; time_offset < num_blocks - NN + 7;
+		for (int time_offset = -7; time_offset < ft8_msg_samples - NN + 7;
 				++time_offset) {  // NN=79
 			for (int freq_offset = ft8_min_bin; freq_offset < num_bins - 8;
 					++freq_offset) {
