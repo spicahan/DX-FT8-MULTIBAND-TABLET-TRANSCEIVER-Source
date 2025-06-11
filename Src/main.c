@@ -93,7 +93,6 @@ static void update_synchronization(void)
 #endif
 			slot_state ^= 1;
 			decode_bypass = 0;
-			clear_decoded_messages();
 		}
 
 		ft8_flag = 1;
@@ -228,6 +227,7 @@ int main(void)
 
 		if (decode_flag && !Tune_On && !xmit_flag && !decode_bypass)
 		{
+			clear_decoded_messages();
 			master_decoded = ft8_decode();
 			// TODO refactor with the retry logic below
 			QSO_xmit = 0;
