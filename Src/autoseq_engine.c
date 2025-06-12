@@ -347,6 +347,7 @@ void autoseq_tick(void)
             ctx.logged = false;
         }
         break;
+    case AS_CALLING: // CQ iscontrolled by Beacon_On, so it's only once
     case AS_SIGNOFF:
         ctx.state = AS_IDLE;
         ctx.next_tx = TX_UNDEF;
