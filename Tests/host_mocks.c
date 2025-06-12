@@ -13,15 +13,21 @@
 #include "decode_ft8.h"
 #include "autoseq_engine.h"
 #include "ADIF.h"
+#include "json_parser.h"
 
 // From Process_DSP.h
 #define ft8_msg_samples 91
 // From Display.h
 #define MESSAGE_SIZE 40
 
+// default test json file name
+// override it with ./main <test_file>
+const char* test_data_file = "test_data.json";
+
 // Forward declaration
 void advance_mock_tick(uint32_t ms);
 void init_mock_timing(void);
+static void handle_beacon_changes(void);
 
 // TX_ON_EVEN now loaded from JSON config
 int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -40,7 +46,7 @@ void update_log_display(int mode) {}
 uint16_t cursor;
 char rtc_date_string[9];
 char rtc_time_string[9];
-int decode_flag;
+extern int decode_flag;
 
 int QSO_Xmit_Touch;
 int FT8_Touch_Flag;
@@ -93,6 +99,9 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
 
 	// Simulate real audio processing timing
     usleep(400); // 0.4ms so 100X faster
+    
+    // Handle beacon changes based on timing
+    handle_beacon_changes();
 }
 
 void Process_Touch(void) {}
@@ -145,7 +154,7 @@ const FreqStruct sBand_Data[NumBands] =
 void receive_sequence(void) {}
 
 // log_file.c
-void Write_Log_Data(char *ch) {
+void Write_Log_Data(const char *ch) {
 	printf("ADIF log: %s\n", ch);
 }
 
@@ -221,7 +230,7 @@ void clear_decoded_messages(void)
 		new_decoded[i].received_snr = 99;
 		new_decoded[i].slot = 0;
 		new_decoded[i].RR73 = 0;
-		new_decoded[i].sequence = 0;
+		new_decoded[i].sequence = Seq_RSL;
 	}
 }
 
@@ -257,244 +266,47 @@ void init_mock_timing(void) {
 }
 
 // -----------------------------------------------------------------------------
-// JSON Test Data Loader
-#define MAX_PERIODS 20
-#define MAX_MESSAGES_PER_SLOT 10
-#define MAX_JSON_SIZE 16384
-
-typedef struct {
-    char my_callsign[14];
-    char my_grid[7];
-    char dx_callsign[14];
-    char dx_grid[7];
-    bool tx_on_even;
-    int beacon_on;
-} TestConfig;
-
-typedef struct {
-    int message_count;
-    Decode messages[MAX_MESSAGES_PER_SLOT];
-} TestPeriod;
-
-typedef struct {
-    TestConfig config;
-    int period_count;
-    TestPeriod periods[MAX_PERIODS];
-} TestData;
-
+// Test Data Management
 static TestData test_data = {0};
 static bool test_data_loaded = false;
 
-// Variable substitution helper - works with buffer and max length
-static void substitute_variables(char* str, size_t max_len, const TestConfig* config) {
-    char temp[64];
-    char* pos;
-    
-    // Replace ${MY_CALLSIGN}
-    while ((pos = strstr(str, "${MY_CALLSIGN}")) != NULL) {
-        *pos = '\0'; // Temporarily terminate at variable position
-        snprintf(temp, sizeof(temp), "%s%s%s", str, config->my_callsign, pos + strlen("${MY_CALLSIGN}"));
-        strncpy(str, temp, max_len - 1);
-        str[max_len - 1] = '\0';
-    }
-    
-    // Replace ${MY_GRID}
-    while ((pos = strstr(str, "${MY_GRID}")) != NULL) {
-        *pos = '\0';
-        snprintf(temp, sizeof(temp), "%s%s%s", str, config->my_grid, pos + strlen("${MY_GRID}"));
-        strncpy(str, temp, max_len - 1);
-        str[max_len - 1] = '\0';
-    }
-    
-    // Replace ${DX_CALLSIGN}
-    while ((pos = strstr(str, "${DX_CALLSIGN}")) != NULL) {
-        *pos = '\0';
-        snprintf(temp, sizeof(temp), "%s%s%s", str, config->dx_callsign, pos + strlen("${DX_CALLSIGN}"));
-        strncpy(str, temp, max_len - 1);
-        str[max_len - 1] = '\0';
-    }
-    
-    // Replace ${DX_GRID}
-    while ((pos = strstr(str, "${DX_GRID}")) != NULL) {
-        *pos = '\0';
-        snprintf(temp, sizeof(temp), "%s%s%s", str, config->dx_grid, pos + strlen("${DX_GRID}"));
-        strncpy(str, temp, max_len - 1);
-        str[max_len - 1] = '\0';
-    }
-}
-
-// Simple JSON string extraction helper
-static char* extract_string_value(const char* json, const char* key, char* output, size_t max_len) {
-    char search_key[64];
-    snprintf(search_key, sizeof(search_key), "\"%s\":", key);
-    
-    const char* start = strstr(json, search_key);
-    if (!start) return NULL;
-    
-    start = strchr(start + strlen(search_key), '"');
-    if (!start) return NULL;
-    start++; // Skip opening quote
-    
-    const char* end = strchr(start, '"');
-    if (!end) return NULL;
-    
-    size_t len = end - start;
-    if (len >= max_len) len = max_len - 1;
-    
-    strncpy(output, start, len);
-    output[len] = '\0';
-    return output;
-}
-
-// Simple JSON integer extraction helper
-static int extract_int_value(const char* json, const char* key) {
-    char search_key[64];
-    snprintf(search_key, sizeof(search_key), "\"%s\":", key);
-    
-    const char* start = strstr(json, search_key);
-    if (!start) return 0;
-    
-    start += strlen(search_key);
-    while (*start && (*start == ' ' || *start == '\t')) start++; // Skip whitespace
-    
-    return atoi(start);
-}
-
-// Simple JSON boolean extraction helper  
-static bool extract_bool_value(const char* json, const char* key) {
-    char search_key[64];
-    snprintf(search_key, sizeof(search_key), "\"%s\":", key);
-    
-    const char* start = strstr(json, search_key);
-    if (!start) return false;
-    
-    start += strlen(search_key);
-    while (*start && (*start == ' ' || *start == '\t')) start++; // Skip whitespace
-    
-    return (strncmp(start, "true", 4) == 0);
-}
-
-// Load and parse test data from JSON file
-static bool load_test_data(const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (!file) {
-        printf("Warning: Could not open test data file '%s', using hardcoded data\n", filename);
-        return false;
-    }
-    
-    static char json_buffer[MAX_JSON_SIZE];
-    size_t bytes_read = fread(json_buffer, 1, sizeof(json_buffer) - 1, file);
-    fclose(file);
-    
-    if (bytes_read == 0) {
-        printf("Warning: Empty test data file '%s'\n", filename);
-        return false;
-    }
-    json_buffer[bytes_read] = '\0';
-    
-    // Parse config section
-    const char* config_start = strstr(json_buffer, "\"config\":");
-    if (config_start) {
-        extract_string_value(config_start, "MY_CALLSIGN", test_data.config.my_callsign, 14);
-        extract_string_value(config_start, "MY_GRID", test_data.config.my_grid, 7);
-        extract_string_value(config_start, "DX_CALLSIGN", test_data.config.dx_callsign, 14);
-        extract_string_value(config_start, "DX_GRID", test_data.config.dx_grid, 7);
-        test_data.config.tx_on_even = extract_bool_value(config_start, "TX_ON_EVEN");
-        test_data.config.beacon_on = extract_int_value(config_start, "Beacon_On");
-    }
-    
-    // Parse periods array
-    const char* periods_start = strstr(json_buffer, "\"periods\":");
-    if (periods_start) {
-        periods_start = strchr(periods_start, '[');
-        if (periods_start) {
-            const char* period_pos = periods_start + 1;
-            test_data.period_count = 0;
+// Helper function to handle beacon changes
+static void handle_beacon_changes(void) {
+    if (test_data_loaded) {
+        int slot_index = ft8_time / 30000;
+        if (slot_index < test_data.period_count) {
+            TestPeriod* current_period = &test_data.periods[slot_index];
             
-            while (test_data.period_count < MAX_PERIODS && period_pos) {
-                // Find next period object
-                period_pos = strchr(period_pos, '{');
-                if (!period_pos) break;
+            if (current_period->has_beacon_change) {
+                uint32_t slot_time_ms = ft8_time % 30000;  // Time within current 30s slot
+                float slot_time_s = slot_time_ms / 1000.0f;  // Convert to seconds
                 
-                // Find end of this period object
-                const char* period_end = period_pos;
-                int brace_count = 0;
-                do {
-                    if (*period_end == '{') brace_count++;
-                    else if (*period_end == '}') brace_count--;
-                    period_end++;
-                } while (brace_count > 0 && *period_end);
+                BeaconChange* bc = &current_period->beacon_change;
                 
-                // Extract period data
-                TestPeriod* period = &test_data.periods[test_data.period_count];
-                period->message_count = 0;
-                
-                // Parse messages array in this period
-                const char* messages_start = strstr(period_pos, "\"messages\":");
-                if (messages_start && messages_start < period_end) {
-                    messages_start = strchr(messages_start, '[');
-                    if (messages_start && messages_start < period_end) {
-                        const char* msg_pos = messages_start + 1;
-                        
-                        while (period->message_count < MAX_MESSAGES_PER_SLOT && msg_pos < period_end) {
-                            msg_pos = strchr(msg_pos, '{');
-                            if (!msg_pos || msg_pos >= period_end) break;
-                            
-                            // Find end of this message object
-                            const char* msg_end = msg_pos;
-                            int msg_brace_count = 0;
-                            do {
-                                if (*msg_end == '{') msg_brace_count++;
-                                else if (*msg_end == '}') msg_brace_count--;
-                                msg_end++;
-                            } while (msg_brace_count > 0 && *msg_end && msg_end < period_end);
-                            
-                            // Extract message data using temporary buffers for variable substitution
-                            Decode* msg = &period->messages[period->message_count];
-                            memset(msg, 0, sizeof(Decode));
-                            
-                            char temp_str[64];
-                            
-                            // Extract and substitute call_to
-                            if (extract_string_value(msg_pos, "call_to", temp_str, sizeof(temp_str))) {
-                                substitute_variables(temp_str, sizeof(temp_str), &test_data.config);
-                                strncpy(msg->call_to, temp_str, 13);
-                                msg->call_to[13] = '\0';
-                            }
-                            
-                            // Extract and substitute call_from
-                            if (extract_string_value(msg_pos, "call_from", temp_str, sizeof(temp_str))) {
-                                substitute_variables(temp_str, sizeof(temp_str), &test_data.config);
-                                strncpy(msg->call_from, temp_str, 13);
-                                msg->call_from[13] = '\0';
-                            }
-                            
-                            // Extract and substitute locator
-                            if (extract_string_value(msg_pos, "locator", temp_str, sizeof(temp_str))) {
-                                substitute_variables(temp_str, sizeof(temp_str), &test_data.config);
-                                strncpy(msg->locator, temp_str, 6);
-                                msg->locator[6] = '\0';
-                            }
-                            
-                            msg->snr = extract_int_value(msg_pos, "snr");
-                            msg->received_snr = extract_int_value(msg_pos, "received_snr");
-                            msg->sequence = (Sequence)extract_int_value(msg_pos, "sequence");
-                            
-                            period->message_count++;
-                            msg_pos = msg_end;
-                        }
-                    }
+                // Apply beacon change if time has passed the offset
+                if (slot_time_s >= bc->time_offset && Beacon_On != bc->beacon_on) {
+					printf("Setting Beacon_On to: %d\n", bc->beacon_on);
+                    Beacon_On = bc->beacon_on;
                 }
-                
-                test_data.period_count++;
-                period_pos = period_end;
             }
         }
     }
-    
-    printf("Loaded test data: %d periods, config: %s/%s\n", 
-           test_data.period_count, test_data.config.my_callsign, test_data.config.my_grid);
-    return true;
+}
+
+// Convert TestMessage to Decode structure
+static void convert_test_message_to_decode(const TestMessage* src, Decode* dst) {
+    memset(dst, 0, sizeof(Decode));
+    strncpy(dst->call_to, src->call_to, 13);
+    strncpy(dst->call_from, src->call_from, 13);
+    strncpy(dst->locator, src->locator, 6);
+    strncpy(dst->target_locator, src->target_locator, 6);
+    dst->snr = src->snr;
+    dst->received_snr = src->received_snr;
+    dst->sequence = (Sequence)src->sequence;
+    dst->slot = src->slot;
+    dst->freq_hz = src->freq_hz;
+    dst->sync_score = src->sync_score;
+    dst->RR73 = src->RR73;
 }
 
 // Needed by autoseq_engine
@@ -549,8 +361,8 @@ WEAK void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr) {
 // Initialize test data and configuration
 static void init_test_data(void) {
     if (!test_data_loaded) {
-        // Try to load from JSON file, fall back to defaults if it fails
-        if (load_test_data("test_data.json")) {
+        // Try to load from JSON file using C++ parser
+        if (load_test_data_json(test_data_file, &test_data)) {
             // Use loaded config
             strncpy(config_my_callsign, test_data.config.my_callsign, sizeof(config_my_callsign)-1);
             strncpy(config_my_grid, test_data.config.my_grid, sizeof(config_my_grid)-1);
@@ -579,13 +391,6 @@ WEAK int ft8_decode(void) {
     
     // Initialize test data on first call
     init_test_data();
-
-	// Inject Beacon_On = 1 at the correct slot
-	if (test_data.config.beacon_on) {
-		if (slot_state == test_data.config.tx_on_even) {
-            Beacon_On = 1;
-		}
-	}
     
     // If no test data loaded, return 0 (no messages)
     if (test_data.period_count == 0) {
@@ -615,7 +420,7 @@ WEAK int ft8_decode(void) {
     // Copy messages to new_decoded array
     int num_decoded = 0;
     for (int i = 0; i < current_period->message_count && i < 25; i++) {
-        new_decoded[i] = current_period->messages[i];
+        convert_test_message_to_decode(&current_period->messages[i], &new_decoded[i]);
         // Set slot to current decode slot
         new_decoded[i].slot = !tx_on_even;
         num_decoded++;

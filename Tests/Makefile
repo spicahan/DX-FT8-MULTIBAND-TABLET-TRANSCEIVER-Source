@@ -1,17 +1,28 @@
 # Makefile for host-side FT8 unit test
 
 CC      = gcc
+CXX     = g++
 CFLAGS  = -DHOST_HAL_MOCK -g -Wall -I../Inc -I../FT8_library
+CXXFLAGS = -DHOST_HAL_MOCK -g -Wall -I../Inc -I../FT8_library -std=c++17
 
-SRC     = ../Src/main.c ../Src/autoseq_engine.c ../Src/ADIF.c host_mocks.c
+C_SRC   = ../Src/main.c ../Src/autoseq_engine.c ../Src/ADIF.c host_mocks.c
+CXX_SRC = json_parser.cpp
+C_OBJS  = $(C_SRC:.c=.o)
+CXX_OBJS = $(CXX_SRC:.cpp=.o)
 TARGET  = host_test
 
 .PHONY: all clean
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(TARGET): $(C_OBJS) $(CXX_OBJS)
+	$(CXX) $(C_OBJS) $(CXX_OBJS) -o $(TARGET)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(C_OBJS) $(CXX_OBJS)

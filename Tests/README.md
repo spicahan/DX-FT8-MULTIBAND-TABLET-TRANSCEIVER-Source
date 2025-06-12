@@ -2,9 +2,24 @@
 
 This directory contains host-side mock implementations for unit testing the FT8 transceiver code on a development machine.
 
+## Architecture
+
+The test system uses a hybrid C/C++ architecture:
+- **C files**: Compiled with `gcc` for compatibility with embedded code
+- **C++ JSON parser**: Uses `nlohmann/json` library for robust JSON parsing
+- **C interface**: Clean C API bridges C and C++ components
+
+### Files
+
+- `host_mocks.c` - Pure C mock implementations and test framework
+- `json_parser.cpp` - C++ JSON parsing using nlohmann/json
+- `json_parser.h` - C interface for JSON parser
+- `test_data.json` - JSON test configuration and message data
+- `Makefile` - Builds C and C++ components separately
+
 ## Enhanced JSON-Based Test Data
 
-The test system now supports loading FT8 decoded messages and configuration from external JSON files, making it easy to create different test scenarios without recompiling.
+The test system supports loading FT8 decoded messages and configuration from external JSON files, making it easy to create different test scenarios without recompiling.
 
 ### JSON Test Data Format
 
@@ -28,8 +43,7 @@ When `TX_ON_EVEN` is `true`, test periods 0, 1, 2, 3... correspond to FT8 slots 
     "MY_GRID": "CM87",
     "DX_CALLSIGN": "AG6AQ", 
     "DX_GRID": "CM97",
-    "TX_ON_EVEN": false,
-    "Beacon_On": 1
+    "TX_ON_EVEN": false
   },
   "periods": [
     {
@@ -45,7 +59,11 @@ When `TX_ON_EVEN` is `true`, test periods 0, 1, 2, 3... correspond to FT8 slots 
           "snr": 0,
           "received_snr": 5
         }
-      ]
+      ],
+      "beacon_change": {
+        "time_offset": 7.3,
+        "beacon_on": 1
+      }
     }
   ]
 }
@@ -58,7 +76,18 @@ When `TX_ON_EVEN` is `true`, test periods 0, 1, 2, 3... correspond to FT8 slots 
 - **DX_CALLSIGN**: Remote station call sign for test scenarios
 - **DX_GRID**: Remote station grid locator
 - **TX_ON_EVEN**: Whether the DX-FT8 transmissions happen on even-numbered FT8 slots
-- **Beacon_On**: Enable beacon mode (1=on, 0=off)
+
+### Beacon State Changes
+
+Each period can include a `beacon_change` object to dynamically control beacon mode:
+
+- **time_offset**: Time in seconds (0.0-30.0) within the 30-second period when the change occurs
+- **beacon_on**: New beacon state (1=enabled, 0=disabled)
+
+This allows testing scenarios where beacon mode is toggled during operation, such as:
+- Starting in receive mode, then enabling beacon at a specific time
+- Disabling beacon after a successful QSO
+- Testing timing-sensitive beacon behavior
 
 ### Message Fields
 
@@ -94,15 +123,23 @@ This allows you to change station call signs and grids in the config section and
 ## Building and Running
 
 ```bash
-# Build the test
+# Build the test (requires g++ with C++17 support)
 make
 
-# Run the test  
+# Run the test with default test_data.json
 ./host_test
+
+# Run with custom test file
+./host_test my_test_scenario.json
 
 # Clean build artifacts
 make clean
 ```
+
+### Dependencies
+
+- **GCC/G++**: C and C++17 compiler
+- **nlohmann/json**: Header-only JSON library (included as `json.hpp`)
 
 ## Key Improvements
 
@@ -128,11 +165,49 @@ make clean
 
 You can create different `test_data.json` files for various scenarios:
 
-1. **Beacon_On: 1**: Simulating we calling CQ
-2. **Beacon_On: 0**: Simulating we responding to CQ
-3. **Lost messages**: Simulating DX's response get lost
-4. **Repeated messages**: Simulating DX can't receive our response
-5. **Multiple response**: Simulating multiple DX'es reponding to us
+1. **Dynamic beacon control**: Use `beacon_change` to enable/disable beacon at specific times
+2. **Beacon startup delay**: Start in receive mode, enable beacon after a few seconds
+3. **QSO interruption**: Disable beacon when a QSO is initiated
+4. **Lost messages**: Simulating DX's response gets lost
+5. **Repeated messages**: Simulating DX can't receive our response
+6. **Multiple responses**: Simulating multiple DXes responding to us
+7. **Timing-sensitive tests**: Beacon changes at precise moments within periods
+
+### Example: Dynamic Beacon Test
+
+```json
+{
+  "config": {
+    "MY_CALLSIGN": "N6HAN",
+    "MY_GRID": "CM87",
+    "TX_ON_EVEN": false
+  },
+  "periods": [
+    {
+      "messages": [],
+      "beacon_change": {
+        "time_offset": 5.0,
+        "beacon_on": 1
+      }
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "W1ABC",
+          "locator": "FN42",
+          "sequence": 1,
+          "snr": -8
+        }
+      ],
+      "beacon_change": {
+        "time_offset": 12.0,
+        "beacon_on": 0
+      }
+    }
+  ]
+}
+```
 
 ## Fallback Behavior
 

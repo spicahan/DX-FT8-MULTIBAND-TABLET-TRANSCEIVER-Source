@@ -111,9 +111,9 @@ static void update_synchronization(void)
 	}
 }
 
+#ifndef HOST_HAL_MOCK
 int main(void)
 {
-#ifndef HOST_HAL_MOCK
 	CPU_CACHE_Enable();
 
 	HAL_Init();
@@ -163,6 +163,11 @@ int main(void)
 	Init_Log_File();
 	FT8_Sync();
 	HAL_Delay(10);
+#else
+int main(int argc, char *argv[]) {
+	if (argc == 2) {
+		test_data_file = argv[1];
+	}
 #endif
 
 	autoseq_init(Station_Call, Locator);

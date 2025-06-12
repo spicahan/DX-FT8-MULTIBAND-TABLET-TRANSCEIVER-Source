@@ -1,0 +1,31 @@
+{
+  "config": {
+    "MY_CALLSIGN": "N6HAN",
+    "MY_GRID": "CM87",
+    "DX_CALLSIGN": "AG6AQ", 
+    "DX_GRID": "CM97",
+    "TX_ON_EVEN": false
+  },
+  "periods": [
+    {
+      "messages": []
+    },
+    {
+      "messages": [],
+      "beacon_change": {
+        "time_offset": 7.3,
+        "beacon_on": 1
+      }
+    },
+    {
+      "messages": []
+    },
+    {
+      "messages": [],
+      "beacon_change": {
+        "time_offset": 7.3,
+        "beacon_on": 0
+      }
+    }
+  ]
+}

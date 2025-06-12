@@ -28,6 +28,8 @@ extern int target_freq;
 extern int decode_flag;
 extern int decode_bypass;
 
+extern const char* test_data_file;
+
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
