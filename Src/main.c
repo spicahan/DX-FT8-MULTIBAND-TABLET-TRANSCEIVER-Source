@@ -234,6 +234,12 @@ int main(int argc, char *argv[]) {
 		{
 			clear_decoded_messages();
 			master_decoded = ft8_decode();
+#ifdef HOST_HAL_MOCK
+			// Check if we should exit the main
+			if (master_decoded == -1) {
+				return 0;
+			}
+#endif
 			// TODO refactor with the retry logic below
 			QSO_xmit = 0;
 			if (master_decoded > 0)
@@ -279,17 +285,7 @@ int main(int argc, char *argv[]) {
 
 		// No TX required by retrying or auto-sequencing
 		// Check if touch happened
-#ifdef HOST_HAL_MOCK
-		static bool touched = false;
-		if (!touched && master_decoded &&
-			(new_decoded[0].call_to[0] == 'C') &&
-			(new_decoded[0].call_to[1] == 'Q'))
-		{
-			printf("\nSimulating selecting the first decoded message...\n");
-			FT8_Touch_Flag = 1;
-			touched = true;
-		}
-#endif
+		// Note: In HOST_HAL_MOCK mode, touch events are simulated via JSON test data
 
 		if (FT_8_counter > 0 && FT_8_counter < 90)
 			Process_Touch();

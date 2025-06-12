@@ -28,6 +28,7 @@ const char* test_data_file = "test_data.json";
 void advance_mock_tick(uint32_t ms);
 void init_mock_timing(void);
 static void handle_beacon_changes(void);
+static void handle_touch_events(void);
 
 // TX_ON_EVEN now loaded from JSON config
 int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -102,6 +103,9 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     
     // Handle beacon changes based on timing
     handle_beacon_changes();
+    
+    // Handle touch events based on timing
+    handle_touch_events();
 }
 
 void Process_Touch(void) {}
@@ -241,7 +245,7 @@ void process_selected_Station(int stations_decoded, int TouchIndex)
 		strcpy(Target_Call, new_decoded[TouchIndex].call_from);
 		strcpy(Target_Locator, new_decoded[TouchIndex].target_locator);
 		// Target_RSL = new_decoded[TouchIndex].snr;
-		target_slot = new_decoded[TouchIndex].slot;
+		target_slot = new_decoded[TouchIndex].slot ^ 1;
 		target_freq = new_decoded[TouchIndex].freq_hz;
 
 		// if (QSO_Fix == 1)
@@ -273,9 +277,9 @@ static bool test_data_loaded = false;
 // Helper function to handle beacon changes
 static void handle_beacon_changes(void) {
     if (test_data_loaded) {
-        int slot_index = ft8_time / 30000;
-        if (slot_index < test_data.period_count) {
-            TestPeriod* current_period = &test_data.periods[slot_index];
+        int period_index = ft8_time / 30000;
+        if (period_index < test_data.period_count) {
+            TestPeriod* current_period = &test_data.periods[period_index];
             
             if (current_period->has_beacon_change) {
                 uint32_t slot_time_ms = ft8_time % 30000;  // Time within current 30s slot
@@ -287,6 +291,44 @@ static void handle_beacon_changes(void) {
                 if (slot_time_s >= bc->time_offset && Beacon_On != bc->beacon_on) {
 					printf("Setting Beacon_On to: %d\n", bc->beacon_on);
                     Beacon_On = bc->beacon_on;
+                }
+            }
+        }
+    }
+}
+
+// Helper function to handle touch events
+static void handle_touch_events(void) {
+    static int last_touch_slot = -1;
+    
+    if (test_data_loaded) {
+        int period_index = ft8_time / 30000;
+        
+        // Only handle touch events during receive slots (same logic as ft8_decode)
+        bool tx_on_even = test_data.config.tx_on_even;
+        if (slot_state != tx_on_even) {
+            return;  // We're in a transmit slot, not a receive slot
+        }
+        
+        if (period_index < test_data.period_count) {
+            TestPeriod* current_period = &test_data.periods[period_index];
+            
+            if (current_period->has_touch_event && last_touch_slot != period_index) {
+                uint32_t slot_time_ms = ft8_time % 15000;  // Time within current 15s slot
+                float slot_time_s = slot_time_ms / 1000.0f;  // Convert to seconds
+                
+                TouchEvent* te = &current_period->touch_event;
+                
+                // Apply touch event if time has passed the offset and we have messages
+                if (slot_time_s >= te->time_offset && current_period->message_count > 0) {
+                    int msg_index = te->message_index;
+                    if (msg_index >= 0 && msg_index < current_period->message_count) {
+                        // Set the touch index and flag
+                        FT_8_TouchIndex = msg_index;
+                        FT8_Touch_Flag = 1;
+                        last_touch_slot = period_index;  // Prevent repeated triggers
+                        printf("\nSimulating touch on message %d at time %.1fs...\n", msg_index, slot_time_s);
+                    }
                 }
             }
         }
@@ -375,8 +417,6 @@ static void init_test_data(void) {
         strncpy(Station_Call, config_my_callsign, sizeof(Station_Call)-1);
         strncpy(Locator, config_my_grid, sizeof(Locator)-1);
         
-        // Initialize target_slot for beacon mode  
-        target_slot = 0; // Default to slot 0 for testing
         
         test_data_loaded = true;
 
@@ -387,7 +427,7 @@ static void init_test_data(void) {
 
 // Replace the real ft8_decode() to feed our test data
 WEAK int ft8_decode(void) {
-	int slot_index = ft8_time / 30000;
+	int period_index = ft8_time / 30000;
     
     // Initialize test data on first call
     init_test_data();
@@ -404,13 +444,14 @@ WEAK int ft8_decode(void) {
         return 0;
     }
     
-    // Check if slot_index is within bounds (O(1) lookup)
-    if (slot_index >= test_data.period_count) {
-        return 0;
+    
+    // Check if period_index is within bounds (O(1) lookup)
+    if (period_index >= test_data.period_count) {
+        return -1;
     }
     
     // Direct array access - O(1) instead of O(N) search
-    TestPeriod* current_period = &test_data.periods[slot_index];
+    TestPeriod* current_period = &test_data.periods[period_index];
     
     // If no messages, return 0
     if (current_period->message_count == 0) {
@@ -422,7 +463,7 @@ WEAK int ft8_decode(void) {
     for (int i = 0; i < current_period->message_count && i < 25; i++) {
         convert_test_message_to_decode(&current_period->messages[i], &new_decoded[i]);
         // Set slot to current decode slot
-        new_decoded[i].slot = !tx_on_even;
+        new_decoded[i].slot = slot_state;
         num_decoded++;
     }
     

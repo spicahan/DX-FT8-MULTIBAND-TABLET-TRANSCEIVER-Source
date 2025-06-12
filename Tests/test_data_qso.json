@@ -4,8 +4,7 @@
     "MY_GRID": "CM87",
     "DX_CALLSIGN": "AG6AQ", 
     "DX_GRID": "CM97",
-    "TX_ON_EVEN": true,
-    "Beacon_On": 0
+    "TX_ON_EVEN": true
   },
   "periods": [
     {
@@ -24,7 +23,11 @@
           "snr": -10,
           "received_snr": 99
         }
-      ]
+      ],
+      "touch_event": {
+        "time_offset": 14.0,
+        "message_index": 0
+      }
     },
     {
       "messages": [

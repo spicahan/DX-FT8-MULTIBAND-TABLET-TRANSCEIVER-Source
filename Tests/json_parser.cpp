@@ -134,6 +134,15 @@ extern "C" int load_test_data_json(const char* filename, TestData* test_data) {
                     period.beacon_change.time_offset = bc_json.value("time_offset", 0.0f);
                     period.beacon_change.beacon_on = bc_json.value("beacon_on", 0);
                 }
+                
+                // Parse touch_event
+                period.has_touch_event = 0;
+                if (period_json.contains("touch_event")) {
+                    auto& te_json = period_json["touch_event"];
+                    period.has_touch_event = 1;
+                    period.touch_event.time_offset = te_json.value("time_offset", 0.0f);
+                    period.touch_event.message_index = te_json.value("message_index", 0);
+                }
             }
         }
         

@@ -20,6 +20,11 @@ typedef struct {
 } BeaconChange;
 
 typedef struct {
+    float time_offset;
+    int message_index;
+} TouchEvent;
+
+typedef struct {
     char call_to[14];
     char call_from[14];
     char locator[7];
@@ -38,6 +43,8 @@ typedef struct {
     int message_count;
     int has_beacon_change;  // 0 = false, 1 = true
     BeaconChange beacon_change;
+    int has_touch_event;    // 0 = false, 1 = true
+    TouchEvent touch_event;
 } TestPeriod;
 
 typedef struct {

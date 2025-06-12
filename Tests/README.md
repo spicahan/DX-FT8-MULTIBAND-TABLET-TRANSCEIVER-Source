@@ -63,6 +63,10 @@ When `TX_ON_EVEN` is `true`, test periods 0, 1, 2, 3... correspond to FT8 slots 
       "beacon_change": {
         "time_offset": 7.3,
         "beacon_on": 1
+      },
+      "touch_event": {
+        "time_offset": 8.0,
+        "message_index": 0
       }
     }
   ]
@@ -88,6 +92,18 @@ This allows testing scenarios where beacon mode is toggled during operation, suc
 - Starting in receive mode, then enabling beacon at a specific time
 - Disabling beacon after a successful QSO
 - Testing timing-sensitive beacon behavior
+
+### Touch Events
+
+Each period can include a `touch_event` object to simulate user touch interactions:
+
+- **time_offset**: Time in seconds (0.0-15.0) within the 15-second receive slot when the touch occurs
+- **message_index**: Index of the decoded message to select (0-based)
+
+This allows testing QSO scenarios where the user selects specific decoded messages:
+- Responding to CQ calls at precise timing
+- Testing autoseq engine response logic
+- Simulating user interaction patterns
 
 ### Message Fields
 
@@ -173,37 +189,46 @@ You can create different `test_data.json` files for various scenarios:
 6. **Multiple responses**: Simulating multiple DXes responding to us
 7. **Timing-sensitive tests**: Beacon changes at precise moments within periods
 
-### Example: Dynamic Beacon Test
+### Example: QSO Simulation with Touch Events
 
 ```json
 {
   "config": {
     "MY_CALLSIGN": "N6HAN",
     "MY_GRID": "CM87",
-    "TX_ON_EVEN": false
+    "DX_CALLSIGN": "AG6AQ",
+    "DX_GRID": "CM97",
+    "TX_ON_EVEN": true
   },
   "periods": [
     {
-      "messages": [],
-      "beacon_change": {
-        "time_offset": 5.0,
-        "beacon_on": 1
+      "messages": []
+    },
+    {
+      "messages": [
+        {
+          "call_to": "CQ",
+          "call_from": "${DX_CALLSIGN}",
+          "locator": "${DX_GRID}",
+          "sequence": 1,
+          "snr": -10
+        }
+      ],
+      "touch_event": {
+        "time_offset": 8.0,
+        "message_index": 0
       }
     },
     {
       "messages": [
         {
           "call_to": "${MY_CALLSIGN}",
-          "call_from": "W1ABC",
-          "locator": "FN42",
-          "sequence": 1,
-          "snr": -8
+          "call_from": "${DX_CALLSIGN}",
+          "locator": "-3",
+          "sequence": 2,
+          "snr": -12
         }
-      ],
-      "beacon_change": {
-        "time_offset": 12.0,
-        "beacon_on": 0
-      }
+      ]
     }
   ]
 }
