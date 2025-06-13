@@ -10,9 +10,10 @@ void autoseq_init(const char *myCall, const char *myGrid);
 
 void autoseq_start_cq(void);
 
-void autoseq_start_reply(const Decode *dxFrame);
+/* === Called for selected decode (manual response) === */
+void autoseq_on_touch(const Decode *msg);
 
-/* === Called for **every** new decode === */
+/* === Called for **every** new decode (auto response) === */
 /* Return whether TX is needed */
 bool autoseq_on_decode(const Decode *msg);
 

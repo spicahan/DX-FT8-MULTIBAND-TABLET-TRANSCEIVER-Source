@@ -295,7 +295,7 @@ int main(int argc, char *argv[]) {
 
 		if (!Tune_On && FT8_Touch_Flag && !Beacon_On) {
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
-			autoseq_start_reply(&new_decoded[FT_8_TouchIndex]);
+			autoseq_on_touch(&new_decoded[FT_8_TouchIndex]);
 			autoseq_get_next_tx(autoseq_txbuf);
 			queue_custom_text(autoseq_txbuf);
 			QSO_xmit = 1;

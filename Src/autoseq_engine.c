@@ -6,20 +6,6 @@
  * wrapper conversion is required.  All logic remains the same as the QEX/WSJT‑X
  * state diagram (Tx1…Tx6) presented earlier.
  *
- * Public API (unchanged except for Decode use)
- * ────────────────────────────────────────────
- *   void  autoseq_init(const char *myCall, const char *myGrid);
- *   void  autoseq_start_cq(void);
- *   void  autoseq_start_reply(const Decode *dxFrame);
- *   void  autoseq_on_decode(const Decode *msg);   // <‑‑ uses Decode now
- *   bool  autoseq_get_next_tx(char out_text[40]); // returns plain text for gen_ft8()
- *   void  autoseq_tick(void);
- *
- * The transmit side now emits a ready‑formatted 3‑field FT8 text message (max
- * 22 chars, but we keep a 40‑char buffer for safety).  Hand this string to the
- * existing *queue_message_custom(text)* helper or directly into *gen_ft8()*.
- *
- * Copyright (c) 2025 <your‑callsign>.  MIT licence.
  */
 
 #include <stdint.h>
@@ -60,6 +46,7 @@ typedef enum {
 typedef struct {
     autoseq_state_t state;
     tx_msg_t        next_tx;
+    tx_msg_t        rcvd_msg_type;
 
     char mycall[14];
     char mygrid[7];
@@ -80,6 +67,9 @@ static autoseq_ctx_t ctx;
 /*************** Forward declarations ****************/ 
 static void set_state(autoseq_state_t s, tx_msg_t first_tx, int limit);
 static void format_tx_text(tx_msg_t id, char out[40]);
+static void parse_rcvd_msg(const Decode *msg);
+// Internal helper called by autoseq_on_touch() and autoseq_on_decode()
+static bool generate_response(const Decode *msg, bool override);
 /******************************************************/
 
 /* ====================================================
@@ -100,16 +90,26 @@ void autoseq_start_cq(void)
     set_state(AS_CALLING, TX6, 0); /* infinite CQ loop */
 }
 
-void autoseq_start_reply(const Decode *dxFrame)
+/* === Called for selected decode (manual response) === */
+void autoseq_on_touch(const Decode *msg)
 {
-    /* dxFrame comes from a double‑click: <DXCALL> CQ etc. */
-    strncpy(ctx.dxcall, dxFrame->call_from, sizeof(ctx.dxcall) - 1);
-    strncpy(ctx.dxgrid, dxFrame->locator,   sizeof(ctx.dxgrid) - 1);
-    ctx.we_are_caller = false;
-    set_state(AS_REPLYING, TX1, MAX_TX_RETRY);
+    if (!msg) return;
+    parse_rcvd_msg(msg);
+    if (strncmp(msg->call_to, ctx.mycall, 14) != 0) {
+        // Not addresses me, treat it as if it's a CQ/TX6
+        ctx.rcvd_msg_type = TX6;
+    } else {
+        // Addressed me
+        generate_response(msg, true);
+        return;
+    }
+    // Must be handling TX6
+    strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
+    strncpy(ctx.dxgrid, msg->locator,   sizeof(ctx.dxgrid) - 1);
+    set_state(AS_REPLYING, TX1, MAX_TX_RETRY); // TODO support skip grid
 }
 
-/* === Called for **every** new decode === */
+/* === Called for **every** new decode (auto response) === */
 /* Return whether TX is needed */
 bool autoseq_on_decode(const Decode *msg)
 {
@@ -125,174 +125,13 @@ bool autoseq_on_decode(const Decode *msg)
             return false;
         }
     }
-    strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
-    ctx.snr_tx = msg->snr;
 
-    // TX type of received message
-    tx_msg_t rcvd_msg_type = TX_UNDEF;
-    if (msg->sequence == Seq_Locator) {
-        rcvd_msg_type = TX1;
-        strncpy(ctx.dxgrid, msg->locator, sizeof(ctx.dxgrid) - 1);
-    } else {
-        if (strncmp(msg->locator, "73", 2) == 0) {
-            rcvd_msg_type = TX5;
-        } 
-        else if (strncmp(msg->locator, "RR73", 4) == 0)
-        {
-            rcvd_msg_type = TX4;
-        }
-        else if (strncmp(msg->locator, "RRR", 3) == 0)
-        {
-            rcvd_msg_type = TX4;
-        }
-        else if (msg->locator[0] == 'R')
-        {
-            rcvd_msg_type = TX3;
-        }
-        else {
-            rcvd_msg_type = TX2;
-        }
-    }
+    parse_rcvd_msg(msg);
 
-    // char rcvd_msg_type_str[15]; // "ST: , Rcvd TXx\n"
-    // snprintf(rcvd_msg_type_str, sizeof(rcvd_msg_type_str), "ST:%u, Rcvd TX%u", ctx.state, rcvd_msg_type);
-    // _debug(rcvd_msg_type_str);
-
-    // Populating Target_Call
-    strncpy(Target_Call, msg->call_from, sizeof(Target_Call) - 1);
-
-    // Populating Station_RSL
-    if (rcvd_msg_type == TX2 || rcvd_msg_type == TX3) {
-        Station_RSL = msg->received_snr;
-    }
-
-    // After CQ TX, state goes back to IDLE. Need to distinguish between Beacon and QSO mode
-    if (ctx.state == AS_IDLE) {
-        ctx.state = Beacon_On ? AS_CALLING : AS_IDLE;
-    }
-
-    switch (ctx.state) {
-    /* ------------------------------------------------ CALLING (we sent CQ) */
-    case AS_CALLING:
-        switch (rcvd_msg_type) {
-            case TX1:
-                // Populate Target_Locator
-                strncpy(Target_Locator, msg->locator, sizeof(Target_Locator) - 1);
-                set_state(AS_REPORT, TX2, MAX_TX_RETRY);
-                return true;
-            case TX2:
-                set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
-                return true;
-            case TX3:
-                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
-                return true;
-            default:
-                return false;
-        }
-
-    /* ------------------------------------------------ REPLYING (we sent Tx1) */
-    case AS_REPLYING:
-        switch (rcvd_msg_type) {
-            // Since we sent TX1, it doesn't make sense to respond to TX1
-            // case TX1:
-            //     set_state(AS_REPORT, TX2, MAX_TX_RETRY);
-            //     return true;
-            case TX2:
-                set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
-                return true;
-            case TX3:
-                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
-                return true;
-
-            // QSO complete without signal report exchange
-            case TX4:
-            case TX5:
-                set_state(AS_SIGNOFF, TX5, 0);
-                return true;
-            default:
-                return false;
-        }
-
-    /* ------------------------------------------------ REPORT sent, waiting Roger */
-    case AS_REPORT:
-        switch (rcvd_msg_type) {
-            // DX didn't copy our TX2 response, stay in the same state by returning false
-            // case TX1:
-            //     set_state(AS_REPORT, TX2, MAX_TX_RETRY);
-            //     return true;
-
-            // Since we sent TX2, it doesn't make sense to respond to TX2
-            // case TX2:
-            //     set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
-            //     return true;
-
-            case TX3:
-                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
-                return true;
-            // QSO complete without signal report exchange
-            case TX4:
-            case TX5:
-                set_state(AS_SIGNOFF, TX5, 0);
-                return true;
-            default:
-                return false;
-        }
-
-    /* ------------------------------------------------ Roger‑Report sent */
-    case AS_ROGER_REPORT:
-        switch (rcvd_msg_type) {
-            // Since we sent TX1, it doesn't make sense to respond to TX1
-            // case TX1:
-            //     set_state(AS_REPORT, TX2, MAX_TX_RETRY);
-            //     return true;
-
-            // DX didn't copy our TX3 response, stay in the same state by returning false
-            // case TX2:
-            //     set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
-            //     return true;
-
-            // Since we sent TX3, it doesn't make sense to respond to TX3
-            // case TX3:
-            //     set_state(AS_SIGNOFF, TX4, MAX_TX_RETRY);
-            //     return true;
-
-            // QSO complete
-            case TX4:
-            case TX5: // Be polite, echo back 73
-                set_state(AS_SIGNOFF, TX5, 0);
-                return true;
-            default:
-                return false;
-        }
-    
-    case AS_ROGERS:
-        switch (rcvd_msg_type) {
-            // QSO complete
-            case TX4:
-            case TX5:
-                set_state(AS_IDLE, TX_UNDEF, 0);
-                break;
-            default:
-                break;
-        }
-        return false;
-
-    case AS_SIGNOFF:
-        switch (rcvd_msg_type) {
-            // DX hasn't received our TX5. Retry
-            case TX4:
-                break;
-            default:
-                set_state(AS_IDLE, TX_UNDEF, 0);
-                break;
-        }
-        return false;
-
-    default:
-        break;
-    }
-    return false;
+    return generate_response(msg, false);
 }
+
+
 
 /* === Provide the message we should transmit this slot (if any) === */
 bool autoseq_get_next_tx(char out_text[40])
@@ -443,4 +282,204 @@ static void format_tx_text(tx_msg_t id, char out[40])
     default:
         break;
     }
+}
+
+static void parse_rcvd_msg(const Decode *msg) {
+    ctx.rcvd_msg_type = TX_UNDEF;
+    if (msg->sequence == Seq_Locator) {
+        ctx.rcvd_msg_type = TX1;
+        strncpy(ctx.dxgrid, msg->locator, sizeof(ctx.dxgrid) - 1);
+    } else {
+        if (strncmp(msg->locator, "73", 2) == 0) {
+            ctx.rcvd_msg_type = TX5;
+        } 
+        else if (strncmp(msg->locator, "RR73", 4) == 0)
+        {
+            ctx.rcvd_msg_type = TX4;
+        }
+        else if (strncmp(msg->locator, "RRR", 3) == 0)
+        {
+            ctx.rcvd_msg_type = TX4;
+        }
+        else if (msg->locator[0] == 'R')
+        {
+            ctx.rcvd_msg_type = TX3;
+        }
+        else {
+            ctx.rcvd_msg_type = TX2;
+        }
+    }
+}
+
+// Internal helper called by autoseq_on_touch() and autoseq_on_decode()
+static bool generate_response(const Decode *msg, bool override)
+{
+    if (!msg || ctx.rcvd_msg_type == TX_UNDEF) {
+        return false;
+    }
+
+    // Update the DX call and SNR
+    strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
+    ctx.snr_tx = msg->snr;
+
+    if(override) {
+        // Reset own internal state to macth rcve_msg_type
+        switch (ctx.rcvd_msg_type) {
+        case TX1:
+            set_state(AS_CALLING, TX_UNDEF, 0);
+            break;
+        case TX2:
+            set_state(AS_REPLYING, TX_UNDEF, 0);
+            break;
+        case TX3:
+            set_state(AS_REPORT, TX_UNDEF, 0);
+            break;
+        case TX4:
+            set_state(AS_ROGER_REPORT, TX_UNDEF, 0);
+            break;
+        case TX5:
+            set_state(AS_ROGERS, TX_UNDEF, 0);
+        // case TX6 already handled by autoseq_on_touch()
+        default:
+            break;
+        }
+    }
+    // char rcvd_msg_type_str[15]; // "ST: , Rcvd TXx\n"
+    // snprintf(rcvd_msg_type_str, sizeof(rcvd_msg_type_str), "ST:%u, Rcvd TX%u", ctx.state, rcvd_msg_type);
+    // _debug(rcvd_msg_type_str);
+
+    // Populating Target_Call
+    strncpy(Target_Call, msg->call_from, sizeof(Target_Call) - 1);
+
+    // Populating Station_RSL
+    if (ctx.rcvd_msg_type == TX2 || ctx.rcvd_msg_type == TX3) {
+        Station_RSL = msg->received_snr;
+    }
+
+    // After CQ TX, state goes back to IDLE. Need to distinguish between Beacon and QSO mode
+    if (ctx.state == AS_IDLE) {
+        ctx.state = Beacon_On ? AS_CALLING : AS_IDLE;
+    }
+
+    switch (ctx.state) {
+    /* ------------------------------------------------ CALLING (we sent CQ) */
+    case AS_CALLING:
+        switch (ctx.rcvd_msg_type) {
+            case TX1:
+                // Populate Target_Locator
+                strncpy(Target_Locator, msg->locator, sizeof(Target_Locator) - 1);
+                set_state(AS_REPORT, TX2, MAX_TX_RETRY);
+                return true;
+            case TX2:
+                set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
+                return true;
+            case TX3:
+                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
+                return true;
+            default:
+                return false;
+        }
+
+    /* ------------------------------------------------ REPLYING (we sent Tx1) */
+    case AS_REPLYING:
+        switch (ctx.rcvd_msg_type) {
+            // Since we sent TX1, it doesn't make sense to respond to TX1
+            // case TX1:
+            //     set_state(AS_REPORT, TX2, MAX_TX_RETRY);
+            //     return true;
+            case TX2:
+                set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
+                return true;
+            case TX3:
+                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
+                return true;
+
+            // QSO complete without signal report exchange
+            case TX4:
+            case TX5:
+                set_state(AS_SIGNOFF, TX5, 0);
+                return true;
+            default:
+                return false;
+        }
+
+    /* ------------------------------------------------ REPORT sent, waiting Roger */
+    case AS_REPORT:
+        switch (ctx.rcvd_msg_type) {
+            // DX didn't copy our TX2 response, stay in the same state by returning false
+            // case TX1:
+            //     set_state(AS_REPORT, TX2, MAX_TX_RETRY);
+            //     return true;
+
+            // Since we sent TX2, it doesn't make sense to respond to TX2
+            // case TX2:
+            //     set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
+            //     return true;
+
+            case TX3:
+                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
+                return true;
+            // QSO complete without signal report exchange
+            case TX4:
+            case TX5:
+                set_state(AS_SIGNOFF, TX5, 0);
+                return true;
+            default:
+                return false;
+        }
+
+    /* ------------------------------------------------ Roger‑Report sent */
+    case AS_ROGER_REPORT:
+        switch (ctx.rcvd_msg_type) {
+            // Since we sent TX1, it doesn't make sense to respond to TX1
+            // case TX1:
+            //     set_state(AS_REPORT, TX2, MAX_TX_RETRY);
+            //     return true;
+
+            // DX didn't copy our TX3 response, stay in the same state by returning false
+            // case TX2:
+            //     set_state(AS_ROGER_REPORT, TX3, MAX_TX_RETRY);
+            //     return true;
+
+            // Since we sent TX3, it doesn't make sense to respond to TX3
+            // case TX3:
+            //     set_state(AS_SIGNOFF, TX4, MAX_TX_RETRY);
+            //     return true;
+
+            // QSO complete
+            case TX4:
+            case TX5: // Be polite, echo back 73
+                set_state(AS_SIGNOFF, TX5, 0);
+                return true;
+            default:
+                return false;
+        }
+    
+    case AS_ROGERS:
+        switch (ctx.rcvd_msg_type) {
+            // QSO complete
+            case TX4:
+            case TX5:
+                set_state(AS_IDLE, TX_UNDEF, 0);
+                break;
+            default:
+                break;
+        }
+        return false;
+
+    case AS_SIGNOFF:
+        switch (ctx.rcvd_msg_type) {
+            // DX hasn't received our TX5. Retry
+            case TX4:
+                break;
+            default:
+                set_state(AS_IDLE, TX_UNDEF, 0);
+                break;
+        }
+        return false;
+
+    default:
+        break;
+    }
+    return false;
 }

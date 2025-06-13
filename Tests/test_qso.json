@@ -65,12 +65,44 @@
         {
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}", 
+          "locator": "-13",
+          "sequence": 2,
+          "snr": -9,
+          "received_snr": -13
+        }
+      ],
+      "touch_event": {
+        "time_offset": 19.3,
+        "message_index": 0
+      }
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "${DX_CALLSIGN}",
           "locator": "RR73",
           "sequence": 2,
-          "snr": 0,
-          "received_snr": 99
+          "snr": -12,
+          "received_snr": -13
         }
       ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "WU6P",
+          "call_from": "K6EY",
+          "locator": "RR73",
+          "sequence": 2,
+          "snr": -17,
+          "received_snr": 99 
+        }
+      ],
+      "touch_event": {
+        "time_offset": 18.8,
+        "message_index": 0
+      }
     }
   ]
 }
