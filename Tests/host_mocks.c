@@ -276,22 +276,26 @@ static bool test_data_loaded = false;
 
 // Helper function to handle beacon changes
 static void handle_beacon_changes(void) {
-    if (test_data_loaded) {
-        int period_index = ft8_time / 30000;
-        if (period_index < test_data.period_count) {
-            TestPeriod* current_period = &test_data.periods[period_index];
-            
-            if (current_period->has_beacon_change) {
-                uint32_t slot_time_ms = ft8_time % 30000;  // Time within current 30s slot
-                float slot_time_s = slot_time_ms / 1000.0f;  // Convert to seconds
-                
-                BeaconChange* bc = &current_period->beacon_change;
-                
-                // Apply beacon change if time has passed the offset
-                if (slot_time_s >= bc->time_offset && Beacon_On != bc->beacon_on) {
-					printf("Setting Beacon_On to: %d\n", bc->beacon_on);
-                    Beacon_On = bc->beacon_on;
-                }
+    if (!test_data_loaded) {
+        return;
+    }
+    int period_index = ft8_time / 30000;
+    if (period_index < test_data.period_count)
+    {
+        TestPeriod *current_period = &test_data.periods[period_index];
+
+        if (current_period->has_beacon_change)
+        {
+            uint32_t period_time_ms = ft8_time % 30000;   // Time within current 30s period
+            float period_time_s = period_time_ms / 1000.0f; // Convert to seconds
+
+            BeaconChange *bc = &current_period->beacon_change;
+
+            // Apply beacon change if time has passed the offset
+            if (period_time_s >= bc->time_offset && Beacon_On != bc->beacon_on)
+            {
+                printf("Setting Beacon_On to: %d\n", bc->beacon_on);
+                Beacon_On = bc->beacon_on;
             }
         }
     }
@@ -301,34 +305,34 @@ static void handle_beacon_changes(void) {
 static void handle_touch_events(void) {
     static int last_touch_slot = -1;
     
-    if (test_data_loaded) {
-        int period_index = ft8_time / 30000;
-        
-        // Only handle touch events during receive slots (same logic as ft8_decode)
-        bool tx_on_even = test_data.config.tx_on_even;
-        if (slot_state != tx_on_even) {
-            return;  // We're in a transmit slot, not a receive slot
-        }
-        
-        if (period_index < test_data.period_count) {
-            TestPeriod* current_period = &test_data.periods[period_index];
-            
-            if (current_period->has_touch_event && last_touch_slot != period_index) {
-                uint32_t slot_time_ms = ft8_time % 15000;  // Time within current 15s slot
-                float slot_time_s = slot_time_ms / 1000.0f;  // Convert to seconds
-                
-                TouchEvent* te = &current_period->touch_event;
-                
-                // Apply touch event if time has passed the offset and we have messages
-                if (slot_time_s >= te->time_offset && current_period->message_count > 0) {
-                    int msg_index = te->message_index;
-                    if (msg_index >= 0 && msg_index < current_period->message_count) {
-                        // Set the touch index and flag
-                        FT_8_TouchIndex = msg_index;
-                        FT8_Touch_Flag = 1;
-                        last_touch_slot = period_index;  // Prevent repeated triggers
-                        printf("\nSimulating touch on message %d at time %.1fs...\n", msg_index, slot_time_s);
-                    }
+    if (!test_data_loaded) {
+        return;
+    }
+    int period_index = ft8_time / 30000;
+
+
+    if (period_index < test_data.period_count)
+    {
+        TestPeriod *current_period = &test_data.periods[period_index];
+
+        if (current_period->has_touch_event && last_touch_slot != period_index)
+        {
+            uint32_t period_time_ms = ft8_time % 30000;   // Time within current 30s period
+            float period_time_s = period_time_ms / 1000.0f; // Convert to seconds
+
+            TouchEvent *te = &current_period->touch_event;
+
+            // Apply touch event if time has passed the offset and we have messages
+            if (period_time_s >= te->time_offset && current_period->message_count > 0)
+            {
+                int msg_index = te->message_index;
+                if (msg_index >= 0 && msg_index < current_period->message_count)
+                {
+                    // Set the touch index and flag
+                    FT_8_TouchIndex = msg_index;
+                    FT8_Touch_Flag = 1;
+                    last_touch_slot = period_index; // Prevent repeated triggers
+                    printf("\nSimulating touch on message %d at time %.1fs...\n", msg_index, period_time_s);
                 }
             }
         }
@@ -441,6 +445,7 @@ WEAK int ft8_decode(void) {
     bool tx_on_even = test_data.config.tx_on_even;
     
     if (slot_state != tx_on_even) {
+        // printf("ERROR!! FT8_DECODE() CALLED IN WRONG SLOT!!\n");
         return 0;
     }
     

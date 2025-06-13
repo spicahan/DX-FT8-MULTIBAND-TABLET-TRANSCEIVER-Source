@@ -4,7 +4,7 @@
     "MY_GRID": "CM87",
     "DX_CALLSIGN": "AG6AQ", 
     "DX_GRID": "CM97",
-    "TX_ON_EVEN": true
+    "TX_ON_EVEN": false
   },
   "periods": [
     {
@@ -40,6 +40,25 @@
           "received_snr": -3
         }
       ]
+    },
+    {
+      "messages": []
+    },
+    {
+      "messages": [
+        {
+          "call_to": "CQ",
+          "call_from": "KG6YJ",
+          "locator": "${DX_GRID}",
+          "sequence": 1,
+          "snr": -10,
+          "received_snr": 99
+        }
+      ],
+      "touch_event": {
+        "time_offset": 17.1,
+        "message_index": 0
+      }
     },
     {
       "messages": [
