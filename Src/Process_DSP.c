@@ -97,8 +97,7 @@ void process_FT8_FFT(void)
 
 		++FT_8_counter;
 
-		// Add an extra decode attempt at 3.2s before the final decode
-		decode_flag = (FT_8_counter == 71 || FT_8_counter == ft8_msg_samples);
+		decode_flag = (FT_8_counter == ft8_msg_samples);
 
 		if (FT_8_counter == ft8_msg_samples) {
 			ft8_flag = 0;

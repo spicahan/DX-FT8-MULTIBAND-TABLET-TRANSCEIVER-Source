@@ -96,7 +96,7 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     advance_mock_tick(40);
     
 	// if (FT_8_counter == ft8_msg_samples) { 
-	decode_flag = (frame_counter == 0 && (FT_8_counter == 71 || FT_8_counter == 91));
+	decode_flag = (frame_counter == 0 && (FT_8_counter == ft8_msg_samples));
 
 	// Simulate real audio processing timing
     usleep(300); // 0.4ms so 100X faster

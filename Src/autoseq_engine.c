@@ -29,6 +29,7 @@
 #include "autoseq_engine.h"
 #include "gen_ft8.h" // For accessing CQ_Mode_Index and saving Target_*
 #include "ADIF.h"    // For write_ADIF_Log()
+extern int Beacon_On; // TODO get rid of manual extern
 
 /***** Compile‑time knobs *****/
 #define MAX_TX_RETRY 5
@@ -163,6 +164,11 @@ bool autoseq_on_decode(const Decode *msg)
     // Populating Station_RSL
     if (rcvd_msg_type == TX2 || rcvd_msg_type == TX3) {
         Station_RSL = msg->received_snr;
+    }
+
+    // After CQ TX, state goes back to IDLE. Need to distinguish between Beacon and QSO mode
+    if (ctx.state == AS_IDLE) {
+        ctx.state = Beacon_On ? AS_CALLING : AS_IDLE;
     }
 
     switch (ctx.state) {
