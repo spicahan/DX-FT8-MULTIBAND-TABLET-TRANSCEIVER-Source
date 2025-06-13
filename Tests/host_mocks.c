@@ -99,7 +99,7 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
 	decode_flag = (frame_counter == 0 && (FT_8_counter == 71 || FT_8_counter == 91));
 
 	// Simulate real audio processing timing
-    usleep(400); // 0.4ms so 100X faster
+    usleep(300); // 0.4ms so 100X faster
     
     // Handle beacon changes based on timing
     handle_beacon_changes();
@@ -431,6 +431,7 @@ static void init_test_data(void) {
 
 // Replace the real ft8_decode() to feed our test data
 WEAK int ft8_decode(void) {
+    printf("d");
 	int period_index = ft8_time / 30000;
     
     // Initialize test data on first call
@@ -472,6 +473,8 @@ WEAK int ft8_decode(void) {
         num_decoded++;
     }
     
+    // Simulate decoding cost
+    advance_mock_tick(300);
     return num_decoded;
 }
 

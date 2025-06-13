@@ -83,31 +83,34 @@ static void update_synchronization(void)
 	current_time = HAL_GetTick();
 	ft8_time = current_time - start_time;
 
-	if (ft8_time % 15000 <= 160)
+	// Update slot and reset RX
+	int current_slot = ft8_time / 15000 % 2;
+	if (current_slot != slot_state)
 	{
-		if (ft8_time / 15000 % 2 != slot_state) {
-			// toggle the slot state
+		// toggle the slot state
 #ifdef HOST_HAL_MOCK
-			printf("\n----------------------------------------\n");
-			printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
+		printf("\n----------------------------------------\n");
+		printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
 #endif
-			slot_state ^= 1;
-			decode_bypass = 0;
-		}
+		slot_state ^= 1;
+		decode_bypass = 0;
 
 		ft8_flag = 1;
 		FT_8_counter = 0;
 		ft8_marker = 1;
 		decode_flag = 0;
+	}
 
-		if (QSO_xmit && target_slot == slot_state)
-		{
-			setup_to_transmit_on_next_DSP_Flag();
-			autoseq_tick();
-			update_log_display(1);
-			QSO_xmit = 0;
-			decode_bypass = 1;
-		}
+	// Check if TX is intended
+	if (QSO_xmit && target_slot == slot_state)
+	{
+		setup_to_transmit_on_next_DSP_Flag(); // TODO: move to main.c
+		autoseq_tick();
+		update_log_display(1);
+		QSO_xmit = 0;
+		decode_bypass = 1;
+		// Partial TX, set the TX counter based on current ft8_time
+		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
 	}
 }
 
