@@ -83,7 +83,7 @@ static void update_synchronization(void)
 	current_time = HAL_GetTick();
 	ft8_time = current_time - start_time;
 
-	if (ft8_time % 15000 <= 160 || FT_8_counter > 90)
+	if (ft8_time % 15000 <= 160)
 	{
 		if (ft8_time / 15000 % 2 != slot_state) {
 			// toggle the slot state
