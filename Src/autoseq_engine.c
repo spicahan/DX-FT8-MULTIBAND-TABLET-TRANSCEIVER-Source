@@ -106,7 +106,7 @@ void autoseq_on_touch(const Decode *msg)
     // Must be handling TX6
     strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
     strncpy(ctx.dxgrid, msg->locator,   sizeof(ctx.dxgrid) - 1);
-    set_state(AS_REPLYING, TX1, MAX_TX_RETRY); // TODO support skip grid
+    set_state(AS_REPLYING, TX2, MAX_TX_RETRY); // TODO support skip grid
 }
 
 /* === Called for **every** new decode (auto response) === */

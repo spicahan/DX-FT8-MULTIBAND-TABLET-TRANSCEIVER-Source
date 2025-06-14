@@ -110,6 +110,9 @@ static void update_synchronization(void)
 		decode_bypass = 1;
 		// Partial TX, set the TX counter based on current ft8_time
 		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
+		// Sync Xmit_DSP_counter with RX frame_counter to maintain alignment
+		// This prevents symbol boundary misalignment between TX and RX chains
+		Xmit_DSP_counter = frame_counter;
 		// Log the TX
 		char log_str[64];
 		snprintf(log_str, sizeof(log_str), "T [%s %s][%s] %s",

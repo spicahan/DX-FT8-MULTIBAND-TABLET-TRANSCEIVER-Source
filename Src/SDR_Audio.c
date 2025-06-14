@@ -107,10 +107,11 @@ void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
 static const float RMSConstant = 1.0 / 65485.0;
 static const long NCOphzinc = (long)(KCONV * (PI2 * LO_Freq / Sample_Frequency));
 
+int frame_counter = 0;
+
 void I2S2_RX_ProcessBuffer(uint16_t offset)
 {
 	static long NCO_phz = 0;
-	static int frame_counter = 0;
 
 	for (int i = 0; i < BUFFERSIZE / 4; i++)
 	{

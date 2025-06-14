@@ -67,8 +67,9 @@ char Free_Text2[MESSAGE_SIZE];
 extern uint32_t current_time, start_time, ft8_time;
 extern int target_slot;
 
+int frame_counter = 0;
+
 void I2S2_RX_ProcessBuffer(uint16_t offset) {
-    static int frame_counter = 0;
     
     // Initialize timing on first call
     init_mock_timing();
