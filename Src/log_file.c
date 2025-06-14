@@ -89,7 +89,7 @@ void Write_RxTxLog_Data(const char *str)
 		f_puts("\n", &RxTxLogFile);
 	}
 
-	f_close(&LogFile);
+	f_close(&RxTxLogFile);
 }
 
 void Close_Log_File(void)

@@ -111,7 +111,13 @@ static void update_synchronization(void)
 		// Partial TX, set the TX counter based on current ft8_time
 		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
 		// Log the TX
-		Write_RxTxLog_Data(autoseq_txbuf);
+		char log_str[64];
+		snprintf(log_str, sizeof(log_str), "T [%s %s][%s] %s",
+				 log_rtc_date_string,
+				 log_rtc_time_string,
+				 sBand_Data[BandIndex].display,
+				 autoseq_txbuf);
+		Write_RxTxLog_Data(log_str);
 	}
 }
 
