@@ -158,8 +158,12 @@ const FreqStruct sBand_Data[NumBands] =
 void receive_sequence(void) {}
 
 // log_file.c
-void Write_Log_Data(const char *ch) {
-	printf("ADIF log: %s\n", ch);
+void Write_Log_Data(const char *entry) {
+	printf("ADIF log: %s\n", entry);
+}
+
+void Write_RxTxLog_Data(const char *entry) {
+	printf("RxTx log: %s\n", entry);
 }
 
 // traffic_manager.c

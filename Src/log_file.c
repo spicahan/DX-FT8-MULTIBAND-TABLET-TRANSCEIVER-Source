@@ -39,6 +39,7 @@
 /* Fatfs structure */
 static FATFS FS;
 static FIL LogFile;
+static FIL RxTxLogFile;
 
 void Init_Log_File(void)
 {
@@ -72,6 +73,20 @@ void Write_Log_Data(const char *str)
 		f_lseek(&LogFile, f_size(&LogFile));
 		f_puts(str, &LogFile);
 		f_puts("\n", &LogFile);
+	}
+
+	f_close(&LogFile);
+}
+
+void Write_RxTxLog_Data(const char *str)
+{
+	f_mount(&FS, "SD:", 1);
+	if (f_open(&RxTxLogFile, "RxTxLog.txt",
+			   FA_OPEN_ALWAYS | FA_WRITE | FA_OPEN_APPEND) == FR_OK)
+	{
+		f_lseek(&RxTxLogFile, f_size(&RxTxLogFile));
+		f_puts(str, &RxTxLogFile);
+		f_puts("\n", &RxTxLogFile);
 	}
 
 	f_close(&LogFile);

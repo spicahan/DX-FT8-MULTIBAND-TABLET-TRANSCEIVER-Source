@@ -39,8 +39,6 @@
 #include "Codec_Gains.h"
 #include "button.h"
 
-#include "log_file.h"
-#include "autoseq_engine.h"
 #include "DS3231.h"
 
 #include "SiLabs.h"
@@ -52,6 +50,7 @@
 #include "constants.h"
 #include "decode_ft8.h"
 #include "gen_ft8.h"
+#include "log_file.h"
 #include "Display.h"
 #include "traffic_manager.h"
 
@@ -111,6 +110,8 @@ static void update_synchronization(void)
 		decode_bypass = 1;
 		// Partial TX, set the TX counter based on current ft8_time
 		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
+		// Log the TX
+		Write_RxTxLog_Data(autoseq_txbuf);
 	}
 }
 
@@ -248,6 +249,20 @@ int main(int argc, char *argv[]) {
 			if (master_decoded > 0)
 			{
 				display_messages(master_decoded);
+			}
+			// Write all the decoded messages to RxTxLog
+			for (int i = 0; i < master_decoded; ++i) {
+				char log_str[64];
+				snprintf(log_str, sizeof(log_str), "R [%s %s][%s] %s %s %s %2i %d",
+						 log_rtc_date_string,
+						 log_rtc_time_string,
+						 sBand_Data[BandIndex].display,
+						 new_decoded[i].call_to,
+						 new_decoded[i].call_from,
+						 new_decoded[i].locator,
+						 new_decoded[i].snr,
+						 new_decoded[i].freq_hz);
+				Write_RxTxLog_Data(log_str);
 			}
 			for (int i = 0; i < master_decoded; i++) {
 				// TX is (potentially) necessary
