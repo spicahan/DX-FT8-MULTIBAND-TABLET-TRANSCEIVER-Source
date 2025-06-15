@@ -139,7 +139,7 @@ void clear_queued_message(void) {}
 
 // button.c
 int BandIndex = 2; // 20M
-int Logging_State = 1;
+int Skip_Tx1 = 1;
 const FreqStruct sBand_Data[NumBands] =
 	{
 		{// 40,

@@ -39,8 +39,8 @@ OptionStruct s_optionsData[] = {
 		/*Data*/ 0,
 	},
 	{
-		/*Name*/ "  Logging_State ", // opt1
-		/*Init*/ 1,					 // Logging is by default, on
+		/*Name*/ "  Skip_Tx1 ",   // opt1
+		/*Init*/ 0,				  // Skipping Tx1 is by default, off
 		/*Min */ 0,
 		/*Max */ 1,
 		/*Rate*/ 1,
@@ -78,7 +78,7 @@ int16_t Options_Initialize(void)
 	}
 
 	BandIndex = Options_GetValue(OPTION_Band_Index);
-	Logging_State = Options_GetValue(OPTION_Logging_State);
+	Skip_Tx1 = Options_GetValue(OPTION_Skip_Tx1);
 	start_freq = sBand_Data[BandIndex].Frequency;
 	show_wide(380, 0, (int)start_freq);
 
@@ -145,7 +145,7 @@ int16_t Write_Int_MicroSD(uint16_t DiskBlock, int16_t value)
 	memset(read_buffer, 0, sizeof(read_buffer));
 	FRESULT fres = f_mount(&SDFatFs, SDPath, 1);
 	if (fres == FR_OK)
-		fres = f_open(&MyFile, "SaveParams.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
+		fres = f_open(&MyFile, "SaveParams.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE | FA_OPEN_APPEND);
 	if (fres == FR_OK)
 	{
 		fres = f_lseek(&MyFile, DiskBlock * 32);

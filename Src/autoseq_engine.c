@@ -16,6 +16,7 @@
 #include "gen_ft8.h" // For accessing CQ_Mode_Index and saving Target_*
 #include "ADIF.h"    // For write_ADIF_Log()
 extern int Beacon_On; // TODO get rid of manual extern
+extern int Skip_Tx1;  // TODO get rid of manual extern
 
 /***** Compile‑time knobs *****/
 #define MAX_TX_RETRY 5
@@ -106,7 +107,7 @@ void autoseq_on_touch(const Decode *msg)
     // Must be handling TX6
     strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
     strncpy(ctx.dxgrid, msg->locator,   sizeof(ctx.dxgrid) - 1);
-    set_state(AS_REPLYING, TX2, MAX_TX_RETRY); // TODO support skip grid
+    set_state(AS_REPLYING, Skip_Tx1 ? TX2 : TX1, MAX_TX_RETRY); // TODO support skip grid
 }
 
 /* === Called for **every** new decode (auto response) === */

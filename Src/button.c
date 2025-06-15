@@ -35,11 +35,9 @@ int Free_Index;
 
 int AGC_Gain = 20;
 int Band_Minimum;
-int Logging_State;
+int Skip_Tx1;
 
 char display_frequency[BAND_DATA_SIZE] = "14.075";
-static const char *Logging_On = "On ";
-static const char *Logging_Off = "Off";
 
 FreqStruct sBand_Data[NumBands] =
 	{
@@ -479,28 +477,28 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ 160,
 	 /*h*/ 30},
 
-	{// button 35 Logging
-	 /*text0*/ "Logging",
-	 /*text1*/ "Logging",
-	 /*blank*/ "       ",
+	{// button 35 SkipTx1
+	 /*text0*/ "Skip Tx1",
+	 /*text1*/ "Skip Tx1",
+	 /*blank*/ "        ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 240,
 	 /*y*/ 120,
-	 /*w*/ 90,
+	 /*w*/ 110,
 	 /*h*/ 30},
 
-	{// button 36 Logging On/Off
-	 /*text0*/ " On",
-	 /*text1*/ "Off",
+	{// button 36 SkipTx1 On/Off
+	 /*text0*/ "Off",
+	 /*text1*/ "On ",
 	 /*blank*/ "   ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 330,
+	 /*x*/ 356,
 	 /*y*/ 120,
-	 /*w*/ 20,
+	 /*w*/ button_width,
 	 /*h*/ 30},
 
 }; // end of button definition
@@ -584,11 +582,6 @@ static void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
 	drawButton(btn3);
 	sButtonData[CQFree].text0 = (char *)button_text;
 	drawButton(CQFree);
-}
-
-static void set_button_text(int btn, const char *button_text)
-{
-	sButtonData[btn].text0 = sButtonData[btn].text1 = (char *)button_text;
 }
 
 static void update_CQFree_button()
@@ -813,14 +806,13 @@ void executeButton(uint16_t index)
 		}
 		break;
 
-	case LoggingMsg:
-	case LoggingOnOff:
-		Logging_State = Logging_State == 0 ? 1 : 0;
-		set_button_text(LoggingOnOff, Logging_State ? Logging_On : Logging_Off);
-		sButtonData[LoggingMsg].state = 0;
-		drawButton(LoggingMsg);
-		sButtonData[LoggingOnOff].state = Logging_State;
-		drawButton(LoggingOnOff);
+	case SkipTx1:
+	case SkipTx1OnOff:
+		Skip_Tx1 ^= 1;
+		sButtonData[SkipTx1].state = 0;
+		drawButton(SkipTx1);
+		sButtonData[SkipTx1OnOff].state = Skip_Tx1;
+		drawButton(SkipTx1OnOff);
 		break;
 	}
 }
@@ -939,7 +931,8 @@ void setup_Cal_Display(void)
 
 	drawButton(SaveRTCDate);
 
-	set_button_text(LoggingOnOff, Logging_State ? Logging_On : Logging_Off);
+	sButtonData[SkipTx1OnOff].state = Skip_Tx1;
+	drawButton(SkipTx1OnOff);
 	for (int button = StandardCQ; button < NumButtons; ++button)
 	{
 		sButtonData[button].Active = 1;
@@ -981,8 +974,8 @@ void erase_Cal_Display(void)
 	sButtonData[CQFree].Active = 1;
 	drawButton(CQFree);
 
-	Options_SetValue(OPTION_Logging_State, Logging_State);
-	Options_StoreValue(OPTION_Logging_State);
+	Options_SetValue(OPTION_Skip_Tx1, Skip_Tx1);
+	Options_StoreValue(OPTION_Skip_Tx1);
 }
 
 void PTT_Out_Init(void)
