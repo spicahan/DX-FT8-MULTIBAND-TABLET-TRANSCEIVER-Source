@@ -115,6 +115,8 @@ static void update_synchronization(void)
 		Xmit_DSP_counter = frame_counter;
 		// Log the TX
 		char log_str[64];
+		make_Real_Time();
+		make_Real_Date();
 		snprintf(log_str, sizeof(log_str), "T [%s %s][%s] %s",
 				 log_rtc_date_string,
 				 log_rtc_time_string,
@@ -260,6 +262,8 @@ int main(int argc, char *argv[]) {
 				display_messages(master_decoded);
 			}
 			// Write all the decoded messages to RxTxLog
+			make_Real_Time();
+			make_Real_Date();
 			for (int i = 0; i < master_decoded; ++i) {
 				char log_str[64];
 				snprintf(log_str, sizeof(log_str), "R [%s %s][%s] %s %s %s %2i %d",
