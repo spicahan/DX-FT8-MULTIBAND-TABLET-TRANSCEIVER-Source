@@ -107,6 +107,7 @@ void autoseq_on_touch(const Decode *msg)
     // Must be handling TX6
     strncpy(ctx.dxcall, msg->call_from, sizeof(ctx.dxcall) - 1);
     strncpy(ctx.dxgrid, msg->locator,   sizeof(ctx.dxgrid) - 1);
+    ctx.snr_tx = msg->snr;
     set_state(Skip_Tx1 ? AS_REPORT : AS_REPLYING,
               Skip_Tx1 ? TX2 : TX1, MAX_TX_RETRY);
 }
