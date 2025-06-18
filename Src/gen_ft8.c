@@ -72,64 +72,6 @@ const char QSO_73[] = "73";
 char Free_Text1[MESSAGE_SIZE];
 char Free_Text2[MESSAGE_SIZE];
 
-void set_cq(void)
-{
-	char message[MESSAGE_SIZE];
-	uint8_t packed[K_BYTES];
-	if (Free_Index == 0)
-	{
-		const char *mode = NULL;
-		switch (CQ_Mode_Index)
-		{
-		default:
-		case 0:
-			break;
-		case 1:
-			mode = SOTA;
-			break;
-		case 2:
-			mode = POTA;
-			break;
-		case 3:
-			mode = QRP;
-			break;
-		}
-
-		if (mode == NULL)
-		{
-			sprintf(message, "%s %s %s", CQ, Station_Call, Locator);
-		}
-		else
-		{
-			sprintf(message, "%s %s %s %s", CQ, mode, Station_Call, Locator);
-		}
-	}
-	else
-	{
-		switch (Free_Index)
-		{
-		default:
-		case 0:
-			break;
-		case 1:
-			strcpy(message, Free_Text1);
-			break;
-		case 2:
-			strcpy(message, Free_Text2);
-			break;
-		}
-	}
-
-	pack77(message, packed);
-	genft8(packed, tones);
-
-	string_init(blank, sizeof(blank), &blank_initialised, ' ');
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
-	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)message, LEFT_MODE);
-}
 
 static int in_range(int num, int min, int max)
 {
@@ -195,26 +137,6 @@ void compose_messages(void)
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)xmit_messages[Que_Locator], LEFT_MODE);
 }
 
-void queue_message(QueID queId)
-{
-	uint8_t packed[K_BYTES];
-
-	const char *tx_msg = xmit_messages[queId];
-	pack77(tx_msg, packed);
-	genft8(packed, tones);
-
-	string_init(blank, sizeof(blank), &blank_initialised, ' ');
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)blank, LEFT_MODE);
-	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)tx_msg, LEFT_MODE);
-
-	strcpy(current_QSO_xmit_message, tx_msg);
-
-	if (queId == Que_73 && Station_RSL != 99)
-		write_ADIF_Log();
-}
 
 void clear_queued_message(void)
 {

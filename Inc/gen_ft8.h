@@ -52,14 +52,12 @@ typedef enum _QueID
 } QueID;
 
 void set_reply(ReplyID index);
-void set_cq(void);
 
 void Read_Station_File(void);
 void SD_Initialize(void);
 
 void compose_messages(void);
 void clear_xmit_messages(void);
-void queue_message(QueID queId);
 void clear_queued_message(void);
 
 #endif /* GEN_FT8_H_ */

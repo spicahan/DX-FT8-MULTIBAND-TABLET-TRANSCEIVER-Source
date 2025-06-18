@@ -52,7 +52,6 @@ typedef struct
 
 extern Decode new_decoded[];
 
-int Check_Calling_Stations(int num_decoded);
 void display_messages(int decoded_messages);
 void process_selected_Station(int num_decoded, int TouchIndex);
 void clear_log_stored_data(void);
