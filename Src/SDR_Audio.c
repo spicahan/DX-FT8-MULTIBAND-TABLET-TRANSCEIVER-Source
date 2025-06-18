@@ -29,8 +29,6 @@ int DSP_Flag;
 int Xmit_Mode = 0;
 int xmit_flag, ft8_xmit_counter, ft8_xmit_delay;
 
-double ft8_shift;
-
 #define PI2 6.2831853071795864765
 #define KCONV 10430.37835 // 		4096*16/PI2
 
@@ -125,18 +123,17 @@ void I2S2_RX_ProcessBuffer(uint16_t offset)
 	Process_FIR_I_32K();
 	Process_FIR_Q_32K();
 
+	// Decimation
+	uint8_t  decimator = 0;
+	uint16_t ft8_pos = frame_counter * 256;
 	for (int i = 0; i < BUFFERSIZE / 4; i++)
 	{
 		USB_Out[i] = FIR_I_Out[i] - FIR_Q_Out[i];
 		LSB_Out[i] = FIR_I_Out[i] + FIR_Q_Out[i];
 
-		if (frame_counter < 4)
-		{
-			div_t d = div(i, 5);
-			if (d.rem == 0)
-			{
-				FT8_Data[d.quot + frame_counter * 256] = USB_Out[i];
-			}
+		if (++decimator == 5) {
+			decimator = 0;
+			FT8_Data[ft8_pos++] = USB_Out[i];
 		}
 
 		int index = i * 2 + offset;

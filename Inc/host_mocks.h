@@ -52,7 +52,6 @@ void receive_sequence(void);
 extern int Xmit_Mode;
 extern int xmit_flag, ft8_xmit_counter, ft8_xmit_flag, ft8_xmit_delay;
 extern int DSP_Flag;
-extern double ft8_shift;
 extern uint16_t buff_offset;
 extern int frame_counter;
 void start_audio_I2C(void);

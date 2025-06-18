@@ -36,7 +36,6 @@ void setup_to_transmit_on_next_DSP_Flag(void)
 	xmit_sequence();
 	ft8_transmit_sequence();
 	xmit_flag = 1;
-	Xmit_DSP_counter = 0;
 }
 
 void terminate_QSO(void)

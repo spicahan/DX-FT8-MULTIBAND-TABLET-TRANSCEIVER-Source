@@ -36,7 +36,6 @@ int Beacon_On = 0;
 int Xmit_Mode;
 int xmit_flag = 0, ft8_xmit_counter, ft8_xmit_flag, ft8_xmit_delay;
 int DSP_Flag = 1;
-double ft8_shift;
 uint16_t buff_offset;
 int ft8_flag, FT_8_counter, ft8_marker;
 
@@ -81,26 +80,24 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
         frame_counter = 0;
     }
     
-    if (xmit_flag == 1) {
-		if (Xmit_DSP_counter % 80 == 1) {
-			printf("t");
-		}
-    } else {
-		if (frame_counter == 0 && FT_8_counter % 20 == 0) {
-			printf("r");
-		}
+    if (frame_counter == 0 && FT_8_counter % 10 == 0) {
+        if (xmit_flag) {
+            printf("t");
+        } else {
+            printf("r");
+        }
     }
     
     fflush(stdout);
     
-    // Advance mock time by ~40ms (matches 32kHz sample rate, 1280 samples)
+    // Advance mock time by 40ms (matches 32kHz sample rate, 1280 samples)
     advance_mock_tick(40);
     
 	// if (FT_8_counter == ft8_msg_samples) { 
 	decode_flag = (frame_counter == 0 && (FT_8_counter == ft8_msg_samples));
 
 	// Simulate real audio processing timing
-    usleep(300); // 0.4ms so 100X faster
+    usleep(400); // 0.4ms so 100X faster
     
     // Handle beacon changes based on timing
     handle_beacon_changes();
@@ -488,7 +485,6 @@ WEAK int ft8_decode(void) {
 WEAK void setup_to_transmit_on_next_DSP_Flag(void) {
     printf("\n[=== TRANSMIT START ===]\n");
 	printf("Transmitting: %s\n", queued_msg);
-	Xmit_DSP_counter = 0;
 	ft8_xmit_counter = 0;
 	ft8_xmit_delay = 0;  // Start transmission immediately for testing
 	xmit_flag = 1;

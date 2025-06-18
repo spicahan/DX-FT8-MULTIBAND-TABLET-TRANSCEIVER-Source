@@ -20,7 +20,6 @@ void _debug(const char *txt);
 extern uint32_t start_time, ft8_time;
 
 extern int QSO_xmit;
-extern int Xmit_DSP_counter;
 
 extern int slot_state;
 extern int target_slot;

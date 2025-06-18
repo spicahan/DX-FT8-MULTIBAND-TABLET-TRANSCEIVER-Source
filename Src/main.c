@@ -54,10 +54,9 @@
 #include "Display.h"
 #include "traffic_manager.h"
 
-uint32_t current_time, start_time, ft8_time;
+uint32_t start_time, ft8_time;
 
 int QSO_xmit = 0;
-int Xmit_DSP_counter;
 int target_slot;
 int target_freq;
 int slot_state = 0;
@@ -79,7 +78,7 @@ static void HID_InitApplication(void);
 
 static void update_synchronization(void)
 {
-	current_time = HAL_GetTick();
+	uint32_t current_time = HAL_GetTick();
 	ft8_time = current_time - start_time;
 
 	// Update slot and reset RX
@@ -110,9 +109,6 @@ static void update_synchronization(void)
 		decode_bypass = 1;
 		// Partial TX, set the TX counter based on current ft8_time
 		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
-		// Sync Xmit_DSP_counter with RX frame_counter to maintain alignment
-		// This prevents symbol boundary misalignment between TX and RX chains
-		Xmit_DSP_counter = frame_counter;
 		// Log the TX
 		char log_str[64];
 		make_Real_Time();
@@ -202,14 +198,11 @@ int main(int argc, char *argv[]) {
 				{
 					if (!Tune_On)
 					{
-						if ((ft8_xmit_counter < 79) && (Xmit_DSP_counter % 4 == 0))
+						if ((ft8_xmit_counter < 79) && (frame_counter == 2))
 						{
-							ft8_shift = ft8_hz * (double)tones[ft8_xmit_counter];
 							set_FT8_Tone(tones[ft8_xmit_counter]);
 							ft8_xmit_counter++;
 						}
-
-						Xmit_DSP_counter++;
 
 						if (ft8_xmit_counter == 79)
 						{
@@ -220,10 +213,6 @@ int main(int argc, char *argv[]) {
 							if (!Beacon_On)
 								clear_queued_message();
 						}
-					}
-					else
-					{
-						ft8_shift = 0;
 					}
 				}
 				else
