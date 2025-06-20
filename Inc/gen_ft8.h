@@ -56,7 +56,6 @@ void set_reply(ReplyID index);
 void Read_Station_File(void);
 void SD_Initialize(void);
 
-void compose_messages(void);
 void clear_xmit_messages(void);
 void clear_queued_message(void);
 

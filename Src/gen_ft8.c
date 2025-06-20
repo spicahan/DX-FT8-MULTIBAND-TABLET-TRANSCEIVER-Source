@@ -122,22 +122,6 @@ void set_reply(ReplyID replyId)
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)reply_message, LEFT_MODE);
 }
 
-static char xmit_messages[Que_Size][MESSAGE_SIZE];
-
-void compose_messages(void)
-{
-	char RSL[5];
-	itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
-
-	sprintf(xmit_messages[Que_Locator], "%s %s %s", Target_Call, Station_Call, Locator);
-	sprintf(xmit_messages[Que_RSL], "%s %s R%s", Target_Call, Station_Call, RSL);
-	sprintf(xmit_messages[Que_73], "%s %s %s", Target_Call, Station_Call, QSO_73);
-
-	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)xmit_messages[Que_Locator], LEFT_MODE);
-}
-
-
 void clear_queued_message(void)
 {
 	BSP_LCD_SetFont(&Font16);

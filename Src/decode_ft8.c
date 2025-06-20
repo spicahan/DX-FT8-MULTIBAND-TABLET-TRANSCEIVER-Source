@@ -47,7 +47,6 @@ static int log_size = 50;
 
 static int message_limit = 10;
 
-int Auto_QSO_State;
 int Target_RSL;
 
 int ft8_decode(void)
@@ -298,11 +297,6 @@ void process_selected_Station(int num_decoded, int TouchIndex)
 
 		if (QSO_Fix == 1)
 			set_QSO_Xmit_Freq(target_freq);
-
-		compose_messages();
-		Auto_QSO_State = 1;
-		RSL_sent = 0;
-		RR73_sent = 0;
 	}
 
 	FT8_Touch_Flag = 0;

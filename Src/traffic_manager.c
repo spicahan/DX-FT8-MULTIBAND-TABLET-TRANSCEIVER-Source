@@ -24,12 +24,6 @@ const int ADC_DVC_Off = 90;
 
 int Beacon_State;
 
-int RSL_sent;
-int QSO_xmit_count;
-int RR73_sent;
-
-
-
 void setup_to_transmit_on_next_DSP_Flag(void)
 {
 	ft8_xmit_counter = 0;

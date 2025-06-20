@@ -9,10 +9,6 @@
 #define TRAFFIC_MANAGER_H_
 
 extern int Beacon_State;
-extern int stop_QSO_reply;
-extern int RSL_sent;
-extern int QSO_xmit_count;
-extern int RR73_sent;
 
 
 void setup_to_transmit_on_next_DSP_Flag(void);

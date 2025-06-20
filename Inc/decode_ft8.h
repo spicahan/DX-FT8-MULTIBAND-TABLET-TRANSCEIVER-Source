@@ -8,7 +8,6 @@
 #ifndef DECODE_FT8_H_
 #define DECODE_FT8_H_
 
-extern int Auto_QSO_State;
 extern int Station_RSL;
 extern int Target_RSL;
 
