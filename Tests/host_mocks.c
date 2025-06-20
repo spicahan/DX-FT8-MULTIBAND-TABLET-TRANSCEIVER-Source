@@ -35,7 +35,7 @@ int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
 int Beacon_On = 0;
 int Xmit_Mode;
 int xmit_flag = 0, ft8_xmit_counter, ft8_xmit_flag, ft8_xmit_delay;
-int DSP_Flag = 1;
+int DSP_Flag = 0;
 uint16_t buff_offset;
 int ft8_flag, FT_8_counter, ft8_marker;
 
@@ -76,10 +76,12 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     // Simulate frame processing (matches real SDR_Audio.c:146-150)
     if (++frame_counter == 4) {
         // process_FT8_FFT() would be called here in real code
+        // model the cost of process_FT8_FFT()
+        advance_mock_tick(29);
 		FT_8_counter++;
         frame_counter = 0;
     }
-    
+
     if (frame_counter == 0 && FT_8_counter % 10 == 0) {
         if (xmit_flag) {
             printf("t");
@@ -90,13 +92,12 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     
     fflush(stdout);
     
-    // Advance mock time by 40ms (matches 32kHz sample rate, 1280 samples)
-    advance_mock_tick(40);
+    // model the cost of I2S2_RX_ProcessBuffer()
+    advance_mock_tick(7);
     
-	// if (FT_8_counter == ft8_msg_samples) { 
 	decode_flag = (frame_counter == 0 && (FT_8_counter == ft8_msg_samples));
 
-	// Simulate real audio processing timing
+	// I2S2_RX_ProcessBuffer() is called every 40ms
     usleep(400); // 0.4ms so 100X faster
     
     // Handle beacon changes based on timing
@@ -166,7 +167,14 @@ void Write_RxTxLog_Data(const char *entry) {
 
 // traffic_manager.c
 void ft8_receive_sequence(void) {}
-void set_FT8_Tone(uint8_t ft8_tone) {}
+
+void set_FT8_Tone(uint8_t ft8_tone) {
+    // model the cost
+    // when frame_counter == 0, the RX path already takes 7+29=36ms,
+    // this captures the bug when TX and process_FT8_FFT are not interleaved
+    // to cause TX to take more than 15s to finish
+    advance_mock_tick(5);
+}
 
 // decode_ft8.c
 const int kMax_decoded_messages = 20;
@@ -366,42 +374,34 @@ void queue_custom_text(const char *tx_msg) {
 // SiLabs.c
 void output_enable(enum si5351_clock clk, uint8_t enable) {}
 
-// -----------------------------------------------------------------------------
-// STM32 HAL stubs (weak definitions override any real HAL code)
-#define WEAK __attribute__((weak))
-
-WEAK HAL_StatusTypeDef HAL_Init(void) {return HAL_OK;}
-WEAK void SystemClock_Config(void) {}
-WEAK void MX_GPIO_Init(void) {}
-WEAK void MX_CRC_Init(void) {}
-WEAK void MX_I2C1_Init(void) {}
-WEAK void MX_QUADSPI_Init(void) {}
-WEAK void MX_RTC_Init(void) {}
-WEAK void MX_FMC_Init(void) {}
-// Add other MX_*_Init() as needed
-
 // Enhanced SysTick & tick counter for FT8 timing
 static uint32_t mock_tick = 0;
-static uint32_t mock_tick_increment = 0;
 
-// Called by I2S2_RX_ProcessBuffer to advance time
+// For modeling the cost of timing-critical functions
+// Also simuates the behavior of BSP_AUDIO_IN_* callback
+// If crossing the 40ms boundary, set DSP_Flag
+// Use prime number to simulate jitters
 void advance_mock_tick(uint32_t ms) {
-    mock_tick_increment += ms;
+    if (mock_tick % 40 + ms >= 40) {
+        DSP_Flag = 1;
+    }
+    mock_tick += ms;
 }
 
-WEAK uint32_t HAL_GetTick(void) {
-    return mock_tick + mock_tick_increment;
+uint32_t HAL_GetTick(void) {
+    advance_mock_tick(1);
+    return mock_tick;
 }
 
-WEAK void HAL_Delay(uint32_t ms) {
+void HAL_Delay(uint32_t ms) {
     mock_tick += ms;
 }
 
 // -----------------------------------------------------------------------------
 // Stub Display & LCD routines so we see output on stdout instead
-WEAK void BSP_LCD_Init(void) { printf("[LCD Init]\n"); }
-WEAK void BSP_LCD_Clear(uint32_t color) { printf("[LCD Clear]\n"); }
-WEAK void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr) {
+void BSP_LCD_Init(void) { printf("[LCD Init]\n"); }
+void BSP_LCD_Clear(uint32_t color) { printf("[LCD Clear]\n"); }
+void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr) {
     printf("[LCD Line %d] %s\n", Line, ptr);
 }
 // Add other LCD_ / Display_ stubs as needed
@@ -432,7 +432,7 @@ static void init_test_data(void) {
 }
 
 // Replace the real ft8_decode() to feed our test data
-WEAK int ft8_decode(void) {
+int ft8_decode(void) {
     printf("d");
 	int period_index = ft8_time / 30000;
     
@@ -476,13 +476,13 @@ WEAK int ft8_decode(void) {
     }
     
     // Simulate decoding cost
-    advance_mock_tick(300);
+    advance_mock_tick(307);
     return num_decoded;
 }
 
 // -----------------------------------------------------------------------------
 // Stub for transmit trigger: dump queued messages to stdout
-WEAK void setup_to_transmit_on_next_DSP_Flag(void) {
+void setup_to_transmit_on_next_DSP_Flag(void) {
     printf("\n[=== TRANSMIT START ===]\n");
 	printf("Transmitting: %s\n", queued_msg);
 	ft8_xmit_counter = 0;
@@ -496,8 +496,8 @@ void _debug(const char *txt) {
 
 // -----------------------------------------------------------------------------
 // Optional: stub or disable any audio / codec / Si5351 dependencies
-WEAK void Audio_Init(void) {}
-WEAK void Codec_Start(void) {}
+void Audio_Init(void) {}
+void Codec_Start(void) {}
 // etc.
 
 // -----------------------------------------------------------------------------

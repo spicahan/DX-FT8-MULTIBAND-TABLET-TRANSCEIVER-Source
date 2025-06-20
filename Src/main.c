@@ -229,9 +229,8 @@ int main(int argc, char *argv[]) {
 				display_Real_Date(0, 240);
 			}
 
-#ifndef HOST_HAL_MOCK
 			DSP_Flag = 0;
-#endif
+
 		}
 
 		if (decode_flag && !Tune_On && !xmit_flag && !decode_bypass)
