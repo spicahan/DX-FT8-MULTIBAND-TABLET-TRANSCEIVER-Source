@@ -59,7 +59,7 @@ static FATFS FS;
 static FIL fil;
 static FIL fil2;
 
-static char blank[19];
+static char blank[20];
 static uint8_t blank_initialised = 0;
 
 const char CQ[] = "CQ";
