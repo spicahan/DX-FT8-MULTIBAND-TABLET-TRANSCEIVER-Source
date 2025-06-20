@@ -45,7 +45,6 @@ Decode new_decoded[25];
 static Calling_Station Answer_CQ[50];
 static int log_size = 50;
 
-static int num_calls; // number of unique calling stations
 static int message_limit = 10;
 
 int Auto_QSO_State;

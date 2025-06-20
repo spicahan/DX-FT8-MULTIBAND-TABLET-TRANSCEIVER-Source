@@ -154,7 +154,7 @@ void clear_xmit_messages(void)
 static void set_text(char *text, const char *source, int field_id)
 {
 	strcpy(text, source);
-	for (int i = 0; i < strlen(text); ++i)
+	for (int i = 0; i < (int)strlen(text); ++i)
 	{
 		if (!isprint((int)text[i]))
 		{

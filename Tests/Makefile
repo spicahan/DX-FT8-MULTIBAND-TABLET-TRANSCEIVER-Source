@@ -2,8 +2,8 @@
 
 CC      = gcc
 CXX     = g++
-CFLAGS  = -DHOST_HAL_MOCK -g -Wall -I../Inc -I../FT8_library
-CXXFLAGS = -DHOST_HAL_MOCK -g -Wall -I../Inc -I../FT8_library -std=c++17
+CFLAGS  = -DHOST_HAL_MOCK -g -Wall -Werror -I../Inc -I../FT8_library
+CXXFLAGS = -DHOST_HAL_MOCK -g -Wall -Werror -I../Inc -I../FT8_library -std=c++17
 
 C_SRC   = ../Src/main.c ../Src/autoseq_engine.c ../Src/ADIF.c host_mocks.c
 CXX_SRC = json_parser.cpp

@@ -90,6 +90,13 @@ set_source_files_properties(
         COMPILE_OPTIONS "-O0"    # or COMPILE_FLAGS "-O0" on <3.3
 )
 
+# --- Treat warnings as errors for SRC_SOURCES
+set_source_files_properties(
+    ${SRC_SOURCES}
+    PROPERTIES
+        COMPILE_OPTIONS "-Werror"
+)
+
 # -----------------------------------------------------------------------------
 # Linker script & options (mirror build.sh)
 # -----------------------------------------------------------------------------

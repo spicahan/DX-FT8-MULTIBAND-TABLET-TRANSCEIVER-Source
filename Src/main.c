@@ -110,7 +110,7 @@ static void update_synchronization(void)
 		// Partial TX, set the TX counter based on current ft8_time
 		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
 		// Log the TX
-		char log_str[64];
+		char log_str[128];
 		make_Real_Time();
 		make_Real_Date();
 		snprintf(log_str, sizeof(log_str), "T [%s %s][%s] %s",
