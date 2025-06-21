@@ -603,7 +603,7 @@ void executeButton(uint16_t index)
 		clear_log_messages();
 		toggle_button_state(Clear);
 		autoseq_init(Station_Call, Locator);
-		decode_bypass = 0;
+		was_txing = 0;
 		break;
 
 	case QSOBeacon:

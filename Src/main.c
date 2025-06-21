@@ -62,7 +62,7 @@ int target_freq;
 int slot_state = 0;
 int decode_flag = 0;
 // Used for skipping the TX slot
-int decode_bypass = 0;
+int was_txing = 0;
 
 // Autoseq TX text buffer
 char autoseq_txbuf[40];
@@ -91,12 +91,11 @@ static void update_synchronization(void)
 		printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
 #endif
 		slot_state ^= 1;
-		decode_bypass = 0;
+		was_txing = 0;
 
 		ft8_flag = 1;
 		FT_8_counter = 0;
 		ft8_marker = 1;
-		decode_flag = 0;
 	}
 
 	// Check if TX is intended
@@ -106,7 +105,7 @@ static void update_synchronization(void)
 		autoseq_tick();
 		update_log_display(1);
 		QSO_xmit = 0;
-		decode_bypass = 1;
+		was_txing = 1;
 		// Partial TX, set the TX counter based on current ft8_time
 		ft8_xmit_counter = (ft8_time % 15000) / 160; // 160ms per symbol
 		// Log the TX
@@ -233,7 +232,7 @@ int main(int argc, char *argv[]) {
 
 		}
 
-		if (decode_flag && !Tune_On && !xmit_flag && !decode_bypass)
+		if (decode_flag && !Tune_On && !xmit_flag)
 		{
 			clear_decoded_messages();
 			master_decoded = ft8_decode();
@@ -243,8 +242,6 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 #endif
-			// TODO refactor with the retry logic below
-			QSO_xmit = 0;
 			if (master_decoded > 0)
 			{
 				display_messages(master_decoded);
@@ -254,7 +251,8 @@ int main(int argc, char *argv[]) {
 			make_Real_Date();
 			for (int i = 0; i < master_decoded; ++i) {
 				char log_str[64];
-				snprintf(log_str, sizeof(log_str), "R [%s %s][%s] %s %s %s %2i %d",
+				snprintf(log_str, sizeof(log_str), "%c [%s %s][%s] %s %s %s %2i %d",
+				         was_txing ? 'O' : 'R',
 						 log_rtc_date_string,
 						 log_rtc_time_string,
 						 sBand_Data[BandIndex].display,
@@ -265,41 +263,50 @@ int main(int argc, char *argv[]) {
 						 new_decoded[i].freq_hz);
 				Write_RxTxLog_Data(log_str);
 			}
-			for (int i = 0; i < master_decoded; i++) {
-				// TX is (potentially) necessary
-				if (autoseq_on_decode(&new_decoded[i])) {
-					// Fetch TX msg
+			if (!was_txing) {
+				for (int i = 0; i < master_decoded; i++)
+				{
+					// TX is (potentially) necessary
+					if (autoseq_on_decode(&new_decoded[i]))
+					{
+						// Fetch TX msg
+						if (autoseq_get_next_tx(autoseq_txbuf))
+						{
+							_debug("QSO_xmit,rspnd");
+							queue_custom_text(autoseq_txbuf);
+							QSO_xmit = 1;
+							break;
+						}
+					}
+				}
+
+				// No valid response has received to advance auto sequencing.
+				// Check TX retry is needed?
+				// Yes => QSO_xmit = True;
+				// No  => check in beacon mode?
+				//       Yes => start_cq, QSO_xmit = True;
+				//       No  => QSO_xmit = False;
+				if (!QSO_xmit)
+				{
+					// Check if retry is necessary
 					if (autoseq_get_next_tx(autoseq_txbuf))
 					{
-						_debug("QSO_xmit,rspnd");
 						queue_custom_text(autoseq_txbuf);
+						_debug("QSO_xmit,retry");
 						QSO_xmit = 1;
-						break;
+					}
+					else if (Beacon_On)
+					{
+						target_slot = slot_state ^ 1;
+						autoseq_start_cq();
+						autoseq_get_next_tx(autoseq_txbuf);
+						queue_custom_text(autoseq_txbuf);
+						_debug("QSO_xmit,CQ...");
+						QSO_xmit = 1;
 					}
 				}
 			}
-
-			// No valid response has received to advance auto sequencing.
-			// Check TX retry is needed?
-			// Yes => QSO_xmit = True;
-			// No  => check in beacon mode?
-			//       Yes => start_cq, QSO_xmit = True;
-			//       No  => QSO_xmit = False;
-			if (!QSO_xmit) {
-				// Check if retry is necessary
-				if (autoseq_get_next_tx(autoseq_txbuf)) {
-					queue_custom_text(autoseq_txbuf);
-					_debug("QSO_xmit,retry");
-					QSO_xmit = 1;
-				} else if(Beacon_On) {
-					target_slot = slot_state ^ 1;
-					autoseq_start_cq();
-					autoseq_get_next_tx(autoseq_txbuf);
-					queue_custom_text(autoseq_txbuf);
-					_debug("QSO_xmit,CQ...");
-					QSO_xmit = 1;
-				}
-			}
+			decode_flag = 0;
 		} // end of servicing FT_Decode
 
 		// No TX required by retrying or auto-sequencing

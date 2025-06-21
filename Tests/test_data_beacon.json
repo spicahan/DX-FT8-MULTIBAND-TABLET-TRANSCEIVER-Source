@@ -9,7 +9,11 @@
   },
   "periods": [
     {
-      "messages": []
+      "messages": [],
+      "beacon_change": {
+        "time_offset": 7.3,
+        "beacon_on": 1
+      }
     },
     {
       "messages": []

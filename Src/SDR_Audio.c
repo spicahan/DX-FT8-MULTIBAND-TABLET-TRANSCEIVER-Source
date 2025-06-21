@@ -145,8 +145,5 @@ void I2S2_RX_ProcessBuffer(uint16_t offset)
 	{
 		process_FT8_FFT();
 		frame_counter = 0;
-	} else
-	{
-		decode_flag = 0; // Make sure decoding happens only after process_FT8_FFT()
 	}
 }

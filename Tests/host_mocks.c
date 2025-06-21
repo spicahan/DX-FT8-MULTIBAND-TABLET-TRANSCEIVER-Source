@@ -95,7 +95,9 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     // model the cost of I2S2_RX_ProcessBuffer()
     advance_mock_tick(7);
     
-	decode_flag = (frame_counter == 0 && (FT_8_counter == ft8_msg_samples));
+    if (FT_8_counter == ft8_msg_samples) {
+        decode_flag = 1;
+    }
 
 	// I2S2_RX_ProcessBuffer() is called every 40ms
     usleep(400); // 0.4ms so 100X faster

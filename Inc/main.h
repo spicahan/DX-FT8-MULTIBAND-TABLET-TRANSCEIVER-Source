@@ -25,7 +25,7 @@ extern int slot_state;
 extern int target_slot;
 extern int target_freq;
 extern int decode_flag;
-extern int decode_bypass;
+extern int was_txing;
 
 extern const char* test_data_file;
 
