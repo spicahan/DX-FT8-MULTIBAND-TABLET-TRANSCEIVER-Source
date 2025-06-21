@@ -598,9 +598,6 @@ void executeButton(uint16_t index)
 		clear_xmit_messages();
 		terminate_QSO();
 		QSO_xmit = 0;
-		clear_reply_message_box();
-		clear_log_stored_data();
-		clear_log_messages();
 		toggle_button_state(Clear);
 		autoseq_init(Station_Call, Locator);
 		was_txing = 0;
@@ -611,16 +608,10 @@ void executeButton(uint16_t index)
 		{
 			Beacon_On = 0;
 			Beacon_State = 0;
-			clear_reply_message_box();
-			clear_log_messages();
-			clear_log_stored_data();
 		}
 		else
 		{
 			Beacon_On = 1;
-			clear_reply_message_box();
-			clear_log_stored_data();
-			clear_Beacon_log_messages();
 			Beacon_State = 1;
 		}
 		break;

@@ -103,7 +103,6 @@ static void update_synchronization(void)
 	{
 		setup_to_transmit_on_next_DSP_Flag(); // TODO: move to main.c
 		autoseq_tick();
-		update_log_display(1);
 		QSO_xmit = 0;
 		was_txing = 1;
 		// Partial TX, set the TX counter based on current ft8_time
@@ -209,8 +208,6 @@ int main(int argc, char *argv[]) {
 							ft8_receive_sequence();
 							receive_sequence();
 							ft8_xmit_delay = 0;
-							if (!Beacon_On)
-								clear_queued_message();
 						}
 					}
 				}

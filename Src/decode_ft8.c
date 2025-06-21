@@ -38,12 +38,8 @@ const int kMin_score = 40; // Minimum sync score threshold for candidates
 static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
-extern char current_QSO_receive_message[];
-
 static display_message display[10];
 Decode new_decoded[25];
-static Calling_Station Answer_CQ[50];
-static int log_size = 50;
 
 static int message_limit = 10;
 
@@ -171,7 +167,6 @@ int ft8_decode(void)
 
 void display_messages(int decoded_messages)
 {
-	const char CQ[] = "CQ";
 	const char *paramlist = "%s %s %s";
 
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
@@ -184,7 +179,7 @@ void display_messages(int decoded_messages)
 		const char *call_from = new_decoded[i].call_from;
 		const char *locator = new_decoded[i].locator;
 
-		if (strcmp(CQ, call_to) == 0)
+		if (strcmp("CQ", call_to) == 0)
 		{
 			if (strcmp(Station_Call, call_from) != 0)
 			{
@@ -248,22 +243,6 @@ static char call_blank[8];
 static uint8_t call_initialised = 0;
 static char locator_blank[5];
 static uint8_t locator_initialised = 0;
-
-void clear_log_stored_data(void)
-{
-	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
-	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
-	for (int i = 0; i < log_size; i++)
-	{
-		Answer_CQ[i].number_times_called = 0;
-		strcpy(Answer_CQ[i].call, call_blank);
-		strcpy(Answer_CQ[i].locator, locator_blank);
-		Answer_CQ[i].RSL = 0;
-		Answer_CQ[i].RR73 = 0;
-		Answer_CQ[i].received_RSL = 99;
-		Answer_CQ[i].sequence = 0;
-	}
-}
 
 void clear_decoded_messages(void)
 {

@@ -33,30 +33,9 @@ extern int Free_Index;
 extern char Free_Text1[MESSAGE_SIZE];
 extern char Free_Text2[MESSAGE_SIZE];
 
-void clear_reply_message_box(void);
-
-typedef enum _ReplyID
-{
-    Reply_RSL,
-    Reply_R_RSL,
-    Reply_Beacon_73,
-    Reply_QSO_73
-} ReplyID;
-
-typedef enum _QueID
-{
-    Que_Locator,
-    Que_RSL,
-    Que_73,
-    Que_Size
-} QueID;
-
-void set_reply(ReplyID index);
-
 void Read_Station_File(void);
 void SD_Initialize(void);
 
 void clear_xmit_messages(void);
-void clear_queued_message(void);
 
 #endif /* GEN_FT8_H_ */

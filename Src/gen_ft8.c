@@ -59,75 +59,12 @@ static FATFS FS;
 static FIL fil;
 static FIL fil2;
 
-static char blank[20];
+#define MAX_BLANK_SIZE 21
+static char blank[MAX_BLANK_SIZE];
 static uint8_t blank_initialised = 0;
-
-const char CQ[] = "CQ";
-const char SOTA[] = "SOTA";
-const char POTA[] = "POTA";
-const char QRP[] = "QRP";
-const char Beacon_73[] = "RR73";
-const char QSO_73[] = "73";
 
 char Free_Text1[MESSAGE_SIZE];
 char Free_Text2[MESSAGE_SIZE];
-
-
-static int in_range(int num, int min, int max)
-{
-	if (num < min)
-		return min;
-	if (num > max)
-		return max;
-	return num;
-}
-
-void set_reply(ReplyID replyId)
-{
-	uint8_t packed[K_BYTES];
-	char RSL[5];
-
-	if (replyId == Reply_RSL || replyId == Reply_R_RSL)
-	{
-		// compute the RSL for use by the next 'switch'
-		itoa(in_range(Target_RSL, -999, 9999), RSL, 10);
-	}
-
-	switch (replyId)
-	{
-	case Reply_RSL:
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, RSL);
-		break;
-	case Reply_R_RSL:
-		sprintf(reply_message, "%s %s R%s", Target_Call, Station_Call, RSL);
-		break;
-	case Reply_Beacon_73:
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, Beacon_73);
-		break;
-	case Reply_QSO_73:
-		sprintf(reply_message, "%s %s %s", Target_Call, Station_Call, QSO_73);
-		break;
-	}
-
-	strcpy(current_Beacon_xmit_message, reply_message);
-	update_Beacon_log_display(1);
-
-	pack77(reply_message, packed);
-	genft8(packed, tones);
-
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)blank, LEFT_MODE);
-	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)reply_message, LEFT_MODE);
-}
-
-void clear_queued_message(void)
-{
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 20, (const uint8_t *)blank, LEFT_MODE);
-}
 
 void clear_xmit_messages(void)
 {
@@ -311,12 +248,6 @@ void Read_Station_File(void)
 			f_close(&fil2);
 		}
 	}
-}
-
-void clear_reply_message_box(void)
-{
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(display_start_x, 40, display_width, 215);
 }
 
 void SD_Initialize(void)

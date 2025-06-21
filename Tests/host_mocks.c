@@ -51,11 +51,6 @@ extern int decode_flag;
 int QSO_Xmit_Touch;
 int FT8_Touch_Flag;
 
-char current_QSO_receive_message[40];
-char current_Beacon_receive_message[40];
-char current_Beacon_xmit_message[40];
-char current_QSO_xmit_message[40];
-
 // gen_ft8.c
 int CQ_Mode_Index = 0;
 int Free_Index = 0;
@@ -135,7 +130,6 @@ char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P 
 char Target_Locator[5]; // four character locator  + null terminator
 int Target_RSL;
 int Station_RSL;
-void clear_queued_message(void) {}
 
 // button.c
 int BandIndex = 2; // 20M
@@ -202,7 +196,6 @@ void string_init(char *string, int size, uint8_t *is_initialised, char character
 
 void display_messages(int decoded_messages)
 {
-	const char CQ[] = "CQ";
 	const char *paramlist = "%s %s %s";
 
 	for (int i = 0; i < decoded_messages && i < message_limit; i++)
@@ -212,7 +205,7 @@ void display_messages(int decoded_messages)
 		const char *call_from = new_decoded[i].call_from;
 		const char *locator = new_decoded[i].locator;
 
-		if (strcmp(CQ, call_to) == 0)
+		if (strcmp("CQ", call_to) == 0)
 		{
 			if (strcmp(Station_Call, call_from) != 0)
 			{

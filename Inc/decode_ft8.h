@@ -32,10 +32,19 @@ typedef struct
     Sequence sequence;
 } Decode;
 
+typedef enum _MsgColor
+{
+    White = 0,
+    Red,
+    Green,
+    Blue,
+    Yellow
+} MsgColor;
+
 typedef struct
 {
     char message[40];
-    int text_color;
+    MsgColor text_color;
 } display_message;
 
 typedef struct
@@ -53,7 +62,6 @@ extern Decode new_decoded[];
 
 void display_messages(int decoded_messages);
 void process_selected_Station(int num_decoded, int TouchIndex);
-void clear_log_stored_data(void);
 void set_QSO_Xmit_Freq(int freq);
 void clear_decoded_messages(void);
 void string_init(char *string, int size, uint8_t *is_initialised, char character);
