@@ -65,7 +65,7 @@ int decode_flag = 0;
 int was_txing = 0;
 
 // Autoseq TX text buffer
-char autoseq_txbuf[40];
+char autoseq_txbuf[MAX_MSG_LEN];
 
 static int master_decoded = 0;
 #ifndef HOST_HAL_MOCK

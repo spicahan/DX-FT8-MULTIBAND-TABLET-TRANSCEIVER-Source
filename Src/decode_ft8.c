@@ -167,8 +167,6 @@ int ft8_decode(void)
 
 void display_messages(int decoded_messages)
 {
-	const char *paramlist = "%s %s %s";
-
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, FFT_H, 240, 200);
 	BSP_LCD_SetFont(&Font16);
@@ -179,31 +177,47 @@ void display_messages(int decoded_messages)
 		const char *call_from = new_decoded[i].call_from;
 		const char *locator = new_decoded[i].locator;
 
-		if (strcmp("CQ", call_to) == 0)
+		// FIXME snprintf generates compile error
+		sprintf(display[i].message, "%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
+		display[i].text_color = White;
+		if (strcmp(call_to, "CQ") == 0 || strncmp(call_to, "CQ ", 3) == 0)
 		{
-			if (strcmp(Station_Call, call_from) != 0)
-			{
-				sprintf(display[i].message, "%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
-			}
-			else
-			{
-				sprintf(display[i].message, paramlist, call_to, call_from, locator);
-			}
-			display[i].text_color = 1;
+			display[i].text_color = Green;
 		}
-		else
+		// Addressed me
+		if (strncmp(call_to, Station_Call, CALLSIGN_SIZE) == 0)
 		{
-			sprintf(display[i].message, paramlist, call_to, call_from, locator);
-			display[i].text_color = 0;
+			display[i].text_color = Red;
+		}
+		// Mark own TX in yellow (WSJT-X)
+		if (was_txing) {
+			display[i].text_color = Yellow;
 		}
 	}
 
 	for (int j = 0; j < decoded_messages && j < message_limit; j++)
 	{
-		if (display[j].text_color == 0)
-			BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-		else
-			BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+		uint32_t lcd_color = LCD_COLOR_BLACK;
+		switch(display[j].text_color) {
+			case White:
+				lcd_color = LCD_COLOR_WHITE;
+				break;
+			case Red:
+				lcd_color = LCD_COLOR_RED;
+				break;
+			case Green:
+				lcd_color = LCD_COLOR_GREEN;
+				break;
+			case Blue:
+				lcd_color = LCD_COLOR_BLUE;
+				break;
+			case Yellow:
+				lcd_color = LCD_COLOR_YELLOW;
+				break;
+			default:
+				break;
+		}
+		BSP_LCD_SetTextColor(lcd_color);
 		BSP_LCD_DisplayStringAt(0, 40 + j * 20, (const uint8_t *)display[j].message, LEFT_MODE);
 	}
 }

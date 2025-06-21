@@ -67,7 +67,7 @@ static autoseq_ctx_t ctx;
 
 /*************** Forward declarations ****************/ 
 static void set_state(autoseq_state_t s, tx_msg_t first_tx, int limit);
-static void format_tx_text(tx_msg_t id, char out[40]);
+static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN]);
 static void parse_rcvd_msg(const Decode *msg);
 // Internal helper called by autoseq_on_touch() and autoseq_on_decode()
 static bool generate_response(const Decode *msg, bool override);
@@ -137,7 +137,7 @@ bool autoseq_on_decode(const Decode *msg)
 
 
 /* === Provide the message we should transmit this slot (if any) === */
-bool autoseq_get_next_tx(char out_text[40])
+bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN])
 {
     if (ctx.next_tx == TX_UNDEF)
         return false;
@@ -219,32 +219,32 @@ static void set_state(autoseq_state_t s, tx_msg_t first_tx, int limit)
 }
 
 /* Build printable FT8 text ("<CALL> <CALL> <LOC/RPT>") */
-static void format_tx_text(tx_msg_t id, char out[40])
+static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
 {
-    memset(out, 0, 40);
+    memset(out, 0, MAX_MSG_LEN);
     const char *cq_str = "CQ";
 
     switch (id) {
     case TX1:
-        snprintf(out, 40, "%s %s %s", ctx.dxcall, ctx.mycall, ctx.mygrid);
+        snprintf(out, MAX_MSG_LEN, "%s %s %s", ctx.dxcall, ctx.mycall, ctx.mygrid);
         break;
     case TX2:
-        snprintf(out, 40, "%s %s %+d", ctx.dxcall, ctx.mycall, ctx.snr_tx);
+        snprintf(out, MAX_MSG_LEN, "%s %s %+d", ctx.dxcall, ctx.mycall, ctx.snr_tx);
         Target_RSL = ctx.snr_tx;
         break;
     case TX3:
-        snprintf(out, 40, "%s %s R%+d", ctx.dxcall, ctx.mycall, ctx.snr_tx);
+        snprintf(out, MAX_MSG_LEN, "%s %s R%+d", ctx.dxcall, ctx.mycall, ctx.snr_tx);
         Target_RSL = ctx.snr_tx;
         break;
     case TX4:
-        snprintf(out, 40, "%s %s RR73", ctx.dxcall, ctx.mycall);
+        snprintf(out, MAX_MSG_LEN, "%s %s RR73", ctx.dxcall, ctx.mycall);
         if (!ctx.logged) {
             write_ADIF_Log();
             ctx.logged = true;
         }
         break;
     case TX5:
-        snprintf(out, 40, "%s %s 73", ctx.dxcall, ctx.mycall);
+        snprintf(out, MAX_MSG_LEN, "%s %s 73", ctx.dxcall, ctx.mycall);
         if (!ctx.logged) {
             write_ADIF_Log();
             ctx.logged = true;
@@ -266,7 +266,7 @@ static void format_tx_text(tx_msg_t id, char out[40])
             default:
                 break;
             }
-            snprintf(out, 40, "%s %s %s", cq_str, ctx.mycall, ctx.mygrid);
+            snprintf(out, MAX_MSG_LEN, "%s %s %s", cq_str, ctx.mycall, ctx.mygrid);
         }
         else {
             switch (Free_Index)
@@ -293,14 +293,14 @@ static void parse_rcvd_msg(const Decode *msg) {
         ctx.rcvd_msg_type = TX1;
         strncpy(ctx.dxgrid, msg->locator, sizeof(ctx.dxgrid) - 1);
     } else {
-        if (strncmp(msg->locator, "73", 2) == 0) {
+        if (strcmp(msg->locator, "73") == 0) {
             ctx.rcvd_msg_type = TX5;
         } 
-        else if (strncmp(msg->locator, "RR73", 4) == 0)
+        else if (strcmp(msg->locator, "RR73") == 0)
         {
             ctx.rcvd_msg_type = TX4;
         }
-        else if (strncmp(msg->locator, "RRR", 3) == 0)
+        else if (strcmp(msg->locator, "RRR") == 0)
         {
             ctx.rcvd_msg_type = TX4;
         }

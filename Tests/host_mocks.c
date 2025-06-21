@@ -360,7 +360,7 @@ static void convert_test_message_to_decode(const TestMessage* src, Decode* dst) 
 }
 
 // Needed by autoseq_engine
-static char queued_msg[40];
+static char queued_msg[MAX_MSG_LEN];
 void queue_custom_text(const char *tx_msg) {
 	strncpy(queued_msg, tx_msg, sizeof(queued_msg));
 }

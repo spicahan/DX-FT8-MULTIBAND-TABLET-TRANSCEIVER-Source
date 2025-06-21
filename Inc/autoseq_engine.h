@@ -18,7 +18,7 @@ void autoseq_on_touch(const Decode *msg);
 bool autoseq_on_decode(const Decode *msg);
 
 /* === Provide the message we should transmit this slot (if any) === */
-bool autoseq_get_next_tx(char out_text[40]);
+bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN]);
 
 /* === Slot timer / time‑out manager === */
 void autoseq_tick(void);

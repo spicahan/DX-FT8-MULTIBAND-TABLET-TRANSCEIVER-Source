@@ -8,6 +8,8 @@
 #ifndef DECODE_FT8_H_
 #define DECODE_FT8_H_
 
+#define MAX_MSG_LEN 40
+
 extern int Station_RSL;
 extern int Target_RSL;
 
@@ -43,7 +45,7 @@ typedef enum _MsgColor
 
 typedef struct
 {
-    char message[40];
+    char message[MAX_MSG_LEN];
     MsgColor text_color;
 } display_message;
 
