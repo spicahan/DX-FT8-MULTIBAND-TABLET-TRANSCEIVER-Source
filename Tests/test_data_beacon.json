@@ -4,8 +4,7 @@
     "MY_GRID": "CM87",
     "DX_CALLSIGN": "AG6AQ", 
     "DX_GRID": "CM97",
-    "TX_ON_EVEN": false,
-    "Beacon_On": 1
+    "TX_ON_EVEN": false
   },
   "periods": [
     {

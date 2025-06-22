@@ -90,7 +90,7 @@ void I2S2_RX_ProcessBuffer(uint16_t offset) {
     // model the cost of I2S2_RX_ProcessBuffer()
     advance_mock_tick(7);
     
-    if (FT_8_counter == ft8_msg_samples) {
+    if (frame_counter == 0 && FT_8_counter == ft8_msg_samples) {
         decode_flag = 1;
     }
 

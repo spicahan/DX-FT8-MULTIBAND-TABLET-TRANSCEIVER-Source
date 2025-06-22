@@ -231,6 +231,7 @@ int main(int argc, char *argv[]) {
 
 		if (decode_flag && !Tune_On && !xmit_flag)
 		{
+			// TODO get rid of this as ft8_decode should always overwrite
 			clear_decoded_messages();
 			master_decoded = ft8_decode();
 #ifdef HOST_HAL_MOCK
@@ -239,10 +240,7 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 #endif
-			if (master_decoded > 0)
-			{
-				display_messages(master_decoded);
-			}
+			display_messages(master_decoded);
 			// Write all the decoded messages to RxTxLog
 			make_Real_Time();
 			make_Real_Date();
@@ -313,7 +311,7 @@ int main(int argc, char *argv[]) {
 		if (FT_8_counter > 0 && FT_8_counter < 90)
 			Process_Touch();
 
-		if (!Tune_On && FT8_Touch_Flag && !Beacon_On) {
+		if (!Tune_On && FT8_Touch_Flag && FT_8_TouchIndex < master_decoded) {
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
 			autoseq_on_touch(&new_decoded[FT_8_TouchIndex]);
 			autoseq_get_next_tx(autoseq_txbuf);

@@ -45,6 +45,12 @@ static int message_limit = 10;
 
 int Target_RSL;
 
+static void clear_messages(void)
+{
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_FillRect(0, FFT_H, 240, 201);
+}
+
 int ft8_decode(void)
 {
 	// Find top candidates by Costas sync score and localize them in time and frequency
@@ -167,8 +173,7 @@ int ft8_decode(void)
 
 void display_messages(int decoded_messages)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(0, FFT_H, 240, 200);
+	clear_messages();
 	BSP_LCD_SetFont(&Font16);
 
 	for (int i = 0; i < decoded_messages && i < message_limit; i++)
@@ -218,14 +223,8 @@ void display_messages(int decoded_messages)
 				break;
 		}
 		BSP_LCD_SetTextColor(lcd_color);
-		BSP_LCD_DisplayStringAt(0, 40 + j * 20, (const uint8_t *)display[j].message, LEFT_MODE);
+		BSP_LCD_DisplayStringAt(0, FFT_H + j * 20, (const uint8_t *)display[j].message, LEFT_MODE);
 	}
-}
-
-void clear_messages(void)
-{
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(0, FFT_H, 240, 201);
 }
 
 static int validate_locator(const char locator[])
