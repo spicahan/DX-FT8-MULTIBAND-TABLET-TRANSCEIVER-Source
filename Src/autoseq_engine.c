@@ -57,8 +57,6 @@ typedef struct {
     int  snr_tx;              /* SNR we report to DX (‑dB) */
     int  retry_counter;
     int  retry_limit;
-    // TODO eliminate
-    bool we_are_caller;       /* true => we started with CQ */
     bool logged;              /* true => QSO logged */
 
 } autoseq_ctx_t;
@@ -87,7 +85,9 @@ void autoseq_init(const char *myCall, const char *myGrid)
 
 void autoseq_start_cq(void)
 {
-    ctx.we_are_caller = true;
+    ctx.dxcall[0] = 'C';
+    ctx.dxcall[1] = 'Q';
+    ctx.dxcall[2] = '\0';
     set_state(AS_CALLING, TX6, 0); /* infinite CQ loop */
 }
 
@@ -152,6 +152,33 @@ bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN])
     }
 
     return true;
+}
+
+/* === Populate the string for displaying the current QSO state  === */
+void autoseq_get_qso_state(char out_text[MAX_MSG_LEN])
+{
+    if (!out_text) {
+        return;
+    }
+
+    out_text[0] = '\0';
+
+    const char states[][5] = {
+        "IDLE", // AS_IDLE
+        "RPLY", // AS_REPLYING
+        "RPRT", // AS_REPORT
+        "RRPT", // AS_ROGER_REPORT
+        "RGRS", // AS_ROGERS
+        "SOFF", // AS_SIGNOFF
+        "CALL", // AS_CALLING
+    };
+
+    snprintf(out_text, MAX_MSG_LEN - 1,
+        "%s %s rtry:%1d",
+        ctx.dxcall,
+        states[ctx.state],
+        ctx.retry_counter
+    );
 }
 
 /* === Slot timer / time‑out manager === */
@@ -221,7 +248,10 @@ static void set_state(autoseq_state_t s, tx_msg_t first_tx, int limit)
 /* Build printable FT8 text ("<CALL> <CALL> <LOC/RPT>") */
 static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
 {
-    memset(out, 0, MAX_MSG_LEN);
+    if (!out) {
+        return;
+    }
+
     const char *cq_str = "CQ";
 
     switch (id) {

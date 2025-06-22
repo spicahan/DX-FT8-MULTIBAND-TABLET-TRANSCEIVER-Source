@@ -488,6 +488,10 @@ void _debug(const char *txt) {
 	printf("\nDEBUG: %s\n", txt);
 }
 
+void display_qso_state(const char *txt) {
+	printf("\nSTATE: %s\n", txt);
+}
+
 // -----------------------------------------------------------------------------
 // Optional: stub or disable any audio / codec / Si5351 dependencies
 void Audio_Init(void) {}

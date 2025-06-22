@@ -20,5 +20,8 @@ bool autoseq_on_decode(const Decode *msg);
 /* === Provide the message we should transmit this slot (if any) === */
 bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN]);
 
+/* === Populate the string for displaying the current QSO state  === */
+void autoseq_get_qso_state(char out_text[MAX_MSG_LEN]);
+
 /* === Slot timer / time‑out manager === */
 void autoseq_tick(void);

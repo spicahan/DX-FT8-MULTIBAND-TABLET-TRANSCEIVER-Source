@@ -66,6 +66,8 @@ int was_txing = 0;
 
 // Autoseq TX text buffer
 char autoseq_txbuf[MAX_MSG_LEN];
+// Autoseq current QSO state text
+char autoseq_state_str[MAX_MSG_LEN];
 
 static int master_decoded = 0;
 #ifndef HOST_HAL_MOCK
@@ -101,6 +103,9 @@ static void update_synchronization(void)
 	// Check if TX is intended
 	if (QSO_xmit && target_slot == slot_state)
 	{
+		// Display current QSO state
+		autoseq_get_qso_state(autoseq_state_str);
+		display_qso_state(autoseq_state_str);
 		setup_to_transmit_on_next_DSP_Flag(); // TODO: move to main.c
 		autoseq_tick();
 		QSO_xmit = 0;
@@ -478,9 +483,20 @@ void _debug(const char *txt) {
 	const int display_start_y = 240;
 	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, (const uint8_t *)"", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, blank, LEFT_MODE);
 	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, (const uint8_t *)txt, LEFT_MODE);
+}
+
+// show the current QSO state on LCD
+void display_qso_state(const char *txt) {
+	const int display_start_x = 240;
+	const int display_start_y = FFT_H + 20;
+	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
+	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)txt, LEFT_MODE);
 }
 #endif
 

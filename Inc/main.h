@@ -14,6 +14,7 @@
 #include "stm32f7xx_hal.h"
 #endif
 void _debug(const char *txt);
+void display_qso_state(const char *txt);
 
 #define NoOp  __NOP()
 
