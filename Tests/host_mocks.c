@@ -492,6 +492,14 @@ void display_qso_state(const char *txt) {
 	printf("\nSTATE: %s\n", txt);
 }
 
+void display_queued_message(const char *txt) {
+	printf("\nQUEUED: %s", txt);
+}
+
+void display_xmitting_message(const char *txt) {
+	printf("\nXMITTING: %s", txt);
+}
+
 // -----------------------------------------------------------------------------
 // Optional: stub or disable any audio / codec / Si5351 dependencies
 void Audio_Init(void) {}

@@ -139,10 +139,10 @@ bool autoseq_on_decode(const Decode *msg)
 /* === Provide the message we should transmit this slot (if any) === */
 bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN])
 {
+    format_tx_text(ctx.next_tx, out_text);
+
     if (ctx.next_tx == TX_UNDEF)
         return false;
-
-    format_tx_text(ctx.next_tx, out_text);
 
     /* Bump retry counter */
     if (ctx.retry_limit) {
@@ -162,9 +162,13 @@ void autoseq_get_qso_state(char out_text[MAX_MSG_LEN])
     }
 
     out_text[0] = '\0';
+    // IDEL state is treated as no active QSO
+    if (ctx.state == AS_IDLE) {
+        return;
+    }
 
     const char states[][5] = {
-        "IDLE", // AS_IDLE
+        "",     // AS_IDLE
         "RPLY", // AS_REPLYING
         "RPRT", // AS_REPORT
         "RRPT", // AS_ROGER_REPORT
@@ -251,6 +255,8 @@ static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
     if (!out) {
         return;
     }
+
+    out[0] = '\0';
 
     const char *cq_str = "CQ";
 

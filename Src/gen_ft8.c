@@ -48,9 +48,8 @@ char reply_message[REPLY_MESSAGE_SIZE];
 char reply_message_list[REPLY_MESSAGE_SIZE][8];
 int reply_message_count;
 
-const int display_start_x = 240;
-const int display_start_y = 240;
-const int display_width = 230;
+static const int display_start_x = 240;
+static const int display_start_y = FFT_H;
 
 static uint8_t isInitialized = 0;
 
@@ -64,10 +63,26 @@ const uint8_t blank[MAX_BLANK_SIZE] = "                    "; // 20 spaces
 char Free_Text1[MESSAGE_SIZE];
 char Free_Text2[MESSAGE_SIZE];
 
-void clear_xmit_messages(void)
+void display_queued_message(const char *tx_msg)
 {
+	BSP_LCD_SetFont(&Font16);
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
+	BSP_LCD_SetTextColor(LCD_COLOR_RED);
+	BSP_LCD_DisplayStringAt(display_start_x, FFT_H, (const uint8_t *)tx_msg, LEFT_MODE);
+
+}
+
+void display_xmitting_message(const char *tx_msg)
+{
+	BSP_LCD_SetFont(&Font16);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
+	BSP_LCD_SetBackColor(LCD_COLOR_RED);
+	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	BSP_LCD_DisplayStringAt(display_start_x, FFT_H, (const uint8_t *)tx_msg, LEFT_MODE);
+	BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+
 }
 
 static void set_text(char *text, const char *source, int field_id)
@@ -293,10 +308,4 @@ void queue_custom_text(const char *tx_msg)
 
 	pack77(tx_msg, packed);
 	genft8(packed, tones);
-
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, FFT_H, blank, LEFT_MODE);
-	BSP_LCD_SetTextColor(LCD_COLOR_RED);
-	BSP_LCD_DisplayStringAt(display_start_x, FFT_H, (const uint8_t *)tx_msg, LEFT_MODE);
 }

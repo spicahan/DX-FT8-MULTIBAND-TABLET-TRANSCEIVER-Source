@@ -595,12 +595,12 @@ void executeButton(uint16_t index)
 	switch (index)
 	{
 	case Clear:
-		clear_xmit_messages();
 		terminate_QSO();
 		QSO_xmit = 0;
 		toggle_button_state(Clear);
 		autoseq_init(Station_Call, Locator);
 		was_txing = 0;
+		tx_display_update();
 		break;
 
 	case QSOBeacon:

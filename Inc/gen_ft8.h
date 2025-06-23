@@ -40,6 +40,7 @@ extern char Free_Text2[MESSAGE_SIZE];
 void Read_Station_File(void);
 void SD_Initialize(void);
 
-void clear_xmit_messages(void);
+void display_queued_message(const char*);
+void display_xmitting_message(const char*);
 
 #endif /* GEN_FT8_H_ */

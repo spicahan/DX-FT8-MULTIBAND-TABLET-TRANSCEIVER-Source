@@ -78,6 +78,18 @@ static void CPU_CACHE_Enable(void);
 static void HID_InitApplication(void);
 #endif
 
+// Helper function for updating TX region display
+void tx_display_update()
+{
+	if (xmit_flag) {
+		display_xmitting_message(autoseq_txbuf);
+	} else {
+		display_queued_message(autoseq_txbuf);
+	}
+	autoseq_get_qso_state(autoseq_state_str);
+	display_qso_state(autoseq_state_str);
+}
+
 static void update_synchronization(void)
 {
 	uint32_t current_time = HAL_GetTick();
@@ -98,14 +110,13 @@ static void update_synchronization(void)
 		ft8_flag = 1;
 		FT_8_counter = 0;
 		ft8_marker = 1;
+
+		tx_display_update();
 	}
 
 	// Check if TX is intended
 	if (QSO_xmit && target_slot == slot_state)
 	{
-		// Display current QSO state
-		autoseq_get_qso_state(autoseq_state_str);
-		display_qso_state(autoseq_state_str);
 		setup_to_transmit_on_next_DSP_Flag(); // TODO: move to main.c
 		autoseq_tick();
 		QSO_xmit = 0;
@@ -122,6 +133,7 @@ static void update_synchronization(void)
 				 sBand_Data[BandIndex].display,
 				 autoseq_txbuf);
 		Write_RxTxLog_Data(log_str);
+		tx_display_update();
 	}
 }
 
@@ -275,6 +287,7 @@ int main(int argc, char *argv[]) {
 							_debug("QSO_xmit,rspnd");
 							queue_custom_text(autoseq_txbuf);
 							QSO_xmit = 1;
+							tx_display_update();
 							break;
 						}
 					}
@@ -303,6 +316,7 @@ int main(int argc, char *argv[]) {
 						queue_custom_text(autoseq_txbuf);
 						_debug("QSO_xmit,CQ...");
 						QSO_xmit = 1;
+						tx_display_update();
 					}
 				}
 			}
