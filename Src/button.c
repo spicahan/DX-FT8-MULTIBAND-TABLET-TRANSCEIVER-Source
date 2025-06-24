@@ -408,7 +408,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*text0*/ " CQ ",
 	 /*text1*/ " CQ ",
 	 /*blank*/ "    ",
-	 /*Active*/ 1,
+	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 1,
 	 /*x*/ 240,
@@ -420,7 +420,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*text0*/ "SOTA",
 	 /*text1*/ "SOTA",
 	 /*blank*/ "    ",
-	 /*Active*/ 1,
+	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 300,
@@ -432,7 +432,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*text0*/ "POTA",
 	 /*text1*/ "POTA",
 	 /*blank*/ "    ",
-	 /*Active*/ 1,
+	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 360,
@@ -441,10 +441,10 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*h*/ 30},
 
 	{// button 32 CQ QRP
-	 /*text0*/ "QRP",
-	 /*text1*/ "QRP",
+	 /*text0*/ "QRP ",
+	 /*text1*/ "QRP ",
 	 /*blank*/ "   ",
-	 /*Active*/ 1,
+	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 420,
@@ -456,7 +456,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*text0*/ "Free1",
 	 /*text1*/ "Free1",
 	 /*blank*/ "    ",
-	 /*Active*/ 1,
+	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 240,
@@ -468,7 +468,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*text0*/ "Free2",
 	 /*text1*/ "Free2",
 	 /*blank*/ "    ",
-	 /*Active*/ 1,
+	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 240,
@@ -571,22 +571,32 @@ static void toggle_button_state(int button)
 	drawButton(button);
 }
 
-static void reset_buttons(int btn1, int btn2, int btn3, const char *button_text)
+static void update_CQFree_buttons()
 {
-	sButtonData[btn1].state = 0;
-	drawButton(btn1);
-	sButtonData[btn2].state = 0;
-	drawButton(btn2);
-	sButtonData[btn3].state = 0;
-	drawButton(btn3);
-	sButtonData[CQFree].text0 = (char *)button_text;
+	// Reset 4 CQ buttons and 2 free text buttons first
+	sButtonData[StandardCQ].state = 0;
+	sButtonData[CQSOTA].state = 0;
+	sButtonData[CQPOTA].state = 0;
+	sButtonData[QRPP].state = 0;
+	sButtonData[FreeText1].state = 0;
+	sButtonData[FreeText2].state = 0;
+	// Pick the one button to highlight
+	if (free_text) {
+		// WARNING! assuming FreeIndex1 and FreeIndex2 are continuous values
+		sButtonData[FreeText1 + Free_Index].state = 1;
+	} else {
+		// WARNING! assuming StandardCQ, CQSOTA, CQPOTA, QRPP are continuous values
+		sButtonData[StandardCQ + CQ_Mode_Index].state = 1;
+		sButtonData[CQFree].text0 = sButtonData[StandardCQ + CQ_Mode_Index].text0;
+	}
+	sButtonData[CQFree].state = free_text;
+	drawButton(StandardCQ);
+	drawButton(CQSOTA);
+	drawButton(CQPOTA);
+	drawButton(QRPP);
 	drawButton(CQFree);
-}
-
-static void update_CQFree_button()
-{
-	sButtonData[CQFree].state = 0;
-	drawButton(CQFree);
+	drawButton(FreeText1);
+	drawButton(FreeText2);
 }
 
 void executeButton(uint16_t index)
@@ -634,10 +644,8 @@ void executeButton(uint16_t index)
 		break;
 
 	case CQFree:
-		if (!sButtonData[CQFree].state && Free_Index != 0)
-		{
-			Free_Index = 0;
-		}
+		free_text = sButtonData[CQFree].state;
+		update_CQFree_buttons();
 		break;
 
 	case FixedReceived:
@@ -732,63 +740,25 @@ void executeButton(uint16_t index)
 		break;
 
 	case StandardCQ:
-		if (sButtonData[StandardCQ].state)
-		{
-			CQ_Mode_Index = 0;
-			reset_buttons(CQSOTA, CQPOTA, QRPP, " CQ ");
-		}
-		break;
-
 	case CQSOTA:
-		if (sButtonData[CQSOTA].state)
-		{
-			CQ_Mode_Index = 1;
-			reset_buttons(StandardCQ, CQPOTA, QRPP, "SOTA");
-		}
-		break;
-
 	case CQPOTA:
-		if (sButtonData[CQPOTA].state)
-		{
-			CQ_Mode_Index = 2;
-			reset_buttons(StandardCQ, CQSOTA, QRPP, "POTA");
-		}
-		break;
-
 	case QRPP:
-		if (sButtonData[QRPP].state)
-		{
-			CQ_Mode_Index = 3;
-			reset_buttons(StandardCQ, CQSOTA, CQPOTA, "QRP ");
+		free_text = !sButtonData[index].state;
+		if (!free_text) {
+			// WARNING! assuming StandardCQ, CQSOTA, CQPOTA, QRPP are continuous values
+			CQ_Mode_Index = index - StandardCQ;
 		}
+		update_CQFree_buttons();
 		break;
 
 	case FreeText1:
-		Free_Index = 0;
-		sButtonData[FreeText2].state = 0;
-		drawButton(FreeText2);
-		if (sButtonData[FreeText1].state)
-		{
-			Free_Index = 1;
-		}
-		else
-		{
-			update_CQFree_button();
-		}
-		break;
-
 	case FreeText2:
-		Free_Index = 0;
-		sButtonData[FreeText1].state = 0;
-		drawButton(FreeText1);
-		if (sButtonData[FreeText2].state)
-		{
-			Free_Index = 2;
+		free_text = sButtonData[index].state;
+		if (free_text) {
+			// WARNING! Assuming FreeText1 and FreeText2 are continuous values
+			Free_Index = index - FreeText1;
 		}
-		else
-		{
-			update_CQFree_button();
-		}
+		update_CQFree_buttons();
 		break;
 
 	case SkipTx1:

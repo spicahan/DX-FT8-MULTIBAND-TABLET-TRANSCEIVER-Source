@@ -287,7 +287,7 @@ static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
         }
         break;
     case TX6:
-	    if (Free_Index == 0) {
+	    if (!free_text) {
             switch (CQ_Mode_Index)
             {
             case 1:
@@ -303,14 +303,13 @@ static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
                 break;
             }
             snprintf(out, MAX_MSG_LEN, "%s %s %s", cq_str, ctx.mycall, ctx.mygrid);
-        }
-        else {
+        } else {
             switch (Free_Index)
             {
-            case 1:
+            case 0:
                 strncpy(out, Free_Text1, sizeof(Free_Text1) - 1);
                 break;
-            case 2:
+            case 1:
                 strncpy(out, Free_Text2, sizeof(Free_Text2) - 1);
                 break;
             default:

@@ -64,11 +64,12 @@ int decode_flag = 0;
 // Used for skipping the TX slot
 int was_txing = 0;
 bool clr_pressed = false;
+bool free_text = false;
 
 // Autoseq TX text buffer
-char autoseq_txbuf[MAX_MSG_LEN];
+static char autoseq_txbuf[MAX_MSG_LEN];
 // Autoseq current QSO state text
-char autoseq_state_str[MAX_MSG_LEN];
+static char autoseq_state_str[MAX_MSG_LEN];
 
 static int master_decoded = 0;
 #ifndef HOST_HAL_MOCK

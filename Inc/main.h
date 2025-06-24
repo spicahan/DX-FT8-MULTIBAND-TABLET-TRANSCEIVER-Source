@@ -31,6 +31,7 @@ extern int target_freq;
 extern int decode_flag;
 extern int was_txing;
 extern bool clr_pressed;
+extern bool free_text;
 
 extern const char* test_data_file;
 
