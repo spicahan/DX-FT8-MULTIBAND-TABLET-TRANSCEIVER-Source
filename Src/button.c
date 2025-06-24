@@ -21,7 +21,6 @@
 #include "DS3231.h"
 #include "SiLabs.h"
 #include "options.h"
-#include "autoseq_engine.h" // for autoseq_init()
 
 int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
 int Beacon_On;
@@ -595,12 +594,8 @@ void executeButton(uint16_t index)
 	switch (index)
 	{
 	case Clear:
-		terminate_QSO();
-		QSO_xmit = 0;
+		clr_pressed = true;
 		toggle_button_state(Clear);
-		autoseq_init(Station_Call, Locator);
-		was_txing = 0;
-		tx_display_update();
 		break;
 
 	case QSOBeacon:

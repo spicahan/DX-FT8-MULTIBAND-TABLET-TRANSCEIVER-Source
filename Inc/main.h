@@ -4,6 +4,7 @@
 #define __MAIN_H
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -29,6 +30,7 @@ extern int target_slot;
 extern int target_freq;
 extern int decode_flag;
 extern int was_txing;
+extern bool clr_pressed;
 
 extern const char* test_data_file;
 

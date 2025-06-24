@@ -63,6 +63,7 @@ int slot_state = 0;
 int decode_flag = 0;
 // Used for skipping the TX slot
 int was_txing = 0;
+bool clr_pressed = false;
 
 // Autoseq TX text buffer
 char autoseq_txbuf[MAX_MSG_LEN];
@@ -327,8 +328,17 @@ int main(int argc, char *argv[]) {
 		// Check if touch happened
 		// Note: In HOST_HAL_MOCK mode, touch events are simulated via JSON test data
 
-		if (FT_8_counter > 0 && FT_8_counter < 90)
-			Process_Touch();
+		Process_Touch();
+
+		if (clr_pressed) {
+			terminate_QSO();
+			QSO_xmit = 0;
+			was_txing = 0;
+			autoseq_init(Station_Call, Locator);
+			autoseq_txbuf[0] = '\0';
+			tx_display_update();
+			clr_pressed = false;
+		}
 
 		if (!Tune_On && FT8_Touch_Flag && FT_8_TouchIndex < master_decoded) {
 			process_selected_Station(master_decoded, FT_8_TouchIndex);

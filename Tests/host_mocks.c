@@ -164,6 +164,8 @@ void Write_RxTxLog_Data(const char *entry) {
 // traffic_manager.c
 void ft8_receive_sequence(void) {}
 
+void terminate_QSO() {};
+
 void set_FT8_Tone(uint8_t ft8_tone) {
     // model the cost
     // when frame_counter == 0, the RX path already takes 7+29=36ms,
