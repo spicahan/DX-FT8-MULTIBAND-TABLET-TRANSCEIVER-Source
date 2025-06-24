@@ -106,6 +106,9 @@ static void update_synchronization(void)
 		printf("slot state %d -> %d\n", slot_state, slot_state ^ 1);
 #endif
 		slot_state ^= 1;
+		if (was_txing) {
+			autoseq_tick();
+		}
 		was_txing = 0;
 
 		ft8_flag = 1;
@@ -119,7 +122,6 @@ static void update_synchronization(void)
 	if (QSO_xmit && target_slot == slot_state)
 	{
 		setup_to_transmit_on_next_DSP_Flag(); // TODO: move to main.c
-		autoseq_tick();
 		QSO_xmit = 0;
 		was_txing = 1;
 		// Partial TX, set the TX counter based on current ft8_time

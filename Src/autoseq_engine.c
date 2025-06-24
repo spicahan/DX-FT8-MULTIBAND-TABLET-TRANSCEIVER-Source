@@ -178,7 +178,7 @@ void autoseq_get_qso_state(char out_text[MAX_MSG_LEN])
     };
 
     snprintf(out_text, MAX_MSG_LEN - 1,
-        "%s %s rtry:%1d",
+        "%s %s tried:%1d",
         ctx.dxcall,
         states[ctx.state],
         ctx.retry_counter
@@ -456,7 +456,7 @@ static bool generate_response(const Decode *msg, bool override)
             //     return true;
 
             case TX3:
-                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
+                set_state(AS_ROGERS, TX4, 0); // Send RR73 only once
                 return true;
             // QSO complete without signal report exchange
             case TX4:
@@ -506,6 +506,7 @@ static bool generate_response(const Decode *msg, bool override)
         }
         return false;
 
+    // Since 73 is sent only once, this should never be reached
     case AS_SIGNOFF:
         switch (ctx.rcvd_msg_type) {
             // DX hasn't received our TX5. Retry
