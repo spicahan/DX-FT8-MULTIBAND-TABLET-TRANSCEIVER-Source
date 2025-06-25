@@ -5,7 +5,7 @@ CXX     = g++
 CFLAGS  = -DHOST_HAL_MOCK -g -Wall -Werror -I../Inc -I../FT8_library
 CXXFLAGS = -DHOST_HAL_MOCK -g -Wall -Werror -I../Inc -I../FT8_library -std=c++17
 
-C_SRC   = ../Src/main.c ../Src/autoseq_engine.c ../Src/ADIF.c host_mocks.c
+C_SRC   = ../Src/main.c ../Src/autoseq_engine.c ../Src/ADIF.c ../Src/qso_display.c host_mocks.c
 CXX_SRC = json_parser.cpp
 C_OBJS  = $(C_SRC:.c=.o)
 CXX_OBJS = $(CXX_SRC:.cpp=.o)

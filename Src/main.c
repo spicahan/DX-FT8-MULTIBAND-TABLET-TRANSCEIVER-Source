@@ -52,6 +52,7 @@
 #include "gen_ft8.h"
 #include "log_file.h"
 #include "Display.h"
+#include "qso_display.h"
 #include "traffic_manager.h"
 
 uint32_t start_time, ft8_time;
@@ -84,7 +85,7 @@ static void HID_InitApplication(void);
 void tx_display_update()
 {
 	if (xmit_flag) {
-		display_xmitting_message(autoseq_txbuf);
+		display_txing_message(autoseq_txbuf);
 	} else {
 		display_queued_message(autoseq_txbuf);
 	}
@@ -252,8 +253,6 @@ int main(int argc, char *argv[]) {
 
 		if (decode_flag && !Tune_On && !xmit_flag)
 		{
-			// TODO get rid of this as ft8_decode should always overwrite
-			clear_decoded_messages();
 			master_decoded = ft8_decode();
 #ifdef HOST_HAL_MOCK
 			// Check if we should exit the main
@@ -261,7 +260,7 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 #endif
-			display_messages(master_decoded);
+			display_messages(new_decoded, master_decoded);
 			// Write all the decoded messages to RxTxLog
 			make_Real_Time();
 			make_Real_Date();
@@ -501,29 +500,6 @@ static void CPU_CACHE_Enable(void)
 
 	/* Enable D-Cache */
 	SCB_EnableDCache();
-}
-
-// show debug text on LCD
-void _debug(const char *txt) {
-	return;
-	const int display_start_x = 240;
-	const int display_start_y = 240;
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, blank, LEFT_MODE);
-	BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y - 40, (const uint8_t *)txt, LEFT_MODE);
-}
-
-// show the current QSO state on LCD
-void display_qso_state(const char *txt) {
-	const int display_start_x = 240;
-	const int display_start_y = FFT_H + 20;
-	BSP_LCD_SetFont(&Font16);
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, blank, LEFT_MODE);
-	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	BSP_LCD_DisplayStringAt(display_start_x, display_start_y, (const uint8_t *)txt, LEFT_MODE);
 }
 #endif
 

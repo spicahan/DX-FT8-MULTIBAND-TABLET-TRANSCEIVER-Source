@@ -41,7 +41,6 @@ int ft8_flag, FT_8_counter, ft8_marker;
 
 // Display.c
 int FT_8_TouchIndex = 0;
-void update_log_display(int mode) {}
 
 uint16_t cursor;
 char rtc_date_string[9];
@@ -175,75 +174,7 @@ void set_FT8_Tone(uint8_t ft8_tone) {
 }
 
 // decode_ft8.c
-const int kMax_decoded_messages = 20;
-static char call_blank[8];
-static uint8_t call_initialised = 0;
-static char locator_blank[5];
-static uint8_t locator_initialised = 0;
-static int message_limit = 10;
 Decode new_decoded[25];
-
-void string_init(char *string, int size, uint8_t *is_initialised, char character)
-{
-	if (*is_initialised != size)
-	{
-		for (int i = 0; i < size - 1; i++)
-		{
-			string[i] = character;
-		}
-		string[size - 1] = 0;
-		*is_initialised = size;
-	}
-}
-
-void display_messages(int decoded_messages)
-{
-	const char *paramlist = "%s %s %s";
-
-	for (int i = 0; i < decoded_messages && i < message_limit; i++)
-	{
-        printf("\nDecoded: ");
-		const char *call_to = new_decoded[i].call_to;
-		const char *call_from = new_decoded[i].call_from;
-		const char *locator = new_decoded[i].locator;
-
-		if (strcmp("CQ", call_to) == 0)
-		{
-			if (strcmp(Station_Call, call_from) != 0)
-			{
-				printf("%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
-			}
-			else
-			{
-				printf(paramlist, call_to, call_from, locator);
-			}
-		}
-		else
-		{
-			printf(paramlist, call_to, call_from, locator);
-		}
-	}
-    printf("\n");
-}
-
-void clear_decoded_messages(void)
-{
-	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
-	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
-	for (int i = 0; i < kMax_decoded_messages; i++)
-	{
-		strcpy(new_decoded[i].call_to, call_blank);
-		strcpy(new_decoded[i].call_from, call_blank);
-		strcpy(new_decoded[i].locator, locator_blank);
-		strcpy(new_decoded[i].target_locator, locator_blank);
-		new_decoded[i].freq_hz = 0;
-		new_decoded[i].sync_score = 0;
-		new_decoded[i].received_snr = 99;
-		new_decoded[i].slot = 0;
-		new_decoded[i].RR73 = 0;
-		new_decoded[i].sequence = Seq_RSL;
-	}
-}
 
 void process_selected_Station(int stations_decoded, int TouchIndex)
 {
@@ -393,15 +324,6 @@ void HAL_Delay(uint32_t ms) {
     mock_tick += ms;
 }
 
-// -----------------------------------------------------------------------------
-// Stub Display & LCD routines so we see output on stdout instead
-void BSP_LCD_Init(void) { printf("[LCD Init]\n"); }
-void BSP_LCD_Clear(uint32_t color) { printf("[LCD Clear]\n"); }
-void BSP_LCD_DisplayStringAtLine(uint16_t Line, uint8_t *ptr) {
-    printf("[LCD Line %d] %s\n", Line, ptr);
-}
-// Add other LCD_ / Display_ stubs as needed
-
 // Initialize test data and configuration
 static void init_test_data(void) {
     if (!test_data_loaded) {
@@ -486,21 +408,25 @@ void setup_to_transmit_on_next_DSP_Flag(void) {
 	xmit_flag = 1;
 }
 
-void _debug(const char *txt) {
-	printf("\nDEBUG: %s\n", txt);
+// LCD mocks
+sFONT Font16 = {
+  NULL,
+  11, /* Width */
+  16, /* Height */
+};
+
+void BSP_LCD_DisplayStringAt(uint16_t Xpos, uint16_t Ypos, const uint8_t *Text, Text_AlignModeTypdef Mode)
+{
+    // Trying to clear the message or display empty string
+    if (!Text || Text[0] == '\0' || Text[0] == ' ') {
+        return;
+    }
+    printf("LCD: %s\n", Text);
 }
 
-void display_qso_state(const char *txt) {
-	printf("\nSTATE: %s\n", txt);
-}
-
-void display_queued_message(const char *txt) {
-	printf("\nQUEUED: %s", txt);
-}
-
-void display_xmitting_message(const char *txt) {
-	printf("\nXMITTING: %s", txt);
-}
+void BSP_LCD_SetBackColor(uint32_t Color) {}
+void BSP_LCD_SetFont(sFONT *fonts) {}
+void BSP_LCD_SetTextColor(uint32_t Color) {}
 
 // -----------------------------------------------------------------------------
 // Optional: stub or disable any audio / codec / Si5351 dependencies

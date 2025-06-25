@@ -16,8 +16,6 @@
 #endif
 void _debug(const char *txt);
 void tx_display_update();
-// TODO refactor
-void display_qso_state(const char *txt);
 
 #define NoOp  __NOP()
 

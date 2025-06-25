@@ -22,10 +22,8 @@
 #include "main.h"
 
 #include "Process_DSP.h"
-#include "stm32746g_discovery_lcd.h"
 #include "log_file.h"
 #include "decode_ft8.h"
-#include "traffic_manager.h"
 #include "ADIF.h"
 #include "DS3231.h"
 
@@ -38,18 +36,9 @@ const int kMin_score = 40; // Minimum sync score threshold for candidates
 static int validate_locator(const char locator[]);
 static int strindex(const char s[], const char t[]);
 
-static display_message display[10];
 Decode new_decoded[25];
 
-static int message_limit = 10;
-
 int Target_RSL;
-
-static void clear_messages(void)
-{
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(0, FFT_H, 240, 201);
-}
 
 int ft8_decode(void)
 {
@@ -171,62 +160,6 @@ int ft8_decode(void)
 	return num_decoded;
 }
 
-void display_messages(int decoded_messages)
-{
-	clear_messages();
-	BSP_LCD_SetFont(&Font16);
-
-	for (int i = 0; i < decoded_messages && i < message_limit; i++)
-	{
-		const char *call_to = new_decoded[i].call_to;
-		const char *call_from = new_decoded[i].call_from;
-		const char *locator = new_decoded[i].locator;
-
-		// FIXME snprintf generates compile error
-		sprintf(display[i].message, "%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
-		display[i].text_color = White;
-		if (strcmp(call_to, "CQ") == 0 || strncmp(call_to, "CQ ", 3) == 0)
-		{
-			display[i].text_color = Green;
-		}
-		// Addressed me
-		if (strncmp(call_to, Station_Call, CALLSIGN_SIZE) == 0)
-		{
-			display[i].text_color = Red;
-		}
-		// Mark own TX in yellow (WSJT-X)
-		if (was_txing) {
-			display[i].text_color = Yellow;
-		}
-	}
-
-	for (int j = 0; j < decoded_messages && j < message_limit; j++)
-	{
-		uint32_t lcd_color = LCD_COLOR_BLACK;
-		switch(display[j].text_color) {
-			case White:
-				lcd_color = LCD_COLOR_WHITE;
-				break;
-			case Red:
-				lcd_color = LCD_COLOR_RED;
-				break;
-			case Green:
-				lcd_color = LCD_COLOR_GREEN;
-				break;
-			case Blue:
-				lcd_color = LCD_COLOR_BLUE;
-				break;
-			case Yellow:
-				lcd_color = LCD_COLOR_YELLOW;
-				break;
-			default:
-				break;
-		}
-		BSP_LCD_SetTextColor(lcd_color);
-		BSP_LCD_DisplayStringAt(0, FFT_H + j * 20, (const uint8_t *)display[j].message, LEFT_MODE);
-	}
-}
-
 static int validate_locator(const char locator[])
 {
 	uint8_t A1, A2, N1, N2;
@@ -251,31 +184,6 @@ static int validate_locator(const char locator[])
 	else
 		return 0;
 }
-
-static char call_blank[8];
-static uint8_t call_initialised = 0;
-static char locator_blank[5];
-static uint8_t locator_initialised = 0;
-
-void clear_decoded_messages(void)
-{
-	string_init(call_blank, sizeof(call_blank), &call_initialised, ' ');
-	string_init(locator_blank, sizeof(locator_blank), &locator_initialised, ' ');
-	for (int i = 0; i < kMax_decoded_messages; i++)
-	{
-		strcpy(new_decoded[i].call_to, call_blank);
-		strcpy(new_decoded[i].call_from, call_blank);
-		strcpy(new_decoded[i].locator, locator_blank);
-		strcpy(new_decoded[i].target_locator, locator_blank);
-		new_decoded[i].freq_hz = 0;
-		new_decoded[i].sync_score = 0;
-		new_decoded[i].received_snr = 99;
-		new_decoded[i].slot = 0;
-		new_decoded[i].RR73 = 0;
-		new_decoded[i].sequence = 0;
-	}
-}
-
 
 void process_selected_Station(int num_decoded, int TouchIndex)
 {
@@ -316,17 +224,4 @@ static int strindex(const char s[], const char t[])
 			result = i;
 	}
 	return result;
-}
-
-void string_init(char *string, int size, uint8_t *is_initialised, char character)
-{
-	if (*is_initialised != size)
-	{
-		for (int i = 0; i < size - 1; i++)
-		{
-			string[i] = character;
-		}
-		string[size - 1] = 0;
-		*is_initialised = size;
-	}
 }

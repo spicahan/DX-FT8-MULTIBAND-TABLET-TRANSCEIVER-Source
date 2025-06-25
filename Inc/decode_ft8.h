@@ -19,7 +19,7 @@ typedef enum _Sequence
     Seq_Locator
 } Sequence;
 
-typedef struct
+typedef struct Decode
 {
     char call_to[14]; // call also be 'CQ'
     char call_from[14];
@@ -34,21 +34,6 @@ typedef struct
     Sequence sequence;
 } Decode;
 
-typedef enum _MsgColor
-{
-    White = 0,
-    Red,
-    Green,
-    Blue,
-    Yellow
-} MsgColor;
-
-typedef struct
-{
-    char message[MAX_MSG_LEN];
-    MsgColor text_color;
-} display_message;
-
 typedef struct
 {
     int number_times_called;
@@ -62,11 +47,7 @@ typedef struct
 
 extern Decode new_decoded[];
 
-void display_messages(int decoded_messages);
 void process_selected_Station(int num_decoded, int TouchIndex);
 void set_QSO_Xmit_Freq(int freq);
-void clear_decoded_messages(void);
-void string_init(char *string, int size, uint8_t *is_initialised, char character);
-void queue_custom_text(const char *plain_text);   /* needed by autoseq_engine */
 
 #endif /* DECODE_FT8_H_ */
