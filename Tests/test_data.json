@@ -76,7 +76,7 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}",
           "locator": "R-3",
-          "sequence": 2,
+          "sequence": 0,
           "snr": -12,
           "received_snr": -3
         }
@@ -96,7 +96,7 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}", 
           "locator": "73",
-          "sequence": 2,
+          "sequence": 1,
           "snr": 0,
           "received_snr": 99
         }

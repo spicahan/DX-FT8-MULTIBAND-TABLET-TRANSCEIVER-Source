@@ -157,7 +157,7 @@ void Write_Log_Data(const char *entry) {
 }
 
 void Write_RxTxLog_Data(const char *entry) {
-	printf("RxTx log: %s\n", entry);
+	// printf("RxTx log: %s\n", entry);
 }
 
 // traffic_manager.c
@@ -289,7 +289,6 @@ static void convert_test_message_to_decode(const TestMessage* src, Decode* dst) 
     dst->slot = src->slot;
     dst->freq_hz = src->freq_hz;
     dst->sync_score = src->sync_score;
-    dst->RR73 = src->RR73;
 }
 
 // Needed by autoseq_engine

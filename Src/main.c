@@ -124,7 +124,7 @@ static void update_synchronization(void)
 	}
 
 	// Check if TX is intended
-	if (QSO_xmit && target_slot == slot_state)
+	if (QSO_xmit && target_slot == slot_state && FT_8_counter < 29)
 	{
 		setup_to_transmit_on_next_DSP_Flag(); // TODO: move to main.c
 		QSO_xmit = 0;
@@ -352,6 +352,7 @@ int main(int argc, char *argv[]) {
 			queue_custom_text(autoseq_txbuf);
 			QSO_xmit = 1;
 			FT8_Touch_Flag = 0;
+			tx_display_update();
 		}
 
 

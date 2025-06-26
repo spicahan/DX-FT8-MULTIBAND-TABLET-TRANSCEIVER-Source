@@ -34,7 +34,6 @@ const unsigned int kMax_message_length = 25;
 const int kMin_score = 40; // Minimum sync score threshold for candidates
 
 static int validate_locator(const char locator[]);
-static int strindex(const char s[], const char t[]);
 
 Decode new_decoded[25];
 
@@ -126,14 +125,11 @@ int ft8_decode(void)
 				display_RSL = (int)((raw_RSL - 160)) / 6;
 				new_decoded[num_decoded].snr = display_RSL;
 
+				new_decoded[num_decoded].sequence = Seq_RSL;
 				if (validate_locator(locator) == 1)
 				{
 					strcpy(new_decoded[num_decoded].target_locator, locator);
 					new_decoded[num_decoded].sequence = Seq_Locator;
-				}
-				else if (strindex(locator, "73") >= 0 || strindex(locator, "RR73") >= 0 || strindex(locator, "RRR") >= 0)
-				{
-					new_decoded[num_decoded].RR73 = 1;
 				}
 				else
 				{
@@ -141,8 +137,6 @@ int ft8_decode(void)
 					if (*ptr == 'R')
 					{
 						ptr++;
-						new_decoded[num_decoded].RR73 = 2; // RR73 pending state
-						new_decoded[num_decoded].sequence = Seq_RSL;
 					}
 
 					received_RSL = atoi(ptr);
@@ -209,19 +203,4 @@ void set_QSO_Xmit_Freq(int freq)
 
 	Set_Cursor_Frequency();
 	show_variable(400, 25, (int)NCO_Frequency);
-}
-
-static int strindex(const char s[], const char t[])
-{
-	int result = -1;
-
-	for (int i = 0; s[i] != 0; i++)
-	{
-		int k = 0;
-		for (int j = i; t[k] != 0 && s[j] == t[k]; j++, k++)
-			;
-		if (k > 0 && t[k] == 0)
-			result = i;
-	}
-	return result;
 }

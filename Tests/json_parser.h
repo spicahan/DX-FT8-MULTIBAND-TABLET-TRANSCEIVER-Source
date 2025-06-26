@@ -35,7 +35,6 @@ typedef struct {
     int slot;
     int freq_hz;
     int sync_score;
-    int RR73;
 } TestMessage;
 
 typedef struct {

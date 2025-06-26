@@ -119,7 +119,6 @@ extern "C" int load_test_data_json(const char* filename, TestData* test_data) {
                             msg.slot = 0;  // Will be set during decode
                             msg.freq_hz = 0;
                             msg.sync_score = 0;
-                            msg.RR73 = 0;
                         }
                     } else {
                         period.messages = nullptr;

@@ -455,7 +455,7 @@ static bool generate_response(const Decode *msg, bool override)
             //     return true;
 
             case TX3:
-                set_state(AS_ROGERS, TX4, 0); // Send RR73 only once
+                set_state(AS_ROGERS, TX4, MAX_TX_RETRY);
                 return true;
             // QSO complete without signal report exchange
             case TX4:

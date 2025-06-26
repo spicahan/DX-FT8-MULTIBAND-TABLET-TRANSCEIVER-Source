@@ -30,20 +30,8 @@ typedef struct Decode
     int received_snr;
     char target_locator[7];
     int slot;
-    int RR73;
     Sequence sequence;
 } Decode;
-
-typedef struct
-{
-    int number_times_called;
-    char call[14];
-    char locator[7];
-    int RSL;
-    int received_RSL;
-    int RR73;
-    Sequence sequence;
-} Calling_Station;
 
 extern Decode new_decoded[];
 
