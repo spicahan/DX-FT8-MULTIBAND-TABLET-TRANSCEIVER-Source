@@ -351,7 +351,7 @@ static void init_test_data(void) {
 
 // Replace the real ft8_decode() to feed our test data
 int ft8_decode(void) {
-    printf("d");
+    printf("d\n");
 	int period_index = ft8_time / 30000;
     
     // Initialize test data on first call

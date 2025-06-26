@@ -84,6 +84,9 @@ static void HID_InitApplication(void);
 // Helper function for updating TX region display
 void tx_display_update()
 {
+	if (Tune_On) {
+		return;
+	}
 	if (xmit_flag) {
 		display_txing_message(autoseq_txbuf);
 	} else {
