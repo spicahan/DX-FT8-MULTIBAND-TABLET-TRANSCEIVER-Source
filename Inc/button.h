@@ -111,9 +111,10 @@ enum ButtonIds
 	FreeText2,
 	SkipTx1,
 	SkipTx1OnOff,
-	EditFreeText,
-	//38-80 is keyboard
-	NumButtons = 81
+	EditFreeText1,
+	EditFreeText2,
+	//39-81 is keyboard
+	NumButtons = 82
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -159,6 +160,7 @@ void EnableKeyboard(void);
 void DisableKeyboard(void);
 void AppendChar(char *str, char c);
 void DeleteLastChar(char *str);
+void UpdateFreeText1(void);
 void UpdateFreeText2(void);
 
 void SelectFilterBlock();
