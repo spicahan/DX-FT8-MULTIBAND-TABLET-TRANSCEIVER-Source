@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "autoseq_engine.h"
+#include "qso_display.h" // For adding worked qso entry
 #include "gen_ft8.h" // For accessing CQ_Mode_Index and saving Target_*
 #include "ADIF.h"    // For write_ADIF_Log()
 extern int Beacon_On; // TODO get rid of manual extern
@@ -69,6 +70,7 @@ static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN]);
 static void parse_rcvd_msg(const Decode *msg);
 // Internal helper called by autoseq_on_touch() and autoseq_on_decode()
 static bool generate_response(const Decode *msg, bool override);
+static void write_worked_qso();
 /******************************************************/
 
 /* ====================================================
@@ -276,6 +278,7 @@ static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
         snprintf(out, MAX_MSG_LEN, "%s %s RR73", ctx.dxcall, ctx.mycall);
         if (!ctx.logged) {
             write_ADIF_Log();
+            write_worked_qso();
             ctx.logged = true;
         }
         break;
@@ -283,6 +286,7 @@ static void format_tx_text(tx_msg_t id, char out[MAX_MSG_LEN])
         snprintf(out, MAX_MSG_LEN, "%s %s 73", ctx.dxcall, ctx.mycall);
         if (!ctx.logged) {
             write_ADIF_Log();
+            write_worked_qso();
             ctx.logged = true;
         }
         break;
@@ -521,4 +525,13 @@ static bool generate_response(const Decode *msg, bool override)
         break;
     }
     return false;
+}
+
+static void write_worked_qso()
+{
+    char *buf = add_worked_qso();
+    snprintf(buf, MAX_LINE_LEN - 4, "%s %+3d",
+        ctx.dxcall,
+        Station_RSL
+    );
 }

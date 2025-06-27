@@ -17,11 +17,16 @@
 #endif
 
 #define MAX_RX_ROWS 10
+#define MAX_QSO_ROWS 10
+#define MAX_QSO_ENTRIES 30
 #define START_X_LEFT 0
 #define START_X_RIGHT 240
 #define START_Y 40 // FFT_H
 #define LINE_HT 20
-const char *blank = "                     "; // 21 spaces
+
+static const char *blank = "                     "; // 21 spaces
+static char worked_qso_entries[MAX_QSO_ENTRIES][MAX_LINE_LEN] = {};
+static int num_qsos = 0;
 
 typedef enum _MsgColor
 {
@@ -65,6 +70,13 @@ static void clear_rx_region()
 {
     for (int i = 0; i < MAX_RX_ROWS; i++) {
         display_line(false, i, Black, Black, blank);
+    }
+}
+
+static void clear_qso_region()
+{
+    for (int i = 0; i < MAX_QSO_ROWS; i++) {
+        display_line(true, i, Black, Black, blank);
     }
 }
 
@@ -115,6 +127,39 @@ void display_qso_state(const char *txt)
 {
     display_line(true, 1, Black, Black, blank);
     display_line(true, 1, Black, White, txt);
+}
+
+char * add_worked_qso() {
+    // TODO overflow
+    return worked_qso_entries[num_qsos++] + 3; // First 3 chars preserved for number
+}
+
+bool display_worked_qsos()
+{
+    // Display in pages
+    // pi is page index
+    static int pi = 0;
+    if (pi * MAX_QSO_ROWS > num_qsos) {
+        pi = 0;
+        return false;
+    }
+    // Clear the entire log region first
+    clear_qso_region();
+    // Display the log in reverse order
+    for (int ri = 0; ri < num_qsos; ++ri)
+    {
+        int cur_qi = num_qsos - (MAX_QSO_ROWS * pi + ri) - 1;
+        if (cur_qi == -1)
+        {
+            break;
+        }
+        // Add number
+        sprintf(worked_qso_entries[cur_qi], "%2d", cur_qi);
+        worked_qso_entries[cur_qi][2] = '.';
+        display_line(true, ri, Black, Green, worked_qso_entries[cur_qi]);
+    }
+    ++pi;
+    return true;
 }
 
 // show debug text on LCD

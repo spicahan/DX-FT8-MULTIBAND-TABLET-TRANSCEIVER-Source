@@ -66,6 +66,7 @@ int decode_flag = 0;
 int was_txing = 0;
 bool clr_pressed = false;
 bool free_text = false;
+bool tx_pressed = false;
 
 // Autoseq TX text buffer
 static char autoseq_txbuf[MAX_MSG_LEN];
@@ -73,6 +74,9 @@ static char autoseq_txbuf[MAX_MSG_LEN];
 static char autoseq_state_str[MAX_MSG_LEN];
 
 static int master_decoded = 0;
+
+static bool worked_qsos_in_display = false;
+
 #ifndef HOST_HAL_MOCK
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
@@ -84,7 +88,7 @@ static void HID_InitApplication(void);
 // Helper function for updating TX region display
 void tx_display_update()
 {
-	if (Tune_On) {
+	if (Tune_On || worked_qsos_in_display) {
 		return;
 	}
 	if (xmit_flag) {
@@ -345,6 +349,12 @@ int main(int argc, char *argv[]) {
 			clr_pressed = false;
 		}
 
+		if (tx_pressed) {
+			worked_qsos_in_display = display_worked_qsos();
+			tx_pressed = false;
+			tx_display_update();
+		}
+
 		if (!Tune_On && FT8_Touch_Flag && FT_8_TouchIndex < master_decoded) {
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
 			autoseq_on_touch(&new_decoded[FT_8_TouchIndex]);
@@ -354,7 +364,6 @@ int main(int argc, char *argv[]) {
 			FT8_Touch_Flag = 0;
 			tx_display_update();
 		}
-
 
 		update_synchronization();
 	}

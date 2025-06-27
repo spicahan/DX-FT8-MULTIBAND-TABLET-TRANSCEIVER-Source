@@ -12,13 +12,11 @@
 #define FFT_X 0
 #define FFT_Y 1
 #define FFT_W (ft8_buffer_size - ft8_min_bin)
+#define TX_X 240
 
 int FT_8_TouchIndex;
 uint16_t cursor = 192;
 int FT8_Touch_Flag;
-
-const int log_start = 240;
-const int log_width = 230;
 
 static uint8_t WF_Bfr[FFT_H * FFT_W];
 
@@ -89,7 +87,7 @@ void setup_display(void)
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: 250625", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: 250627", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
 	BSP_LCD_DisplayStringAt(50, 160,
@@ -163,6 +161,11 @@ static uint8_t FT8_Touch(void)
 	return 0;
 }
 
+static bool TX_Touch()
+{
+	return valx > TX_X && valy > 40 && valy < 240;
+}
+
 void Process_Touch(void)
 {
 	static uint8_t touch_detected = 0;
@@ -212,6 +215,11 @@ void Process_Touch(void)
 			{
 				BSP_LCD_DisplayOff();
 				turn_backlight_on = display_on = 0;
+			}
+			// in the TX region?
+			else if (!Tune_On && TX_Touch())
+			{
+				tx_pressed = true;
 			}
 			else
 			{
