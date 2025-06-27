@@ -111,7 +111,10 @@ enum ButtonIds
 	FreeText2,
 	SkipTx1,
 	SkipTx1OnOff,
-	NumButtons = 37
+	EditFreeText1,
+	EditFreeText2,
+	//39-81 is keyboard
+	NumButtons = 82
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -152,6 +155,13 @@ void setup_Cal_Display(void);
 void erase_Cal_Display(void);
 
 void FT8_Sync(void);
+
+void EnableKeyboard(void);
+void DisableKeyboard(void);
+void AppendChar(char *str, char c);
+void DeleteLastChar(char *str);
+void UpdateFreeText1(void);
+void UpdateFreeText2(void);
 
 void SelectFilterBlock();
 
