@@ -150,7 +150,7 @@ bool display_worked_qsos()
     // Determine how many entries to show (max 100)
     int total_entries = num_qsos < MAX_QSO_ENTRIES ? num_qsos : MAX_QSO_ENTRIES;
     
-    if (pi * MAX_QSO_ROWS >= total_entries) {
+    if (pi * MAX_QSO_ROWS > total_entries) {
         pi = 0;
         return false;
     }
