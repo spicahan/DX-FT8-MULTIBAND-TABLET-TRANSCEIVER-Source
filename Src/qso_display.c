@@ -131,9 +131,11 @@ void display_qso_state(const char *txt)
 }
 
 char * add_worked_qso() {
-    // TODO overflow
+    // Handle circular buffer overflow - use modulo for array indexing
+    int entry_index = num_qsos % MAX_QSO_ENTRIES;
+    num_qsos++;
     // First 12 chars preserved for number, band, time
-    return worked_qso_entries[num_qsos++] + 12;
+    return worked_qso_entries[entry_index] + 12;
 }
 
 bool display_worked_qsos()
@@ -144,29 +146,38 @@ bool display_worked_qsos()
     // Display in pages
     // pi is page index
     static int pi = 0;
-    if (pi * MAX_QSO_ROWS > num_qsos) {
+    
+    // Determine how many entries to show (max 100)
+    int total_entries = num_qsos < MAX_QSO_ENTRIES ? num_qsos : MAX_QSO_ENTRIES;
+    
+    if (pi * MAX_QSO_ROWS >= total_entries) {
         pi = 0;
         return false;
     }
+    
     // Clear the entire log region first
     clear_qso_region();
-    // Display the log in reverse order
-    for (int ri = 0; ri < num_qsos; ++ri)
+    
+    // Display the log in reverse order (most recent first)
+    for (int ri = 0; ri < MAX_QSO_ROWS && (pi * MAX_QSO_ROWS + ri) < total_entries; ++ri)
     {
-        int cur_qi = num_qsos - (MAX_QSO_ROWS * pi + ri) - 1;
-        if (cur_qi == -1)
-        {
-            break;
-        }
+        // Calculate the QSO index in reverse chronological order
+        int paging_offset = pi * MAX_QSO_ROWS + ri;
+        int qso_index = num_qsos - 1 - paging_offset;
+        
+        // Get the actual array index using modulo for circular buffer
+        int array_index = qso_index % MAX_QSO_ENTRIES;
+        
         // Add 1-based number, HH:MM, band (11 chars + space)
-        snprintf(worked_qso_entries[cur_qi % MAX_QSO_ENTRIES], 12,
+        // Display number shows original sequence (like odometer)
+        snprintf(worked_qso_entries[array_index], 12,
             "%02u %.3s %.4s",
-            (cur_qi + 1) % MAX_QSO_ENTRIES,
+            (qso_index + 1) % MAX_QSO_ENTRIES,
             band_strs[BandIndex],
             log_rtc_time_string
         );
-        worked_qso_entries[cur_qi][11] = ' ';
-        display_line(true, ri, Black, Green, worked_qso_entries[cur_qi]);
+        worked_qso_entries[array_index][11] = ' ';
+        display_line(true, ri, Black, Green, worked_qso_entries[array_index]);
     }
     ++pi;
     return true;
