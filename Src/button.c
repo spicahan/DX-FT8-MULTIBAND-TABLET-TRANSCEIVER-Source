@@ -678,18 +678,18 @@ void executeButton(uint16_t index)
 	case Tune:
 		if (!sButtonData[Tune].state)
 		{
-			tune_Off_sequence();
+			//tune_Off_sequence();
 			Tune_On = 0;
-			Arm_Tune = 0;
-			xmit_flag = 0;
-			receive_sequence();
+			//Arm_Tune = 0;
+			//xmit_flag = 0;
+			//receive_sequence();
 			erase_Cal_Display();
 		}
 		else
 		{
 			Tune_On = 1; // Turns off display of FT8 traffic
 			setup_Cal_Display();
-			Arm_Tune = 0;
+			//Arm_Tune = 0;
 		}
 		break;
 
