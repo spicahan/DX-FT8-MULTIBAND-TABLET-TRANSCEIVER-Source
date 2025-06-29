@@ -11,10 +11,8 @@
 #ifdef HOST_HAL_MOCK
 #include "host_mocks.h"
 #else
-#include "button.h"
 #include "fonts.h"
 #include "stm32746g_discovery_lcd.h"
-#include "DS3231.h"
 #endif
 
 #define MAX_RX_ROWS 10
@@ -134,15 +132,12 @@ char * add_worked_qso() {
     // Handle circular buffer overflow - use modulo for array indexing
     int entry_index = num_qsos % MAX_QSO_ENTRIES;
     num_qsos++;
-    // First 12 chars preserved for number, band, time
-    return worked_qso_entries[entry_index] + 12;
+    // First 3 chars preserved for number
+    return worked_qso_entries[entry_index] + 3;
 }
 
 bool display_worked_qsos()
 {
-    static const char band_strs[][4] = {
-        "40M", "30M", "20M", "17M", "15M", "12M", "10M"
-    };
     // Display in pages
     // pi is page index
     static int pi = 0;
@@ -170,13 +165,11 @@ bool display_worked_qsos()
         
         // Add 1-based number, HH:MM, band (11 chars + space)
         // Display number shows original sequence (like odometer)
-        snprintf(worked_qso_entries[array_index], 12,
-            "%02u %.3s %.4s",
-            (qso_index + 1) % MAX_QSO_ENTRIES,
-            band_strs[BandIndex],
-            log_rtc_time_string
+        snprintf(worked_qso_entries[array_index], 3,
+            "%02u",
+            (qso_index + 1) % MAX_QSO_ENTRIES
         );
-        worked_qso_entries[array_index][11] = ' ';
+        worked_qso_entries[array_index][2] = ' ';
         display_line(true, ri, Black, Green, worked_qso_entries[array_index]);
     }
     ++pi;

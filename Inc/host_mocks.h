@@ -27,6 +27,7 @@ enum BandIndex
 	_10M = 6,
 	NumBands = 7
 };
+extern int Arm_Tune;
 extern int BandIndex;
 
 typedef struct

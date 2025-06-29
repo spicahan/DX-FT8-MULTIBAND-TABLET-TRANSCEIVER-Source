@@ -16,6 +16,15 @@
 #include "qso_display.h" // For adding worked qso entry
 #include "gen_ft8.h" // For accessing CQ_Mode_Index and saving Target_*
 #include "ADIF.h"    // For write_ADIF_Log()
+
+// HAL
+#ifdef HOST_HAL_MOCK
+#include "host_mocks.h"
+#else
+#include "button.h"  // For BandIndex
+#include "DS3231.h"  // For log_rtc_time_string
+#endif
+
 extern int Beacon_On; // TODO get rid of manual extern
 extern int Skip_Tx1;  // TODO get rid of manual extern
 
@@ -529,7 +538,15 @@ static bool generate_response(const Decode *msg, bool override)
 
 static void write_worked_qso()
 {
+    static const char band_strs[][4] = {
+        "40M", "30M", "20M", "17M", "15M", "12M", "10M"
+    };
     char *buf = add_worked_qso();
-    // Only 9 character is available
-    strncpy(buf, ctx.dxcall, 9);
+    // band, HH:MM, callsign
+    // only 9 character is available for call sign
+    snprintf(buf, 19, "%.3s %.4s %.9s",
+        band_strs[BandIndex],
+        log_rtc_time_string,
+        ctx.dxcall
+    );
 }

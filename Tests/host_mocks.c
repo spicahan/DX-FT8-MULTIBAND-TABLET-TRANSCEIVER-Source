@@ -131,6 +131,7 @@ int Target_RSL;
 int Station_RSL;
 
 // button.c
+int Arm_Tune = 0;
 int BandIndex = 2; // 20M
 int Skip_Tx1 = 1;
 const FreqStruct sBand_Data[NumBands] =
