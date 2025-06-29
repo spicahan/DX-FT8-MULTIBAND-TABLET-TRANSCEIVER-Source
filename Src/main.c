@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
 				// to match the observed behavior.
 				if (ft8_xmit_delay >= 28)
 				{
-					if (!Tune_On)
+					if (!Arm_Tune)
 					{
 						if ((ft8_xmit_counter < 79) && (frame_counter == 2))
 						{
