@@ -132,8 +132,7 @@ char * add_worked_qso() {
     // Handle circular buffer overflow - use modulo for array indexing
     int entry_index = num_qsos % MAX_QSO_ENTRIES;
     num_qsos++;
-    // First 3 chars preserved for number
-    return worked_qso_entries[entry_index] + 3;
+    return worked_qso_entries[entry_index];
 }
 
 bool display_worked_qsos()
@@ -163,13 +162,6 @@ bool display_worked_qsos()
         // Get the actual array index using modulo for circular buffer
         int array_index = qso_index % MAX_QSO_ENTRIES;
         
-        // Add 1-based number, HH:MM, band (11 chars + space)
-        // Display number shows original sequence (like odometer)
-        snprintf(worked_qso_entries[array_index], 3,
-            "%02u",
-            (qso_index + 1) % MAX_QSO_ENTRIES
-        );
-        worked_qso_entries[array_index][2] = ' ';
         display_line(true, ri, Black, Green, worked_qso_entries[array_index]);
     }
     ++pi;

@@ -2,7 +2,7 @@
   "config": {
     "MY_CALLSIGN": "N6HAN",
     "MY_GRID": "CM87",
-    "DX_CALLSIGN": "AG6AQ", 
+    "DX_CALLSIGN": "AG6AQ/AH6", 
     "DX_GRID": "CM97",
     "TX_ON_EVEN": false
   },
@@ -75,10 +75,10 @@
         {
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}",
-          "locator": "R-3",
+          "locator": "R-13",
           "sequence": 0,
-          "snr": -12,
-          "received_snr": -3
+          "snr": 20,
+          "received_snr": -13
         }
       ]
     },
