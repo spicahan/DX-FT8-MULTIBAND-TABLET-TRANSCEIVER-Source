@@ -157,7 +157,7 @@ bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN])
 }
 
 /* === Populate the string for displaying the current QSO state  === */
-void autoseq_get_qso_state(char out_text[MAX_MSG_LEN])
+void autoseq_get_qso_state(char out_text[MAX_LINE_LEN])
 {
     if (!out_text) {
         return;
@@ -179,8 +179,8 @@ void autoseq_get_qso_state(char out_text[MAX_MSG_LEN])
         "CALL", // AS_CALLING
     };
 
-    snprintf(out_text, MAX_MSG_LEN - 1,
-        "%s %s tried:%1d",
+    snprintf(out_text, MAX_LINE_LEN,
+        "%-8.8s %.4s tried:%1u",
         ctx.dxcall,
         states[ctx.state],
         ctx.retry_counter
@@ -530,8 +530,6 @@ static bool generate_response(const Decode *msg, bool override)
 static void write_worked_qso()
 {
     char *buf = add_worked_qso();
-    snprintf(buf, MAX_LINE_LEN - 4, "%s %+3d",
-        ctx.dxcall,
-        Station_RSL
-    );
+    // Only 9 character is available
+    strncpy(buf, ctx.dxcall, 9);
 }

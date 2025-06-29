@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 #include "decode_ft8.h"   // for Decode
 #include "gen_ft8.h"      // for Station_Call
 #include "main.h"         // for was_txing
@@ -12,13 +11,15 @@
 #ifdef HOST_HAL_MOCK
 #include "host_mocks.h"
 #else
+#include "button.h"
 #include "fonts.h"
 #include "stm32746g_discovery_lcd.h"
+#include "DS3231.h"
 #endif
 
 #define MAX_RX_ROWS 10
 #define MAX_QSO_ROWS 10
-#define MAX_QSO_ENTRIES 30
+#define MAX_QSO_ENTRIES 100
 #define START_X_LEFT 0
 #define START_X_RIGHT 240
 #define START_Y 40 // FFT_H
@@ -90,9 +91,9 @@ void display_messages(Decode new_decoded[], int decoded_messages)
 		const char *call_from = new_decoded[i].call_from;
 		const char *locator = new_decoded[i].locator;
 
-		// FIXME snprintf generates compile error
         char message[MAX_MSG_LEN];
-		sprintf(message, "%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
+		snprintf(message, MAX_LINE_LEN, "%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
+        message[MAX_LINE_LEN] = '\0'; // Make sure it fits the display region
         MsgColor color = White;
 		if (strcmp(call_to, "CQ") == 0 || strncmp(call_to, "CQ ", 3) == 0)
 		{
@@ -131,11 +132,15 @@ void display_qso_state(const char *txt)
 
 char * add_worked_qso() {
     // TODO overflow
-    return worked_qso_entries[num_qsos++] + 3; // First 3 chars preserved for number
+    // First 12 chars preserved for number, band, time
+    return worked_qso_entries[num_qsos++] + 12;
 }
 
 bool display_worked_qsos()
 {
+    static const char band_strs[][4] = {
+        "40M", "30M", "20M", "17M", "15M", "12M", "10M"
+    };
     // Display in pages
     // pi is page index
     static int pi = 0;
@@ -153,9 +158,14 @@ bool display_worked_qsos()
         {
             break;
         }
-        // Add number
-        sprintf(worked_qso_entries[cur_qi], "%2d", cur_qi);
-        worked_qso_entries[cur_qi][2] = '.';
+        // Add 1-based number, HH:MM, band (11 chars + space)
+        snprintf(worked_qso_entries[cur_qi % MAX_QSO_ENTRIES], 12,
+            "%02u %.3s %.4s",
+            (cur_qi + 1) % MAX_QSO_ENTRIES,
+            band_strs[BandIndex],
+            log_rtc_time_string
+        );
+        worked_qso_entries[cur_qi][11] = ' ';
         display_line(true, ri, Black, Green, worked_qso_entries[cur_qi]);
     }
     ++pi;

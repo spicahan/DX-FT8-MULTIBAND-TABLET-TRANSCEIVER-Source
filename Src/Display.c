@@ -87,7 +87,7 @@ void setup_display(void)
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: 250627", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(50, 100, (const uint8_t *)"Firmware: 250629", LEFT_MODE);
 	BSP_LCD_DisplayStringAt(50, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
 	BSP_LCD_DisplayStringAt(50, 160,
@@ -163,7 +163,7 @@ static uint8_t FT8_Touch(void)
 
 static bool TX_Touch()
 {
-	return valx > TX_X && valy > 40 && valy < 240;
+	return valx > TX_X + 40 && valy > 80 && valy < 200;
 }
 
 void Process_Touch(void)

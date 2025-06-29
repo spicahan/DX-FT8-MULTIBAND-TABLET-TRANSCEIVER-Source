@@ -71,7 +71,7 @@ bool tx_pressed = false;
 // Autoseq TX text buffer
 static char autoseq_txbuf[MAX_MSG_LEN];
 // Autoseq current QSO state text
-static char autoseq_state_str[MAX_MSG_LEN];
+static char autoseq_state_str[MAX_LINE_LEN];
 
 static int master_decoded = 0;
 
