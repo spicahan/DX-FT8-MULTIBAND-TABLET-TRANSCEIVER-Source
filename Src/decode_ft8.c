@@ -27,6 +27,9 @@
 #include "ADIF.h"
 #include "DS3231.h"
 
+/* Returns −1 if (a) < (b), 0 if equal, +1 if (a) > (b) */
+#define CMP(a, b)   ( ((a) > (b)) - ((a) < (b)) )
+
 const int kLDPC_iterations = 20;
 const int kMax_candidates = 20;
 const int kMax_decoded_messages = 20;
@@ -34,6 +37,8 @@ const unsigned int kMax_message_length = 25;
 const int kMin_score = 40; // Minimum sync score threshold for candidates
 
 static int validate_locator(const char locator[]);
+
+static int compare(const void *a, const void *b);
 
 Decode new_decoded[25];
 
@@ -151,7 +156,41 @@ int ft8_decode(void)
 		}
 	} // End of big decode loop
 
+	qsort(new_decoded, num_decoded, sizeof(Decode), compare);
+
 	return num_decoded;
+}
+
+static int compare(const void *a, const void *b)
+{
+	const Decode *left = (const Decode *)a;
+	const Decode *right = (const Decode *)b;
+	// Addressed me?
+	// If both addressed me, compare SNR
+	if (strncmp(left->call_to, Station_Call, sizeof(Station_Call) == 0) &&
+	    strncmp(right->call_to, Station_Call, sizeof(Station_Call) == 0)) {
+		return CMP(left->snr, right->snr);
+	}
+	if (strncmp(left->call_to, Station_Call, sizeof(Station_Call) == 0)) {
+		return 1;
+	}
+	if (strncmp(right->call_to, Station_Call, sizeof(Station_Call) == 0)) {
+		return -1;
+	}
+	// CQ?
+	// If both are CQ, compare SNR
+	if ((strcmp(left->call_to, "CQ")  == 0 || strncmp(left->call_to, "CQ ", 3) == 0) &&
+	    (strcmp(right->call_to, "CQ")  == 0 || strncmp(right->call_to, "CQ ", 3) == 0)) {
+		return CMP(left->snr, right->snr);
+	}
+	if (strcmp(left->call_to, "CQ")  == 0 || strncmp(left->call_to, "CQ ", 3) == 0) {
+		return 1;
+	}
+	if (strcmp(right->call_to, "CQ")  == 0 || strncmp(right->call_to, "CQ ", 3) == 0) {
+		return 1;
+	}
+	// Everything else. Compare SNR
+	return CMP(left->snr, right->snr);
 }
 
 static int validate_locator(const char locator[])
