@@ -291,7 +291,7 @@ static int packtext77(const char *text, uint8_t *b77)
         --length;
     }
 
-    if (length >= 13)
+    if (length > 13)
     {
         return -1;
     }
