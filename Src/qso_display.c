@@ -98,7 +98,7 @@ void display_messages(Decode new_decoded[], int decoded_messages)
 			color = Green;
 		}
 		// Addressed me
-		if (strncmp(call_to, Station_Call, CALLSIGN_SIZE) == 0)
+		if (strncmp(call_to, Station_Call, sizeof(Station_Call)) == 0)
 		{
 			color = Red;
 		}
