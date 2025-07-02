@@ -187,7 +187,7 @@ static int compare(const void *a, const void *b)
 		return 1;
 	}
 	if (strcmp(right->call_to, "CQ")  == 0 || strncmp(right->call_to, "CQ ", 3) == 0) {
-		return 1;
+		return -1;
 	}
 	// Everything else. Compare SNR
 	return CMP(left->snr, right->snr);
