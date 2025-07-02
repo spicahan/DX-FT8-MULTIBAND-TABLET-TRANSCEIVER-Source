@@ -19,6 +19,8 @@ void tx_display_update();
 
 #define NoOp  __NOP()
 
+#define MAX_QUEUE_SIZE 9
+
 extern uint32_t start_time, ft8_time;
 
 extern int QSO_xmit;

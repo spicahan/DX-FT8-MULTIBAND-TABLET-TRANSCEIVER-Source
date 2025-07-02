@@ -71,7 +71,7 @@ bool tx_pressed = false;
 // Autoseq TX text buffer
 static char autoseq_txbuf[MAX_MSG_LEN];
 // Autoseq current QSO state text
-static char autoseq_state_str[MAX_LINE_LEN];
+static char autoseq_state_strs[MAX_QUEUE_SIZE][MAX_LINE_LEN];
 
 static int master_decoded = 0;
 
@@ -96,8 +96,8 @@ void tx_display_update()
 	} else {
 		display_queued_message(autoseq_txbuf);
 	}
-	autoseq_get_qso_state(autoseq_state_str);
-	display_qso_state(autoseq_state_str);
+	autoseq_get_qso_state(autoseq_state_strs);
+	display_qso_state(autoseq_state_strs);
 }
 
 static void update_synchronization(void)
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
 	}
 #endif
 
-	autoseq_init(Station_Call, Locator);
+	autoseq_init();
 
 
 	while (1)
@@ -286,54 +286,24 @@ int main(int argc, char *argv[]) {
 				Write_RxTxLog_Data(log_str);
 			}
 			if (!was_txing) {
-				for (int i = 0; i < master_decoded; i++)
+				autoseq_on_decodes(new_decoded, master_decoded);
+				if (autoseq_get_next_tx(autoseq_txbuf))
 				{
-					// TX is (potentially) necessary
-					if (autoseq_on_decode(&new_decoded[i]))
-					{
-						// Fetch TX msg
-						if (autoseq_get_next_tx(autoseq_txbuf))
-						{
-							_debug("QSO_xmit,rspnd");
-							queue_custom_text(autoseq_txbuf);
-							QSO_xmit = 1;
-							tx_display_update();
-							break;
-						}
-					}
+					queue_custom_text(autoseq_txbuf);
+					QSO_xmit = 1;
+				} else if (Beacon_On)  {
+					autoseq_start_cq();
+					autoseq_get_next_tx(autoseq_txbuf);
+					queue_custom_text(autoseq_txbuf);
+					QSO_xmit = 1;
+					target_slot = slot_state ^ 1;
 				}
-
-				// No valid response has received to advance auto sequencing.
-				// Check TX retry is needed?
-				// Yes => QSO_xmit = True;
-				// No  => check in beacon mode?
-				//       Yes => start_cq, QSO_xmit = True;
-				//       No  => QSO_xmit = False;
-				if (!QSO_xmit)
-				{
-					// Check if retry is necessary
-					if (autoseq_get_next_tx(autoseq_txbuf))
-					{
-						queue_custom_text(autoseq_txbuf);
-						_debug("QSO_xmit,retry");
-						QSO_xmit = 1;
-					}
-					else if (Beacon_On)
-					{
-						target_slot = slot_state ^ 1;
-						autoseq_start_cq();
-						autoseq_get_next_tx(autoseq_txbuf);
-						queue_custom_text(autoseq_txbuf);
-						_debug("QSO_xmit,CQ...");
-						QSO_xmit = 1;
-						tx_display_update();
-					}
-				}
+				tx_display_update();
 			}
+			
 			decode_flag = 0;
 		} // end of servicing FT_Decode
 
-		// No TX required by retrying or auto-sequencing
 		// Check if touch happened
 		// Note: In HOST_HAL_MOCK mode, touch events are simulated via JSON test data
 
@@ -343,7 +313,7 @@ int main(int argc, char *argv[]) {
 			terminate_QSO();
 			QSO_xmit = 0;
 			was_txing = 0;
-			autoseq_init(Station_Call, Locator);
+			autoseq_init();
 			autoseq_txbuf[0] = '\0';
 			tx_display_update();
 			clr_pressed = false;
@@ -358,11 +328,12 @@ int main(int argc, char *argv[]) {
 		if (!Tune_On && FT8_Touch_Flag && FT_8_TouchIndex < master_decoded) {
 			process_selected_Station(master_decoded, FT_8_TouchIndex);
 			autoseq_on_touch(&new_decoded[FT_8_TouchIndex]);
-			autoseq_get_next_tx(autoseq_txbuf);
-			queue_custom_text(autoseq_txbuf);
-			QSO_xmit = 1;
-			FT8_Touch_Flag = 0;
+			if (autoseq_get_next_tx(autoseq_txbuf)) {
+				queue_custom_text(autoseq_txbuf);
+				QSO_xmit = 1;
+			}
 			tx_display_update();
+			FT8_Touch_Flag = 0;
 		}
 
 		update_synchronization();

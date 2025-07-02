@@ -122,10 +122,13 @@ void display_txing_message(const char*msg)
     display_line(true, 0, Red, White, msg);
 }
 
-void display_qso_state(const char *txt)
+void display_qso_state(const char lines[][MAX_LINE_LEN])
 {
-    display_line(true, 1, Black, Black, blank);
-    display_line(true, 1, Black, White, txt);
+    for(int i = 0; i < MAX_QUEUE_SIZE; i++)
+    {
+        display_line(true, 1 + i, Black, Black, blank);
+        display_line(true, 1 + i, Black, White, lines[i]);
+    }
 }
 
 char * add_worked_qso() {
