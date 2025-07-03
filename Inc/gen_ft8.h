@@ -29,6 +29,7 @@ extern int CQ_Mode_Index;
 extern int Free_Index;
 extern char Free_Text1[MESSAGE_SIZE];
 extern char Free_Text2[MESSAGE_SIZE];
+extern char Comment[MESSAGE_SIZE];
 
 void Read_Station_File(void);
 void SD_Initialize(void);
