@@ -119,9 +119,17 @@ void autoseq_start_cq(void)
 // TODO dedup
 void autoseq_on_touch(const Decode *msg)
 {
-    if (!msg || queue_size == MAX_QUEUE_SIZE) {
+    if (!msg) {
         return;
     }
+
+    // If queue is full, remove the last one
+    // Note that with MAX_QUEUE_SIZE == 1, it replaces the current TX,
+    // which effectively disables the smart scheduler.
+    if (queue_size == MAX_QUEUE_SIZE) {
+        --queue_size;
+    }
+
     ctx_t *ctx = append();
     // Everything addressed me already processed by on_decode()
     strncpy(ctx->dxcall, msg->call_from, sizeof(ctx->dxcall) - 1);
@@ -386,6 +394,12 @@ static void parse_rcvd_msg(ctx_t *ctx, const Decode *msg) {
 /* Return whether TX is needed */
 void on_decode(const Decode *msg)
 {
+    // Not addressed us
+    if (strncmp(msg->call_to, Station_Call, sizeof(Station_Call)) != 0)
+    {
+        return;
+    }
+
     // Check if it matches an existing ctx
     for (int i = 0; i < queue_size; ++i) {
         ctx_t *ctx = &ctx_queue[i];
@@ -398,15 +412,7 @@ void on_decode(const Decode *msg)
 
     // No matching existing ctx found.
     // Check if need to enqueue a new ctx
-    // TODO: demote the lowest
-    // Queue is full
     if (queue_size == MAX_QUEUE_SIZE) {
-        return;
-    }
-
-    // Not addressed us
-    if (strncmp(msg->call_to, Station_Call, sizeof(Station_Call)) != 0)
-    {
         return;
     }
 
@@ -581,9 +587,9 @@ static int compare(const void *a, const void *b)
 {
     const ctx_t *left = (const ctx_t *)a;
     const ctx_t *right = (const ctx_t *)b;
-    // If both are in the same state, higher SNR wins
+    // If both are in the same state, lower retry times wins
     if (left->state == right->state) {
-        return CMP(left->snr_tx, right->snr_tx);
+        return CMP(right->retry_counter, left->retry_counter);
     }
     // Higher state wins
     return CMP(left->state, right->state);
