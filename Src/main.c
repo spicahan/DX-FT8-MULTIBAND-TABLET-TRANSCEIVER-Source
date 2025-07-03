@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 
 		}
 
-		if (decode_flag && !Tune_On && !xmit_flag)
+		if (decode_flag && !xmit_flag)
 		{
 			master_decoded = ft8_decode();
 #ifdef HOST_HAL_MOCK
@@ -291,6 +291,7 @@ int main(int argc, char *argv[]) {
 				{
 					queue_custom_text(autoseq_txbuf);
 					QSO_xmit = 1;
+					target_slot = slot_state ^ 1;
 				} else if (Beacon_On)  {
 					autoseq_start_cq();
 					autoseq_get_next_tx(autoseq_txbuf);

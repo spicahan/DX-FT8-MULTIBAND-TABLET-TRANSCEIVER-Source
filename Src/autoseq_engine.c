@@ -188,13 +188,13 @@ void autoseq_get_qso_state(char lines[][MAX_LINE_LEN])
         }
 
         const char states[][5] = {
-            "",     // AS_IDLE
+            "CALL", // AS_CALLING
             "RPLY", // AS_REPLYING
             "RPRT", // AS_REPORT
             "RRPT", // AS_ROGER_REPORT
             "RGRS", // AS_ROGERS
             "SOFF", // AS_SIGNOFF
-            "CALL", // AS_CALLING
+            "",     // AS_IDLE
         };
 
         snprintf(out_text, MAX_LINE_LEN,
