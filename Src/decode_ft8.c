@@ -167,14 +167,14 @@ static int compare(const void *a, const void *b)
 	const Decode *right = (const Decode *)b;
 	// Addressed me?
 	// If both addressed me, compare SNR
-	if (strncmp(left->call_to, Station_Call, sizeof(Station_Call) == 0) &&
-	    strncmp(right->call_to, Station_Call, sizeof(Station_Call) == 0)) {
+	if (strncmp(left->call_to, Station_Call, sizeof(Station_Call)) == 0 &&
+	    strncmp(right->call_to, Station_Call, sizeof(Station_Call)) == 0) {
 		return CMP(left->snr, right->snr);
 	}
-	if (strncmp(left->call_to, Station_Call, sizeof(Station_Call) == 0)) {
+	if (strncmp(left->call_to, Station_Call, sizeof(Station_Call)) == 0) {
 		return -1;
 	}
-	if (strncmp(right->call_to, Station_Call, sizeof(Station_Call) == 0)) {
+	if (strncmp(right->call_to, Station_Call, sizeof(Station_Call)) == 0) {
 		return 1;
 	}
 	// CQ?

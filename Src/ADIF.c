@@ -72,6 +72,11 @@ void write_ADIF_Log(void)
 	rsl_len = num_digits(Station_RSL);
 	if (rsl_len > 0)
 		offset += sprintf(log_line + offset, "<rst_rcvd:%1u:N>%i ", rsl_len, Station_RSL);
+
+	rsl_len = strlen(Comment);
+	if (rsl_len > 0)
+		offset += sprintf(log_line + offset, "<comment:%d>%s ", rsl_len, Comment);
+
 	strcpy(log_line + offset, "<tx_pwr:4>0.5 <eor>");
 
 	Write_Log_Data(log_line);

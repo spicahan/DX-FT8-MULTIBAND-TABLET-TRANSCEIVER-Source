@@ -53,6 +53,7 @@ static FIL fil2;
 
 char Free_Text1[MESSAGE_SIZE];
 char Free_Text2[MESSAGE_SIZE];
+char Comment[MESSAGE_SIZE]={'\0'};
 
 static void set_text(char *text, const char *source, int field_id)
 {

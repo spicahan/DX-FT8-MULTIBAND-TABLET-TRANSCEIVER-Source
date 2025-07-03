@@ -25,7 +25,7 @@
         }
       ],
       "touch_event": {
-        "time_offset": 28.6,
+        "time_offset": 18.6,
         "message_index": 0
       }
     },
@@ -35,7 +35,7 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}",
           "locator": "-3",
-          "sequence": 2,
+          "sequence": 1,
           "snr": -12,
           "received_snr": -3
         }
@@ -66,15 +66,11 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}", 
           "locator": "-13",
-          "sequence": 2,
+          "sequence": 0,
           "snr": -9,
           "received_snr": -13
         }
-      ],
-      "touch_event": {
-        "time_offset": 19.3,
-        "message_index": 0
-      }
+      ]
     },
     {
       "messages": [
@@ -82,7 +78,7 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}",
           "locator": "RR73",
-          "sequence": 2,
+          "sequence": 0,
           "snr": -12,
           "received_snr": -13
         }
@@ -93,9 +89,9 @@
         {
           "call_to": "WU6P",
           "call_from": "K6EY",
-          "locator": "RR73",
-          "sequence": 2,
-          "snr": -17,
+          "locator": "-17",
+          "sequence": 0,
+          "snr": -9,
           "received_snr": 99 
         }
       ],
@@ -103,6 +99,30 @@
         "time_offset": 18.8,
         "message_index": 0
       }
+    },
+    {
+      "messages": [
+        {
+          "call_to": "K6EY",
+          "call_from": "WU6P",
+          "locator": "R-9",
+          "sequence": 0,
+          "snr": -10,
+          "received_snr": 99 
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "WU6P",
+          "call_from": "K6EY",
+          "locator": "RR73",
+          "sequence": 0,
+          "snr": -17,
+          "received_snr": 99 
+        }
+      ]
     }
   ]
 }

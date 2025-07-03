@@ -133,7 +133,7 @@ int Station_RSL;
 // button.c
 int Arm_Tune = 0;
 int BandIndex = 2; // 20M
-int Skip_Tx1 = 1;
+int Skip_Tx1 = 0;
 const FreqStruct sBand_Data[NumBands] =
 	{
 		{// 40,
@@ -345,7 +345,7 @@ static void init_test_data(void) {
         test_data_loaded = true;
 
 		// init autoseq again
-	    autoseq_init(Station_Call, Locator);
+	    autoseq_init();
     }
 }
 
@@ -421,7 +421,11 @@ void BSP_LCD_DisplayStringAt(uint16_t Xpos, uint16_t Ypos, const uint8_t *Text, 
     if (!Text || Text[0] == '\0' || Text[0] == ' ') {
         return;
     }
-    printf("LCD: %s\n", Text);
+    printf("LCD: ");
+    if (Xpos != 0) { // TX side
+        printf("                     |");
+    }
+    printf("%s\n", Text);
 }
 
 void BSP_LCD_SetBackColor(uint32_t Color) {}

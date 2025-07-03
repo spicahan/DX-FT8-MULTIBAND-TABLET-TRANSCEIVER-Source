@@ -32,7 +32,7 @@
           "call_from": "N6LN",
           "locator": "DM03",
           "sequence": 1,
-          "snr": 0,
+          "snr": -17,
           "received_snr": 99
         }
       ]
@@ -96,7 +96,31 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}", 
           "locator": "73",
-          "sequence": 1,
+          "sequence": 0,
+          "snr": 0,
+          "received_snr": 99
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "N6LN",
+          "locator": "R-9",
+          "sequence": 0,
+          "snr": -13,
+          "received_snr": -9 
+        }
+      ]
+    },
+    {
+      "messages": [
+        {
+          "call_to": "${MY_CALLSIGN}",
+          "call_from": "N6LN",
+          "locator": "73",
+          "sequence": 0,
           "snr": 0,
           "received_snr": 99
         }
