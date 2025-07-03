@@ -36,6 +36,9 @@ int AGC_Gain = 20;
 int Band_Minimum;
 int Skip_Tx1;
 
+char Free_Text1_Holder[MESSAGE_SIZE];
+char Free_Text2_Holder[MESSAGE_SIZE];
+
 char display_frequency[BAND_DATA_SIZE] = "14.075";
 
 FreqStruct sBand_Data[NumBands] =
@@ -477,8 +480,8 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*h*/ 30},
 
 	{// button 35 SkipTx1
-	 /*text0*/ "Skip Tx1",
-	 /*text1*/ "Skip Tx1",
+	 /*text0*/ "SkipTx1",
+	 /*text1*/ "SkipTx1",
 	 /*blank*/ "        ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
@@ -489,8 +492,8 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*h*/ 30},
 
 	{// button 36 SkipTx1 On/Off
-	 /*text0*/ "Off",
-	 /*text1*/ "On ",
+	 /*text0*/ "CallGrid",
+	 /*text1*/ "CallGrid",
 	 /*blank*/ "   ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
@@ -816,13 +819,30 @@ void executeButton(uint16_t index)
 		break;
 
 	case SkipTx1:
-	case SkipTx1OnOff:
 		Skip_Tx1 ^= 1;
-		sButtonData[SkipTx1].state = 0;
+		sButtonData[SkipTx1].state = Skip_Tx1;
 		drawButton(SkipTx1);
-		sButtonData[SkipTx1OnOff].state = Skip_Tx1;
-		drawButton(SkipTx1OnOff);
 		break;
+
+	case CallGrid:
+		if(sButtonData[CallGrid].state == 1){
+			//Load station_call and grid
+			strcpy(Free_Text1_Holder,Free_Text1);
+			strcpy(Free_Text2_Holder,Free_Text2);
+			strcpy(Free_Text1,Station_Call);
+			strcpy(Free_Text2,Locator);
+			UpdateFreeText1();
+			UpdateFreeText2();
+		}
+		else {
+			//restore free text
+			strcpy(Station_Call,Free_Text1);
+			strcpy(Locator, Free_Text2);
+			strcpy(Free_Text1,Free_Text1_Holder);
+			strcpy(Free_Text2,Free_Text2_Holder);
+			UpdateFreeText1();
+			UpdateFreeText2();
+		}
 
 	case EditFreeText1: // Enable Edit
 		if (sButtonData[EditFreeText1].state == 1){
@@ -1007,8 +1027,8 @@ void setup_Cal_Display(void)
 
 	drawButton(SaveRTCDate);
 
-	sButtonData[SkipTx1OnOff].state = Skip_Tx1;
-	drawButton(SkipTx1OnOff);
+	sButtonData[SkipTx1].state = Skip_Tx1;
+	drawButton(SkipTx1);
 	for (int button = StandardCQ; button < NumButtons-43; ++button) //43:skip keyboard
 	{
 		sButtonData[button].Active = 1;
@@ -1210,7 +1230,7 @@ void EnableKeyboard(void)
 	sButtonData[TxCalibrate].Active = 0;
 	sButtonData[SaveBand].Active = 0;
 	sButtonData[SkipTx1].Active = 0;
-	sButtonData[SkipTx1OnOff].Active = 0;
+	sButtonData[CallGrid].Active = 0;
 	for(int i=29; i<33; i++) sButtonData[i].Active = 0;
 
 	//Enable Keyboard
@@ -1235,11 +1255,11 @@ void DisableKeyboard(void)
 	sButtonData[TxCalibrate].Active = 1;
 	sButtonData[SaveBand].Active = 1;
 	sButtonData[SkipTx1].Active = 1;
-	sButtonData[SkipTx1OnOff].Active = 1;
+	sButtonData[CallGrid].Active = 1;
 	drawButton(TxCalibrate);
 	drawButton(SaveBand);
 	drawButton(SkipTx1);
-	drawButton(SkipTx1OnOff);
+	drawButton(CallGrid);
 
 	for(int i=29; i<33; i++) {
 		sButtonData[i].Active = 1;

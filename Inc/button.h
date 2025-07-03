@@ -110,7 +110,7 @@ enum ButtonIds
 	FreeText1,
 	FreeText2,
 	SkipTx1,
-	SkipTx1OnOff,
+	CallGrid,
 	EditFreeText1,
 	EditFreeText2,
 	//39-81 is keyboard
