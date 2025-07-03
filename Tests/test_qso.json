@@ -35,7 +35,7 @@
           "call_to": "${MY_CALLSIGN}",
           "call_from": "${DX_CALLSIGN}",
           "locator": "-3",
-          "sequence": 1,
+          "sequence": 0,
           "snr": -12,
           "received_snr": -3
         }
@@ -103,9 +103,9 @@
     {
       "messages": [
         {
-          "call_to": "K6EY",
-          "call_from": "WU6P",
-          "locator": "R-9",
+          "call_to": "WU6P",
+          "call_from": "K6EY",
+          "locator": "-9",
           "sequence": 0,
           "snr": -10,
           "received_snr": 99 
