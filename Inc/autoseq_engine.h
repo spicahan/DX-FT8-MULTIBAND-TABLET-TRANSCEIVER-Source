@@ -7,7 +7,7 @@
 #include "qso_display.h"
 #include "main.h"
 
-extern void autoseq_init(const char *myCall, const char *myGrid);
+void autoseq_init();
 
 void autoseq_start_cq(void);
 

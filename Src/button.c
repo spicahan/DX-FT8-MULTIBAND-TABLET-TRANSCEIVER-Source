@@ -848,7 +848,6 @@ void executeButton(uint16_t index)
 			strcpy(Free_Text2,Free_Text2_Holder);
 			UpdateFreeText1();
 			UpdateFreeText2();
-			autoseq_init(Station_Call, Locator);
 		}
 		break;
 
