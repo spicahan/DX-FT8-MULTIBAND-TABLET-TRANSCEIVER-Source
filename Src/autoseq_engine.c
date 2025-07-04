@@ -73,8 +73,10 @@ typedef struct {
     int  retry_counter;
     int  retry_limit;
     bool logged;              /* true => QSO logged */
-
 } ctx_t;
+// For logging ctx in RxTxLog
+static const char *queue_log_format = 
+    "Q s:%1ut:%1ur:%1u:%-13.13s:%-6.6s:%+3d:%+3d:%1u:%1u:%1u";
 
 static ctx_t ctx_queue[MAX_QUEUE_SIZE];
 static int queue_size = 0;
@@ -89,6 +91,8 @@ static void pop();
 static ctx_t* append();
 // Internal helper called by autoseq_on_touch() and on_decode()
 static bool generate_response(ctx_t *ctx, const Decode *msg, bool override);
+// Ensure the queue is sorted and IDLE entries are popped
+static void sort_and_clean();
 static void write_worked_qso();
 /******************************************************/
 
@@ -137,25 +141,18 @@ void autoseq_on_touch(const Decode *msg)
     if (strncmp(msg->call_to, Station_Call, sizeof(Station_Call)) == 0)
     {
         generate_response(ctx, msg, true);
-        qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
-        // Finished QSOs (AS_IDLE) are at the top. Pop them
-        while (queue_size != 0 && ctx_queue[0].state == AS_IDLE)
-        {
-            pop();
-        }
+        sort_and_clean();
         return;
     }
     // Treat it as calling CQ
     strncpy(ctx->dxcall, msg->call_from, sizeof(ctx->dxcall) - 1);
     if (msg->sequence == Seq_Locator) {
         strncpy(ctx->dxgrid, msg->locator, sizeof(ctx->dxgrid) - 1);
-    } else {
-        ctx->dxgrid[0] = '\0';
     }
     ctx->snr_tx = msg->snr;
     set_state(ctx, Skip_Tx1 ? AS_REPORT : AS_REPLYING,
                    Skip_Tx1 ? TX2 : TX1, MAX_TX_RETRY);
-    qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
+    sort_and_clean();
 }
 
 void autoseq_on_decodes(const Decode *messages, int num_decoded)
@@ -163,12 +160,7 @@ void autoseq_on_decodes(const Decode *messages, int num_decoded)
     for (int i = 0; i < num_decoded; i++) {
         on_decode(&messages[i]);
     }
-    // Sort the queue.
-    qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
-    // Finished QSOs (AS_IDLE) are at the top. Pop them
-    while (queue_size != 0 && ctx_queue[0].state == AS_IDLE) {
-        pop();
-    }
+    sort_and_clean();
 }
 
 /* === Provide the message we should transmit this slot (if any) === */
@@ -189,8 +181,8 @@ bool autoseq_get_next_tx(char out_text[MAX_MSG_LEN])
     return true;
 }
 
-/* === Populate the string for displaying the current QSO state  === */
-void autoseq_get_qso_state(char lines[][MAX_LINE_LEN])
+/* === Populate the strings for displaying the QSO states  === */
+void autoseq_get_qso_states(char lines[][MAX_LINE_LEN])
 {
     if (!lines) {
         return;
@@ -289,6 +281,37 @@ void autoseq_tick(void)
     }
     if (queue_size == 0 && Beacon_On) {
         autoseq_start_cq();
+    }
+}
+
+/* === Populate the strings for logging the ctx queue === */
+void autoseq_log_ctx_queue(char lines[][53])
+{
+    if (!lines) {
+        return;
+    }
+
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++)
+    {
+        char *out_text = lines[i];
+        out_text[0] = '\0';
+
+        if (i >= queue_size)
+        {
+            continue;
+        }
+        snprintf(out_text, 53, queue_log_format,
+            ctx_queue[i].state,
+            ctx_queue[i].next_tx,
+            ctx_queue[i].rcvd_msg_type,
+            ctx_queue[i].dxcall,
+            ctx_queue[i].dxgrid,
+            ctx_queue[i].snr_tx,
+            ctx_queue[i].snr_rx,
+            ctx_queue[i].retry_counter,
+            ctx_queue[i].retry_limit,
+            ctx_queue[i].logged
+        );
     }
 }
 
@@ -627,9 +650,19 @@ static ctx_t* append()
 {
     assert(queue_size < MAX_QUEUE_SIZE);
     ctx_t *ctx = &ctx_queue[queue_size++];
+    ctx->dxgrid[0] = '\0';
     ctx->logged = false;
-    ctx->dxcall[0] = '\0';
     return ctx;
+}
+
+static void sort_and_clean()
+{
+    qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
+    // Finished QSOs (AS_IDLE) are at the top. Pop them
+    while (queue_size != 0 && ctx_queue[0].state == AS_IDLE)
+    {
+        pop();
+    }
 }
 
 static void write_worked_qso()

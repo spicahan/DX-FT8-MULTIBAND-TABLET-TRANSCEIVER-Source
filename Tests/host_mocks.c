@@ -158,7 +158,7 @@ void Write_Log_Data(const char *entry) {
 }
 
 void Write_RxTxLog_Data(const char *entry) {
-	// printf("RxTx log: %s\n", entry);
+	printf("RxTx log: %s\n", entry);
 }
 
 // traffic_manager.c

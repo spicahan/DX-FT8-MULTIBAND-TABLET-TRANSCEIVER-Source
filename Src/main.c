@@ -70,8 +70,10 @@ bool tx_pressed = false;
 
 // Autoseq TX text buffer
 static char autoseq_txbuf[MAX_MSG_LEN];
-// Autoseq current QSO state text
+// Autoseq QSO states text
 static char autoseq_state_strs[MAX_QUEUE_SIZE][MAX_LINE_LEN];
+// Autoseq ctx queue log text
+static char autoseq_queue_strs[MAX_QUEUE_SIZE][53];
 
 static int master_decoded = 0;
 
@@ -96,7 +98,7 @@ void tx_display_update()
 	} else {
 		display_queued_message(autoseq_txbuf);
 	}
-	autoseq_get_qso_state(autoseq_state_strs);
+	autoseq_get_qso_states(autoseq_state_strs);
 	display_qso_state(autoseq_state_strs);
 }
 
@@ -139,6 +141,15 @@ static void update_synchronization(void)
 		char log_str[128];
 		make_Real_Time();
 		make_Real_Date();
+		// Log the ctx queue
+		autoseq_log_ctx_queue(autoseq_queue_strs);
+		for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+			const char *cur_line = autoseq_queue_strs[i];
+			if (cur_line[0] == '\0') {
+				break;
+			}
+			Write_RxTxLog_Data(cur_line);
+		}
 		snprintf(log_str, sizeof(log_str), "T [%s %s][%s] %s",
 				 log_rtc_date_string,
 				 log_rtc_time_string,
