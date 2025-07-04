@@ -112,12 +112,14 @@ void display_messages(Decode new_decoded[], int decoded_messages)
 
 void display_queued_message(const char* msg)
 {
+    clear_qso_region();
     display_line(true, 0, Black, Black, blank);
     display_line(true, 0, Black, Red, msg);
 }
 
 void display_txing_message(const char*msg)
 {
+    clear_qso_region();
     display_line(true, 0, Red, Black, blank);
     display_line(true, 0, Red, White, msg);
 }
