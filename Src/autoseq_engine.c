@@ -98,7 +98,9 @@ static void write_worked_qso();
 
 void autoseq_init()
 {
-    queue_size = 0;
+    if (queue_size > 0) {
+        pop();
+    }
 }
 
 void autoseq_start_cq(void)
@@ -131,7 +133,19 @@ void autoseq_on_touch(const Decode *msg)
     }
 
     ctx_t *ctx = append();
-    // Everything addressed me already processed by on_decode()
+    // Check if it's addressed me
+    if (strncmp(msg->call_to, Station_Call, sizeof(Station_Call)) == 0)
+    {
+        generate_response(ctx, msg, true);
+        qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
+        // Finished QSOs (AS_IDLE) are at the top. Pop them
+        while (queue_size != 0 && ctx_queue[0].state == AS_IDLE)
+        {
+            pop();
+        }
+        return;
+    }
+    // Treat it as calling CQ
     strncpy(ctx->dxcall, msg->call_from, sizeof(ctx->dxcall) - 1);
     if (msg->sequence == Seq_Locator) {
         strncpy(ctx->dxgrid, msg->locator, sizeof(ctx->dxgrid) - 1);
