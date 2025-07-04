@@ -131,7 +131,14 @@ void autoseq_on_touch(const Decode *msg)
     }
 
     ctx_t *ctx = append();
-    // Everything addressed me already processed by on_decode()
+    // Check if it's addressed me
+    if (strncmp(msg->call_to, Station_Call, sizeof(Station_Call)) == 0)
+    {
+        generate_response(ctx, msg, true);
+        qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
+        return;
+    }
+    // Treat it as calling CQ
     strncpy(ctx->dxcall, msg->call_from, sizeof(ctx->dxcall) - 1);
     if (msg->sequence == Seq_Locator) {
         strncpy(ctx->dxgrid, msg->locator, sizeof(ctx->dxgrid) - 1);
