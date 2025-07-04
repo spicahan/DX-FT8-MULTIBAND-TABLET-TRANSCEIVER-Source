@@ -50,12 +50,6 @@ extern int decode_flag;
 int QSO_Xmit_Touch;
 int FT8_Touch_Flag;
 
-// gen_ft8.c
-int CQ_Mode_Index = 0;
-int Free_Index = 0;
-char Free_Text1[MESSAGE_SIZE];
-char Free_Text2[MESSAGE_SIZE];
-
 // FT8 timing variables from main.c 
 extern uint32_t current_time, start_time, ft8_time;
 extern int target_slot;
@@ -129,6 +123,12 @@ char Target_Call[10];	// seven character call sign (e.g. 3DA0XYZ) + optional /P 
 char Target_Locator[5]; // four character locator  + null terminator
 int Target_RSL;
 int Station_RSL;
+int CQ_Mode_Index = 0;
+int Free_Index = 0;
+char Free_Text1[MESSAGE_SIZE];
+char Free_Text2[MESSAGE_SIZE];
+char Comment[MESSAGE_SIZE];
+
 
 // button.c
 int Arm_Tune = 0;
