@@ -133,7 +133,11 @@ void autoseq_on_touch(const Decode *msg)
     ctx_t *ctx = append();
     // Everything addressed me already processed by on_decode()
     strncpy(ctx->dxcall, msg->call_from, sizeof(ctx->dxcall) - 1);
-    strncpy(ctx->dxgrid, msg->locator,   sizeof(ctx->dxgrid) - 1);
+    if (msg->sequence == Seq_Locator) {
+        strncpy(ctx->dxgrid, msg->locator, sizeof(ctx->dxgrid) - 1);
+    } else {
+        ctx->dxgrid[0] = '\0';
+    }
     ctx->snr_tx = msg->snr;
     set_state(ctx, Skip_Tx1 ? AS_REPORT : AS_REPLYING,
                    Skip_Tx1 ? TX2 : TX1, MAX_TX_RETRY);
