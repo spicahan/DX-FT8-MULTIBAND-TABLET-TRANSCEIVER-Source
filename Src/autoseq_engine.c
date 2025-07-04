@@ -98,7 +98,9 @@ static void write_worked_qso();
 
 void autoseq_init()
 {
-    queue_size = 0;
+    if (queue_size > 0) {
+        pop();
+    }
 }
 
 void autoseq_start_cq(void)
@@ -136,6 +138,11 @@ void autoseq_on_touch(const Decode *msg)
     {
         generate_response(ctx, msg, true);
         qsort(ctx_queue, queue_size, sizeof(ctx_t), compare);
+        // Finished QSOs (AS_IDLE) are at the top. Pop them
+        while (queue_size != 0 && ctx_queue[0].state == AS_IDLE)
+        {
+            pop();
+        }
         return;
     }
     // Treat it as calling CQ
