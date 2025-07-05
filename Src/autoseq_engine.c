@@ -279,9 +279,6 @@ void autoseq_tick(void)
     if (ctx->state == AS_IDLE) {
         pop();
     }
-    if (queue_size == 0 && Beacon_On) {
-        autoseq_start_cq();
-    }
 }
 
 /* === Populate the strings for logging the ctx queue === */
