@@ -52,7 +52,7 @@ void write_ADIF_Log(void)
 	make_Real_Time();
 	make_Real_Date();
 
-	static char log_line[220];
+	static char log_line[300];
 	const char *freq = sBand_Data[BandIndex].display;
 
 	int offset = sprintf(log_line, "<call:%1u>%s ", num_chars(Target_Call), trim_front(Target_Call));
@@ -75,9 +75,12 @@ void write_ADIF_Log(void)
 
 	rsl_len = strlen(Comment);
 	if (rsl_len > 0)
-		offset += sprintf(log_line + offset, "<comment:%d>%s ", rsl_len, Comment);
+		offset += sprintf(log_line + offset, "<comment:%u>%s ", rsl_len, Comment);
 
 	strcpy(log_line + offset, "<tx_pwr:4>0.5 <eor>");
+
+	// Force NULL termination
+	log_line[sizeof(log_line) - 1] = '\0';
 
 	Write_Log_Data(log_line);
 }
