@@ -74,10 +74,11 @@ static char autoseq_txbuf[MAX_MSG_LEN];
 static char autoseq_state_strs[MAX_QUEUE_SIZE][MAX_LINE_LEN];
 // Autoseq ctx queue log text
 static char autoseq_queue_strs[MAX_QUEUE_SIZE][53];
-
 static int master_decoded = 0;
-
 static bool worked_qsos_in_display = false;
+// Used for display RX and TX after returning from Tune
+static bool tune_pressed = false;
+
 
 #ifndef HOST_HAL_MOCK
 /* Private function prototypes -----------------------------------------------*/
@@ -264,6 +265,13 @@ int main(int argc, char *argv[]) {
 			{
 				display_Real_Date(0, 240);
 			}
+			// falling edge detection - tune mode exited
+			if (!Tune_On && tune_pressed) {
+				// Need to display RX and TX again
+				display_messages(new_decoded, master_decoded);
+				tx_display_update();
+			}
+			tune_pressed = Tune_On;
 
 			DSP_Flag = 0;
 
@@ -278,7 +286,10 @@ int main(int argc, char *argv[]) {
 				return 0;
 			}
 #endif
-			display_messages(new_decoded, master_decoded);
+			if (!Tune_On)
+			{
+				display_messages(new_decoded, master_decoded);
+			}
 			// Write all the decoded messages to RxTxLog
 			make_Real_Time();
 			make_Real_Date();
