@@ -157,15 +157,27 @@ void RTC_setDate(unsigned char daySet, unsigned char dateSet,
 }
 
 void display_RealTime(int x, int y) {
-	//fetch time from RTC
-	unsigned char old_rtc_hour = rtc_hour;
+	static int cnt = 0;
+	cnt++;
+	// reduce DS3231 time polling frequency
+	if (cnt % 5 != 0) {
+		return;
+	}
+	// fetch time from RTC
 	getTime(&rtc_hour, &rtc_minute, &rtc_second, &rtc_ampm, _24_hour_format);
-	if (rtc_hour < old_rtc_hour) {
-		getDate(&rtc_dow, &rtc_date, &rtc_month, &rtc_year);
+	show_UTC_time(x, y, rtc_hour, rtc_minute, rtc_second, 0);
+	// further reduce date polling frequency
+	if (cnt % 25 != 0) {
+		return;
+	}
+	unsigned char old_rtc_year = rtc_year;
+	unsigned char old_rtc_month = rtc_month;
+	unsigned char old_rtc_date = rtc_date;
+	getDate(&rtc_dow, &rtc_date, &rtc_month, &rtc_year);
+	if (rtc_date != old_rtc_date || rtc_month != old_rtc_month || rtc_year != old_rtc_year) {
 		display_Real_Date(0, 240);
 		Init_Log_File();
 	}
-	show_UTC_time(x, y, rtc_hour, rtc_minute, rtc_second, 0);
 }
 
 void load_RealTime(void) {

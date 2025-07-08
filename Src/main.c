@@ -259,12 +259,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
+			// Called at 25Hz, need to be efficient
 			display_RealTime(100, 240);
 
-			if (Tune_On)
-			{
-				display_Real_Date(0, 240);
-			}
 			// falling edge detection - tune mode exited
 			if (!Tune_On && tune_pressed) {
 				// Need to display RX and TX again
