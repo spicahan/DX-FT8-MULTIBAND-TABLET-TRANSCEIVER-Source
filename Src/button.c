@@ -543,10 +543,10 @@ ButtonStruct sButtonData[NumButtons] = {
 	 //text0, text1, blank, Active, Displayed, state,   x,   y,   w,   h
 
 	/*40*/ {   "F1",  "F1",  "  ",  0,      1,         0,     390,  SETUP_line7,  30,  30},    //EditFreeText1
-	/*41*/ {   "F2",  "F2",  "  ",  0,      1,         0,     420,  SETUP_line7,  30,  30},    //EditFreeText2
+	/*41*/ {   "F2",  "F2",  "  ",  0,      1,         0,     418,  SETUP_line7,  30,  30},    //EditFreeText2
 
 	/*42*/ {   "FREQ",  "FREQ",  "    ",  0,      1,         0,     340,  SETUP_line7,  30,  30},    //EditFreq
-	/*43*/ {  "COM",  "COM",  "   ",  0,      1,         0,     450,  SETUP_line7,  40,  30},    //EditComment
+	/*43*/ {  "COM",  "COM",  "   ",  0,      1,         0,     446,  SETUP_line7,  40,  30},    //EditComment
 	/*44*/ {  "",  "",  " ",  0,      1,         0,     KEYBASE_X,  SETUP_line0,  259,  30},    //EditingWindow
 
   	/*	Key1	*/ {	"1"	,	"1"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
