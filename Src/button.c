@@ -36,13 +36,6 @@ int AGC_Gain = 20;
 int Band_Minimum;
 int Skip_Tx1;
 
-int EditingFreq=0;
-int EditingComment=0;
-int EditingCall=0;
-int EditingGrid=0;
-int EditingFree1=0;
-int EditingFree2=0;
-
 char EditingText[MESSAGE_SIZE]={'\0'};
 
 char display_frequency[BAND_DATA_SIZE] = "14.075";
@@ -469,7 +462,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 256,
+	 /*x*/ 240,
 	 /*y*/ SETUP_line5,
 	 /*w*/ 160,
 	 /*h*/ 30},
@@ -481,7 +474,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 256,
+	 /*x*/ 240,
 	 /*y*/ SETUP_line6,
 	 /*w*/ 160,
 	 /*h*/ 30},
@@ -493,12 +486,12 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 356,
-	 /*y*/ SETUP_line2,
+	 /*x*/ 390,
+	 /*y*/ SETUP_line3,
 	 /*w*/ 110,
 	 /*h*/ 30},
 
-	{// button 36 EditCall
+	{// button 36 Call
 	 /*text0*/ Station_Call,
 	 /*text1*/ Station_Call,
 	 /*blank*/ "    ",
@@ -510,69 +503,93 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*w*/ 70,
 	 /*h*/ 30},
 
-	{// button 37 EditGrid
+	{// button 37 Grid
 	 /*text0*/ Locator,
 	 /*text1*/ Locator,
 	 /*blank*/ "    ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 356,
+	 /*x*/ 330,
 	 /*y*/ SETUP_line3,
 	 /*w*/ 60,
+	 /*h*/ 30},
+
+	{// button 38 EditCall
+	 /*text0*/ "CALL",
+	 /*text1*/ "CALL",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 240,
+	 /*y*/ SETUP_line7,
+	 /*w*/ 30,
+	 /*h*/ 30},
+
+	{// button 39 EditGrid
+	 /*text0*/ "GRID",
+	 /*text1*/ "GRID",
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 290,
+	 /*y*/ SETUP_line7,
+	 /*w*/ 30,
 	 /*h*/ 30},
 
 
 	 //text0, text1, blank, Active, Displayed, state,   x,   y,   w,   h
 
-	/*38*/ {   "E",  "E",  "  ",  0,      1,         0,     240,  SETUP_line5,  16,  30},    //EditFreeText1
-	/*39*/ {   "E",  "E",  "  ",  0,      1,         0,     240,  SETUP_line6,  16,  30},    //EditFreeText2
+	/*40*/ {   "F1",  "F1",  "  ",  0,      1,         0,     390,  SETUP_line7,  30,  30},    //EditFreeText1
+	/*41*/ {   "F2",  "F2",  "  ",  0,      1,         0,     420,  SETUP_line7,  30,  30},    //EditFreeText2
 
-	/*40*/ {   "Edit",  "Edit",  "  ",  0,      1,         0,     270,  SETUP_line1,  60,  30},    //EditFreq
-	/*41*/ {  "COMMENT",  "COMMENT",  "  ",  0,      1,         0,     240,  SETUP_line2,  110,  30},    //EditComment
-	/*42*/ {  "COMMENT",  "COMMENT",  " ",  0,      1,         0,     KEYBASE_X,  SETUP_line0,  259,  30},    //EditingWindow
+	/*42*/ {   "FREQ",  "FREQ",  "    ",  0,      1,         0,     340,  SETUP_line7,  30,  30},    //EditFreq
+	/*43*/ {  "COM",  "COM",  "   ",  0,      1,         0,     450,  SETUP_line7,  40,  30},    //EditComment
+	/*44*/ {  "",  "",  " ",  0,      1,         0,     KEYBASE_X,  SETUP_line0,  259,  30},    //EditingWindow
 
-  	/*	Key1	*/ {	"1"	,	" 1 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key2	*/ {	"2"	,	" 2 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key3	*/ {	"3"	,	" 3 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key4	*/ {	"4"	,	" 4 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key5	*/ {	"5"	,	" 5 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key6	*/ {	"6"	,	" 6 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key7	*/ {	"7"	,	" 7 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key8	*/ {	"8"	,	" 8 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key9	*/ {	"9"	,	" 9 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key0	*/ {	"0"	,	" 0 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyDash	*/ {	"-"	,	" - "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyQ	*/ {	"Q"	,	" Q "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyW	*/ {	"W"	,	" W "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyE	*/ {	"E"	,	" E "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyR	*/ {	"R"	,	" R "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyT	*/ {	"T"	,	" T "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyY	*/ {	"Y"	,	" Y "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyU	*/ {	"U"	,	" U "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyI	*/ {	"I"	,	" I "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyO	*/ {	"O"	,	" O "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyP	*/ {	"P"	,	" P "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	keyPlus	*/ {	"+"	,	" + "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyA	*/ {	"A"	,	" A "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyS	*/ {	"S"	,	" S "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyD	*/ {	"D"	,	" D "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyF	*/ {	"F"	,	" F "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyG	*/ {	"G"	,	" G "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyH	*/ {	"H"	,	" H "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyJ	*/ {	"J"	,	" J "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyK	*/ {	"K"	,	" K "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyL	*/ {	"L"	,	" L "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Keydot	*/ {	"."	,	" . "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeySlash*/ {	"/"	,	" / "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyZ	*/ {	"Z"	,	" Z "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyX	*/ {	"X"	,	" X "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyC	*/ {	"C"	,	" C "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyV	*/ {	"V"	,	" V "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyB	*/ {	"B"	,	" B "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyN	*/ {	"N"	,	" N "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyM	*/ {	"M"	,	" M "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-	/*	KeyQMark*/ {	"?"	,	" ? "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key1	*/ {	"1"	,	"1"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key2	*/ {	"2"	,	"2"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key3	*/ {	"3"	,	"3"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key4	*/ {	"4"	,	"4"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key5	*/ {	"5"	,	"5"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key6	*/ {	"6"	,	"6"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key7	*/ {	"7"	,	"7"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key8	*/ {	"8"	,	"8"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key9	*/ {	"9"	,	"9"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key0	*/ {	"0"	,	"0"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyDash	*/ {	"-"	,	"-"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyQ	*/ {	"Q"	,	"Q"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyW	*/ {	"W"	,	"W"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyE	*/ {	"E"	,	"E"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyR	*/ {	"R"	,	"R"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyT	*/ {	"T"	,	"T"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyY	*/ {	"Y"	,	"Y"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyU	*/ {	"U"	,	"U"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyI	*/ {	"I"	,	"I"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyO	*/ {	"O"	,	"O"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyP	*/ {	"P"	,	"P"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	keyPlus	*/ {	"+"	,	"+"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyA	*/ {	"A"	,	"A"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyS	*/ {	"S"	,	"S"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyD	*/ {	"D"	,	"D"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyF	*/ {	"F"	,	"F"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyG	*/ {	"G"	,	"G"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyH	*/ {	"H"	,	"H"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyJ	*/ {	"J"	,	"J"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyK	*/ {	"K"	,	"K"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyL	*/ {	"L"	,	"L"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Keydot	*/ {	"."	,	"."	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeySlash*/ {	"/"	,	"/"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyZ	*/ {	"Z"	,	"Z"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyX	*/ {	"X"	,	"X"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyC	*/ {	"C"	,	"C"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyV	*/ {	"V"	,	"V"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyB	*/ {	"B"	,	"B"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyN	*/ {	"N"	,	"N"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyM	*/ {	"M"	,	"M"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+	/*	KeyQMark*/ {	"?"	,	"?"	," "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
 	/*	KeySpace*/ {	"SPC"	,	"SPC"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
 	/*	KeyBack	*/ {	"<--"	,	"<--"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
 
@@ -667,6 +684,8 @@ static void toggle_button_state(int button)
 
 static void toggle_key_state(int button)
 {
+	sButtonData[button].state = 1;
+	drawKey(button);
 	HAL_Delay(10);
 	sButtonData[button].state = 0;
 	drawKey(button);
@@ -868,86 +887,115 @@ void executeButton(uint16_t index)
 		drawButton(SkipTx1);
 		break;
 
+	case Call:
+		break;
+
+	case Grid:
+		break;
+
 	case EditCall:
-		strcpy(EditingText,Station_Call);
-		EnableKeyboard();
-		EditingCall = 1;
-		toggle_button_state(EditCall);
+		if(sButtonData[EditCall].state == 1){
+			strcpy(EditingText,Station_Call);
+			sButtonData[EditingWindow].text0 = EditingText;
+			EnableKeyboard();
+			for(int i=38; i<44; i++) sButtonData[i].Active = 0;
+			sButtonData[EditCall].Active = 1;
+		}
+		else{
+			strcpy(Station_Call, EditingText);
+			sButtonData[Call].text0 = Station_Call;
+			DisableKeyboard();
+			update_stationdata();
+		}
+		drawButton(EditCall);
 		break;
 
 	case EditGrid:
-		strcpy(EditingText,Locator);
-		EnableKeyboard();
-		EditingGrid = 1;
-		toggle_button_state(EditGrid);
+		if(sButtonData[EditGrid].state == 1){
+			strcpy(EditingText,Locator);
+			sButtonData[EditingWindow].text0 = EditingText;
+			EnableKeyboard();
+			for(int i=38; i<44; i++) sButtonData[i].Active = 0;
+			sButtonData[EditGrid].Active = 1;
+		}
+		else{
+			strcpy(Locator, EditingText);
+			sButtonData[Grid].text0 = Locator;
+			DisableKeyboard();
+			update_stationdata();
+		}
+		drawButton(EditGrid);
 		break;
 
 	case EditFreq:
-		sprintf(display_frequency, "%i", sBand_Data[BandIndex].Frequency);
-		strcpy(EditingText,display_frequency);
-		EnableKeyboard();
-		EditingFreq = 1;
-		toggle_button_state(EditFreq);
+		if(sButtonData[EditFreq].state == 1) {
+			sprintf(display_frequency, "%i", sBand_Data[BandIndex].Frequency);
+			strcpy(EditingText,display_frequency);
+			sButtonData[EditingWindow].text0 = EditingText;
+			EnableKeyboard();
+			for(int i=38; i<44; i++) sButtonData[i].Active = 0;
+			sButtonData[EditFreq].Active = 1;
+		}
+		else {
+			sBand_Data[BandIndex].Frequency = (uint16_t)atoi(EditingText);
+			strcpy(sBand_Data[BandIndex].display, EditingText);
+			DisableKeyboard();
+			update_stationdata();
+		}
+		drawButton(EditFreq);
 		break;
 
 	case EditComment:
-		strcpy(EditingText,Comment);
-		sButtonData[EditingWindow].text0 = Comment;
-		EnableKeyboard();
-		EditingComment = 1;
-		toggle_button_state(EditComment);
+		if(sButtonData[EditComment].state == 1){
+			strcpy(EditingText,Comment);
+			sButtonData[EditingWindow].text0 = EditingText;
+			EnableKeyboard();
+			for(int i=38; i<44; i++) sButtonData[i].Active = 0;
+			sButtonData[EditComment].Active = 1;
+		}
+		else {
+			strcpy(Comment, EditingText);
+			DisableKeyboard();
+			update_stationdata();
+		}
+		drawButton(EditComment);
 		break;
 
-
 	case EditFreeText1: //
-		strcpy(EditingText,Free_Text1);
-		EnableKeyboard();
-		EditingFree1 = 1;
-		toggle_button_state(EditFreeText1);
+		if(sButtonData[EditFreeText1].state == 1){
+			strcpy(EditingText,Free_Text1);
+			sButtonData[EditingWindow].text0 = EditingText;
+			EnableKeyboard();
+			for(int i=38; i<44; i++) sButtonData[i].Active = 0;
+			sButtonData[EditFreeText1].Active = 1;
+		}
+		else {
+			strcpy(Free_Text1, EditingText);
+			sButtonData[FreeText1].text0 = Free_Text1;
+			DisableKeyboard();
+			update_stationdata();
+		}
+		drawButton(EditFreeText1);
 		break;
 
 	case EditFreeText2: //
-		strcpy(EditingText,Free_Text2);
-		EnableKeyboard();
-		EditingFree2 = 1;
-		toggle_button_state(EditFreeText2);
+		if(sButtonData[EditFreeText2].state == 1){
+			strcpy(EditingText,Free_Text2);
+			sButtonData[EditingWindow].text0 = EditingText;
+			EnableKeyboard();
+			for(int i=38; i<44; i++) sButtonData[i].Active = 0;
+			sButtonData[EditFreeText2].Active = 1;
+		}
+		else {
+			strcpy(Free_Text2, EditingText);
+			sButtonData[FreeText2].text0 = Free_Text2;
+			DisableKeyboard();
+			update_stationdata();
+		}
+		drawButton(EditFreeText2);
 		break;
 
 	case EditingWindow: //
-		toggle_key_state(EditingWindow);
-
-		if(EditingFreq == 1){
-			EditingFreq = 0;
-			sBand_Data[BandIndex].Frequency = (uint16_t)atoi(EditingText);
-			strcpy(sBand_Data[BandIndex].display, EditingText);
-		}
-		if(EditingComment == 1){
-			EditingComment = 0;
-			strcpy(Comment, EditingText);
-		}
-		if(EditingCall == 1){
-			EditingCall = 0;
-			strcpy(Station_Call, EditingText);
-			sButtonData[EditCall].text0 = Station_Call;
-
-		}
-		if(EditingGrid == 1){
-			EditingGrid = 0;
-			strcpy(Locator, EditingText);
-			sButtonData[EditGrid].text0 = Locator;
-		}
-		if(EditingFree1 == 1){
-			EditingFree1 = 0;
-			strcpy(Free_Text1, EditingText);
-			sButtonData[FreeText1].text0 = Free_Text1;
-		}
-		if(EditingFree2 == 1){
-			EditingFree2 = 0;
-			strcpy(Free_Text2, EditingText);
-			sButtonData[FreeText2].text0 = Free_Text2;
-		}
-		DisableKeyboard();
-		update_stationdata();
 		break;
 
 	case Key1	: AppendChar(EditingText, '1'); UpdateEditingWindow(); toggle_key_state(Key1	); break;
@@ -1307,16 +1355,15 @@ void FT8_Sync(void)
 void EnableKeyboard(void)
 {
 	//disable buttons
-	for(int i=NUMMAINBUTTON; i<NumButtons-NUMKEYS; i++)
+	for(int i=NUMMAINBUTTON; i<NumButtons-NUMKEYS-7; i++)
 		sButtonData[i].Active = 0;
 
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, 50, 480, 180);
 
-	HAL_Delay(200);
 	//Enable Keyboard
 	for(int i=NumButtons-NUMKEYS; i<NumButtons; i++) {
-		sButtonData[i].Active = 2;
+		sButtonData[i].Active = 1;
 		drawKey(i);
 	}
 	sButtonData[EditingWindow].Active = 1;
@@ -1352,7 +1399,7 @@ void DeleteLastChar(char *str){
 
 void UpdateEditingWindow(void) {
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(KEYBASE_X, SETUP_line0, 259, 40);
+	BSP_LCD_FillRect(0, SETUP_line0, 480, 40);
 	sButtonData[EditingWindow].text0 = EditingText;
 	sButtonData[EditingWindow].text1 = EditingText;
 	drawKey(EditingWindow);
