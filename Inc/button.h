@@ -40,7 +40,7 @@
 #define KEYBASE_X 15
 #define KEYBASE_Y 70
 #define KEYWIDTH 40
-#define KEYHIGHT 40
+#define KEYHIGHT 35
 
 #define SETUP_line0 40
 #define SETUP_line1 65
@@ -49,6 +49,7 @@
 #define SETUP_line4 140
 #define SETUP_line5 165
 #define SETUP_line6 190
+#define SETUP_line7 215
 
 #define NUMKEYS 43
 #define NUMMAINBUTTON 11
@@ -127,6 +128,8 @@ enum ButtonIds
 	FreeText1,
 	FreeText2,
 	SkipTx1,
+	Call,
+	Grid,
 	EditCall,
 	EditGrid,
 	EditFreeText1,
@@ -134,7 +137,7 @@ enum ButtonIds
 	EditFreq,
 	EditComment,
 	EditingWindow,
-	//43-85 is keyboard
+	//45-87 is keyboard
 	Key1,
 	Key2,
 	Key3,
@@ -178,7 +181,7 @@ enum ButtonIds
 	KeyQMark,
 	KeySpace,
 	KeyBack,
-	NumButtons = 86
+	NumButtons = 88
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
