@@ -37,7 +37,7 @@
 #define RTC_Button 100
 #define RTC_Add 180
 
-#define KEYBASE_X 25
+#define KEYBASE_X 15
 #define KEYBASE_Y 70
 #define KEYWIDTH 40
 #define KEYHIGHT 40

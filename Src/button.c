@@ -532,49 +532,49 @@ ButtonStruct sButtonData[NumButtons] = {
 	/*41*/ {  "COMMENT",  "COMMENT",  "  ",  0,      1,         0,     240,  SETUP_line2,  110,  30},    //EditComment
 	/*42*/ {  "COMMENT",  "COMMENT",  " ",  0,      1,         0,     KEYBASE_X,  SETUP_line0,  259,  30},    //EditingWindow
 
-  	/*	Key1	*/ {	" 1 "	,	" 1 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key2	*/ {	" 2 "	,	" 2 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key3	*/ {	" 3 "	,	" 3 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key4	*/ {	" 4 "	,	" 4 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key5	*/ {	" 5 "	,	" 5 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key6	*/ {	" 6 "	,	" 6 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key7	*/ {	" 7 "	,	" 7 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key8	*/ {	" 8 "	,	" 8 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key9	*/ {	" 9 "	,	" 9 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Key0	*/ {	" 0 "	,	" 0 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyDash	*/ {	" - "	,	" - "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyQ	*/ {	" Q "	,	" Q "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyW	*/ {	" W "	,	" W "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyE	*/ {	" E "	,	" E "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyR	*/ {	" R "	,	" R "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyT	*/ {	" T "	,	" T "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyY	*/ {	" Y "	,	" Y "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyU	*/ {	" U "	,	" U "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyI	*/ {	" I "	,	" I "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyO	*/ {	" O "	,	" O "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyP	*/ {	" P "	,	" P "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	keyPlus	*/ {	" + "	,	" + "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyA	*/ {	" A "	,	" A "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyS	*/ {	" S "	,	" S "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyD	*/ {	" D "	,	" D "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyF	*/ {	" F "	,	" F "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyG	*/ {	" G "	,	" G "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyH	*/ {	" H "	,	" H "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyJ	*/ {	" J "	,	" J "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyK	*/ {	" K "	,	" K "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyL	*/ {	" L "	,	" L "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	Keydot	*/ {	" . "	,	" . "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeySlash*/ {	" / "	,	" / "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyZ	*/ {	" Z "	,	" Z "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyX	*/ {	" X "	,	" X "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyC	*/ {	" C "	,	" C "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyV	*/ {	" V "	,	" V "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyB	*/ {	" B "	,	" B "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyN	*/ {	" N "	,	" N "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-  	/*	KeyM	*/ {	" M "	,	" M "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-	/*	KeyQMark*/ {	" ? "	,	" ? "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key1	*/ {	"1"	,	" 1 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key2	*/ {	"2"	,	" 2 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key3	*/ {	"3"	,	" 3 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key4	*/ {	"4"	,	" 4 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key5	*/ {	"5"	,	" 5 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key6	*/ {	"6"	,	" 6 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key7	*/ {	"7"	,	" 7 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key8	*/ {	"8"	,	" 8 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key9	*/ {	"9"	,	" 9 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key0	*/ {	"0"	,	" 0 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyDash	*/ {	"-"	,	" - "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyQ	*/ {	"Q"	,	" Q "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyW	*/ {	"W"	,	" W "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyE	*/ {	"E"	,	" E "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyR	*/ {	"R"	,	" R "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyT	*/ {	"T"	,	" T "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyY	*/ {	"Y"	,	" Y "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyU	*/ {	"U"	,	" U "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyI	*/ {	"I"	,	" I "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyO	*/ {	"O"	,	" O "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyP	*/ {	"P"	,	" P "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	keyPlus	*/ {	"+"	,	" + "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyA	*/ {	"A"	,	" A "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyS	*/ {	"S"	,	" S "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyD	*/ {	"D"	,	" D "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyF	*/ {	"F"	,	" F "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyG	*/ {	"G"	,	" G "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyH	*/ {	"H"	,	" H "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyJ	*/ {	"J"	,	" J "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyK	*/ {	"K"	,	" K "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyL	*/ {	"L"	,	" L "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Keydot	*/ {	"."	,	" . "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeySlash*/ {	"/"	,	" / "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyZ	*/ {	"Z"	,	" Z "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyX	*/ {	"X"	,	" X "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyC	*/ {	"C"	,	" C "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyV	*/ {	"V"	,	" V "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyB	*/ {	"B"	,	" B "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyN	*/ {	"N"	,	" N "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyM	*/ {	"M"	,	" M "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+	/*	KeyQMark*/ {	"?"	,	" ? "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
 	/*	KeySpace*/ {	"SPC"	,	"SPC"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
-	/*	KeyBack	*/ {	"<--"	,	"<--"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+	/*	KeyBack	*/ {	"<--"	,	"<--"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
 
 }; // end of button definition
 
@@ -597,7 +597,25 @@ void drawButton(uint16_t button)
 		BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 	}
 }
+void drawKey(uint16_t button)
+{
+	BSP_LCD_SetFont(&Font24);
+	if (sButtonData[button].Active > 0)
+	{
+		if (sButtonData[button].state == 1)
+			BSP_LCD_SetBackColor(LCD_COLOR_RED);
+		else
+			BSP_LCD_SetBackColor(LCD_COLOR_BLUE);
 
+		BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+
+		BSP_LCD_DisplayStringAt(sButtonData[button].x, sButtonData[button].y + 15,
+								sButtonData[button].state == 1 ? (const uint8_t *)sButtonData[button].text1 : (const uint8_t *)sButtonData[button].text0,
+								LEFT_MODE);
+
+		BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+	}
+}
 void checkButton(void)
 {
 	for (uint16_t button = Clear; button < NumButtons; button++)
@@ -645,6 +663,13 @@ static void toggle_button_state(int button)
 	HAL_Delay(10);
 	sButtonData[button].state = 0;
 	drawButton(button);
+}
+
+static void toggle_key_state(int button)
+{
+	HAL_Delay(10);
+	sButtonData[button].state = 0;
+	drawKey(button);
 }
 
 static void update_CQFree_buttons()
@@ -889,7 +914,7 @@ void executeButton(uint16_t index)
 		break;
 
 	case EditingWindow: //
-		toggle_button_state(EditingWindow);
+		toggle_key_state(EditingWindow);
 
 		if(EditingFreq == 1){
 			EditingFreq = 0;
@@ -925,49 +950,49 @@ void executeButton(uint16_t index)
 		update_stationdata();
 		break;
 
-	case Key1	: AppendChar(EditingText, '1'); UpdateEditingWindow(); toggle_button_state(Key1	); break;
-	case Key2	: AppendChar(EditingText, '2'); UpdateEditingWindow(); toggle_button_state(Key2	); break;
-	case Key3	: AppendChar(EditingText, '3'); UpdateEditingWindow(); toggle_button_state(Key3	); break;
-	case Key4	: AppendChar(EditingText, '4'); UpdateEditingWindow(); toggle_button_state(Key4	); break;
-	case Key5	: AppendChar(EditingText, '5'); UpdateEditingWindow(); toggle_button_state(Key5	); break;
-	case Key6	: AppendChar(EditingText, '6'); UpdateEditingWindow(); toggle_button_state(Key6	); break;
-	case Key7	: AppendChar(EditingText, '7'); UpdateEditingWindow(); toggle_button_state(Key7	); break;
-	case Key8	: AppendChar(EditingText, '8'); UpdateEditingWindow(); toggle_button_state(Key8	); break;
-	case Key9	: AppendChar(EditingText, '9'); UpdateEditingWindow(); toggle_button_state(Key9	); break;
-	case Key0	: AppendChar(EditingText, '0'); UpdateEditingWindow(); toggle_button_state(Key0	); break;
-	case KeyDash	: AppendChar(EditingText, '-'); UpdateEditingWindow(); toggle_button_state(KeyDash	); break;
-	case KeyQ	: AppendChar(EditingText, 'Q'); UpdateEditingWindow(); toggle_button_state(KeyQ	); break;
-	case KeyW	: AppendChar(EditingText, 'W'); UpdateEditingWindow(); toggle_button_state(KeyW	); break;
-	case KeyE	: AppendChar(EditingText, 'E'); UpdateEditingWindow(); toggle_button_state(KeyE	); break;
-	case KeyR	: AppendChar(EditingText, 'R'); UpdateEditingWindow(); toggle_button_state(KeyR	); break;
-	case KeyT	: AppendChar(EditingText, 'T'); UpdateEditingWindow(); toggle_button_state(KeyT	); break;
-	case KeyY	: AppendChar(EditingText, 'Y'); UpdateEditingWindow(); toggle_button_state(KeyY	); break;
-	case KeyU	: AppendChar(EditingText, 'U'); UpdateEditingWindow(); toggle_button_state(KeyU	); break;
-	case KeyI	: AppendChar(EditingText, 'I'); UpdateEditingWindow(); toggle_button_state(KeyI	); break;
-	case KeyO	: AppendChar(EditingText, 'O'); UpdateEditingWindow(); toggle_button_state(KeyO	); break;
-	case KeyP	: AppendChar(EditingText, 'P'); UpdateEditingWindow(); toggle_button_state(KeyP	); break;
-	case keyPlus	: AppendChar(EditingText, '+'); UpdateEditingWindow(); toggle_button_state(keyPlus	); break;
-	case KeyA	: AppendChar(EditingText, 'A'); UpdateEditingWindow(); toggle_button_state(KeyA	); break;
-	case KeyS	: AppendChar(EditingText, 'S'); UpdateEditingWindow(); toggle_button_state(KeyS	); break;
-	case KeyD	: AppendChar(EditingText, 'D'); UpdateEditingWindow(); toggle_button_state(KeyD	); break;
-	case KeyF	: AppendChar(EditingText, 'F'); UpdateEditingWindow(); toggle_button_state(KeyF	); break;
-	case KeyG	: AppendChar(EditingText, 'G'); UpdateEditingWindow(); toggle_button_state(KeyG	); break;
-	case KeyH	: AppendChar(EditingText, 'H'); UpdateEditingWindow(); toggle_button_state(KeyH	); break;
-	case KeyJ	: AppendChar(EditingText, 'J'); UpdateEditingWindow(); toggle_button_state(KeyJ	); break;
-	case KeyK	: AppendChar(EditingText, 'K'); UpdateEditingWindow(); toggle_button_state(KeyK	); break;
-	case KeyL	: AppendChar(EditingText, 'L'); UpdateEditingWindow(); toggle_button_state(KeyL	); break;
-	case Keydot	: AppendChar(EditingText, '.'); UpdateEditingWindow(); toggle_button_state(Keydot	); break;
-	case KeySlash   : AppendChar(EditingText, '/'); UpdateEditingWindow(); toggle_button_state(KeySlash ); break;
-	case KeyZ	: AppendChar(EditingText, 'Z'); UpdateEditingWindow(); toggle_button_state(KeyZ	); break;
-	case KeyX	: AppendChar(EditingText, 'X'); UpdateEditingWindow(); toggle_button_state(KeyX	); break;
-	case KeyC	: AppendChar(EditingText, 'C'); UpdateEditingWindow(); toggle_button_state(KeyC	); break;
-	case KeyV	: AppendChar(EditingText, 'V'); UpdateEditingWindow(); toggle_button_state(KeyV	); break;
-	case KeyB	: AppendChar(EditingText, 'B'); UpdateEditingWindow(); toggle_button_state(KeyB	); break;
-	case KeyN	: AppendChar(EditingText, 'N'); UpdateEditingWindow(); toggle_button_state(KeyN	); break;
-	case KeyM	: AppendChar(EditingText, 'M'); UpdateEditingWindow(); toggle_button_state(KeyM	); break;
-	case KeyQMark   : AppendChar(EditingText, '?'); UpdateEditingWindow(); toggle_button_state(KeyQMark ); break;
-	case KeySpace   : AppendChar(EditingText, ' '); UpdateEditingWindow(); toggle_button_state(KeySpace ); break;
-	case KeyBack	: DeleteLastChar(EditingText);  UpdateEditingWindow(); toggle_button_state(KeyBack	); break;
+	case Key1	: AppendChar(EditingText, '1'); UpdateEditingWindow(); toggle_key_state(Key1	); break;
+	case Key2	: AppendChar(EditingText, '2'); UpdateEditingWindow(); toggle_key_state(Key2	); break;
+	case Key3	: AppendChar(EditingText, '3'); UpdateEditingWindow(); toggle_key_state(Key3	); break;
+	case Key4	: AppendChar(EditingText, '4'); UpdateEditingWindow(); toggle_key_state(Key4	); break;
+	case Key5	: AppendChar(EditingText, '5'); UpdateEditingWindow(); toggle_key_state(Key5	); break;
+	case Key6	: AppendChar(EditingText, '6'); UpdateEditingWindow(); toggle_key_state(Key6	); break;
+	case Key7	: AppendChar(EditingText, '7'); UpdateEditingWindow(); toggle_key_state(Key7	); break;
+	case Key8	: AppendChar(EditingText, '8'); UpdateEditingWindow(); toggle_key_state(Key8	); break;
+	case Key9	: AppendChar(EditingText, '9'); UpdateEditingWindow(); toggle_key_state(Key9	); break;
+	case Key0	: AppendChar(EditingText, '0'); UpdateEditingWindow(); toggle_key_state(Key0	); break;
+	case KeyDash	: AppendChar(EditingText, '-'); UpdateEditingWindow(); toggle_key_state(KeyDash	); break;
+	case KeyQ	: AppendChar(EditingText, 'Q'); UpdateEditingWindow(); toggle_key_state(KeyQ	); break;
+	case KeyW	: AppendChar(EditingText, 'W'); UpdateEditingWindow(); toggle_key_state(KeyW	); break;
+	case KeyE	: AppendChar(EditingText, 'E'); UpdateEditingWindow(); toggle_key_state(KeyE	); break;
+	case KeyR	: AppendChar(EditingText, 'R'); UpdateEditingWindow(); toggle_key_state(KeyR	); break;
+	case KeyT	: AppendChar(EditingText, 'T'); UpdateEditingWindow(); toggle_key_state(KeyT	); break;
+	case KeyY	: AppendChar(EditingText, 'Y'); UpdateEditingWindow(); toggle_key_state(KeyY	); break;
+	case KeyU	: AppendChar(EditingText, 'U'); UpdateEditingWindow(); toggle_key_state(KeyU	); break;
+	case KeyI	: AppendChar(EditingText, 'I'); UpdateEditingWindow(); toggle_key_state(KeyI	); break;
+	case KeyO	: AppendChar(EditingText, 'O'); UpdateEditingWindow(); toggle_key_state(KeyO	); break;
+	case KeyP	: AppendChar(EditingText, 'P'); UpdateEditingWindow(); toggle_key_state(KeyP	); break;
+	case keyPlus	: AppendChar(EditingText, '+'); UpdateEditingWindow(); toggle_key_state(keyPlus	); break;
+	case KeyA	: AppendChar(EditingText, 'A'); UpdateEditingWindow(); toggle_key_state(KeyA	); break;
+	case KeyS	: AppendChar(EditingText, 'S'); UpdateEditingWindow(); toggle_key_state(KeyS	); break;
+	case KeyD	: AppendChar(EditingText, 'D'); UpdateEditingWindow(); toggle_key_state(KeyD	); break;
+	case KeyF	: AppendChar(EditingText, 'F'); UpdateEditingWindow(); toggle_key_state(KeyF	); break;
+	case KeyG	: AppendChar(EditingText, 'G'); UpdateEditingWindow(); toggle_key_state(KeyG	); break;
+	case KeyH	: AppendChar(EditingText, 'H'); UpdateEditingWindow(); toggle_key_state(KeyH	); break;
+	case KeyJ	: AppendChar(EditingText, 'J'); UpdateEditingWindow(); toggle_key_state(KeyJ	); break;
+	case KeyK	: AppendChar(EditingText, 'K'); UpdateEditingWindow(); toggle_key_state(KeyK	); break;
+	case KeyL	: AppendChar(EditingText, 'L'); UpdateEditingWindow(); toggle_key_state(KeyL	); break;
+	case Keydot	: AppendChar(EditingText, '.'); UpdateEditingWindow(); toggle_key_state(Keydot	); break;
+	case KeySlash   : AppendChar(EditingText, '/'); UpdateEditingWindow(); toggle_key_state(KeySlash ); break;
+	case KeyZ	: AppendChar(EditingText, 'Z'); UpdateEditingWindow(); toggle_key_state(KeyZ	); break;
+	case KeyX	: AppendChar(EditingText, 'X'); UpdateEditingWindow(); toggle_key_state(KeyX	); break;
+	case KeyC	: AppendChar(EditingText, 'C'); UpdateEditingWindow(); toggle_key_state(KeyC	); break;
+	case KeyV	: AppendChar(EditingText, 'V'); UpdateEditingWindow(); toggle_key_state(KeyV	); break;
+	case KeyB	: AppendChar(EditingText, 'B'); UpdateEditingWindow(); toggle_key_state(KeyB	); break;
+	case KeyN	: AppendChar(EditingText, 'N'); UpdateEditingWindow(); toggle_key_state(KeyN	); break;
+	case KeyM	: AppendChar(EditingText, 'M'); UpdateEditingWindow(); toggle_key_state(KeyM	); break;
+	case KeyQMark   : AppendChar(EditingText, '?'); UpdateEditingWindow(); toggle_key_state(KeyQMark ); break;
+	case KeySpace   : AppendChar(EditingText, ' '); UpdateEditingWindow(); toggle_key_state(KeySpace ); break;
+	case KeyBack	: DeleteLastChar(EditingText);  UpdateEditingWindow(); toggle_key_state(KeyBack	); break;
 
 	}
 }
@@ -1292,10 +1317,10 @@ void EnableKeyboard(void)
 	//Enable Keyboard
 	for(int i=NumButtons-NUMKEYS; i<NumButtons; i++) {
 		sButtonData[i].Active = 2;
-		drawButton(i);
+		drawKey(i);
 	}
 	sButtonData[EditingWindow].Active = 1;
-	drawButton(EditingWindow);
+	drawKey(EditingWindow);
 }
 
 void DisableKeyboard(void)
@@ -1327,10 +1352,10 @@ void DeleteLastChar(char *str){
 
 void UpdateEditingWindow(void) {
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(KEYBASE_X, SETUP_line0, 259, 35);
+	BSP_LCD_FillRect(KEYBASE_X, SETUP_line0, 259, 40);
 	sButtonData[EditingWindow].text0 = EditingText;
 	sButtonData[EditingWindow].text1 = EditingText;
-	drawButton(EditingWindow);
+	drawKey(EditingWindow);
 }
 
 
