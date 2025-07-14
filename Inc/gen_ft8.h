@@ -36,4 +36,6 @@ void SD_Initialize(void);
 
 void queue_custom_text(const char *plain_text);   /* needed by autoseq_engine */
 
+extern void update_stationdata(void);
+
 #endif /* GEN_FT8_H_ */

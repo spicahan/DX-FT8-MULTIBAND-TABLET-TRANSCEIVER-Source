@@ -48,12 +48,14 @@ static uint8_t isInitialized = 0;
 
 /* Fatfs structure */
 static FATFS FS;
-static FIL fil;
 static FIL fil2;
+static const char *ini_file_name  = "StationData.ini";
 
 char Free_Text1[MESSAGE_SIZE];
 char Free_Text2[MESSAGE_SIZE];
 char Comment[MESSAGE_SIZE]={'\0'};
+
+void update_stationdata(void);
 
 static void set_text(char *text, const char *source, int field_id)
 {
@@ -73,8 +75,6 @@ static void set_text(char *text, const char *source, int field_id)
 		sButtonData[field_id].text1 = text;
 	}
 }
-
-static const char *delimiters = ":;,";
 
 static void validate_call()
 {
@@ -146,9 +146,6 @@ extern uint8_t _ssdram; /* Symbol defined in the linker script */
 
 void Read_Station_File(void)
 {
-	static const char *data_file_name = "StationData.txt";
- 	static const char *ini_file_name  = "StationData.ini";
-
 	Station_Call[0] = 0;
 	Locator[0] = 0;
 	Free_Text1[0] = 0;
@@ -157,79 +154,84 @@ void Read_Station_File(void)
 	f_mount(&FS, SDPath, 1);
 
 	FILINFO filInfo = {0};
-	if (f_stat(data_file_name, &filInfo) == FR_OK &&
-		f_open(&fil, data_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
+
+	if (f_stat(ini_file_name, &filInfo) == FR_OK &&
+		f_open(&fil2, ini_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
 	{
 		char read_buffer[filInfo.fsize];
-		char *call_part, *locator_part = NULL, *free_text1_part = NULL, *free_text2_part = NULL;
-		f_lseek(&fil, 0);
-		f_gets(read_buffer, filInfo.fsize, &fil);
+		f_lseek(&fil2, 0);
 
-		call_part = strtok(read_buffer, delimiters);
-		if (call_part != NULL)
-			locator_part = strtok(NULL, delimiters);
-		if (locator_part != NULL)
-			free_text1_part = strtok(NULL, delimiters);
-		if (free_text1_part != NULL)
-			free_text2_part = strtok(NULL, delimiters);
-
-		setup_station_call(call_part);
-		setup_locator(locator_part);
-		setup_free_text(free_text1_part, FreeText1);
-		setup_free_text(free_text2_part, FreeText2);
-		f_close(&fil);
-	}
-	else
-	{
-		if (f_stat(ini_file_name, &filInfo) == FR_OK &&
-			f_open(&fil2, ini_file_name, FA_OPEN_EXISTING | FA_READ) == FR_OK)
+		unsigned bytes_read;
+		if (f_read(&fil2, read_buffer, filInfo.fsize, &bytes_read) == FR_OK)
 		{
-			char read_buffer[filInfo.fsize];
-			f_lseek(&fil2, 0);
-
-			unsigned bytes_read;
-			if (f_read(&fil2, read_buffer, filInfo.fsize, &bytes_read) == FR_OK)
-			{
-				ini_data_t ini_data;
-				parse_ini(read_buffer, bytes_read, &ini_data);
-
+			ini_data_t ini_data;
+			parse_ini(read_buffer, bytes_read, &ini_data);
 				const ini_section_t *section = get_ini_section(&ini_data, "Station");
-				if (section != NULL)
-				{
-					setup_station_call(get_ini_value_from_section(section, "Call"));
-					setup_locator(get_ini_value_from_section(section, "Locator"));
-				}
-
+			if (section != NULL)
+			{
+				setup_station_call(get_ini_value_from_section(section, "Call"));
+				setup_locator(get_ini_value_from_section(section, "Locator"));
+			}
 				section = get_ini_section(&ini_data, "FreeText");
-				if (section != NULL)
-				{
-					setup_free_text(get_ini_value_from_section(section, "1"), FreeText1);
-					setup_free_text(get_ini_value_from_section(section, "2"), FreeText2);
-				}
-
+			if (section != NULL)
+			{
+				setup_free_text(get_ini_value_from_section(section, "1"), FreeText1);
+				setup_free_text(get_ini_value_from_section(section, "2"), FreeText2);
+			}
 				section = get_ini_section(&ini_data, "BandData");
-				if (section != NULL)
+			if (section != NULL)
+			{
+				// see BandIndex
+				static const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
+				for (int idx = _40M; idx <= _10M; ++idx)
 				{
-					// see BandIndex
-					static const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
-					for (int idx = _40M; idx <= _10M; ++idx)
-					{
-						const char *band_data = get_ini_value_from_section(section, bands[idx]);
-						if (band_data != NULL)
+					const char *band_data = get_ini_value_from_section(section, bands[idx]);
+					if (band_data != NULL)
 						{
-							size_t band_data_size = strlen(band_data) + 1;
-							if (band_data_size < BAND_DATA_SIZE)
-							{
-								sBand_Data[idx].Frequency = (uint16_t)(atof(band_data) * 1000);
-								memcpy(sBand_Data[idx].display, band_data, band_data_size);
-							}
+						size_t band_data_size = strlen(band_data) + 1;
+						if (band_data_size < BAND_DATA_SIZE)
+						{
+							sBand_Data[idx].Frequency = (uint16_t)(atof(band_data) * 1000);
+							memcpy(sBand_Data[idx].display, band_data, band_data_size);
 						}
 					}
 				}
 			}
+				section = get_ini_section(&ini_data, "MISC");
+			if (section != NULL)
+			{
+				strcpy(Comment,(get_ini_value_from_section(section, "COMMENT")));
+			}
 
-			f_close(&fil2);
+		f_close(&fil2);
 		}
+	}
+	else{
+		FRESULT fres = f_open(&fil2, ini_file_name, FA_OPEN_ALWAYS | FA_WRITE);
+		if (fres == FR_OK)
+		{
+			fres = f_lseek(&fil2, 0);
+			if (fres == FR_OK)
+			{
+				f_puts("[Station]\n", &fil2);
+				f_puts("Call=N0CAL\n", &fil2);
+				f_puts("Locator=AA00\n", &fil2);
+				f_puts("[FreeText]\n", &fil2);
+				f_puts("1=Free text 1\n", &fil2);
+				f_puts("2=Free text 2\n", &fil2);
+				f_puts("[BandData]\n", &fil2);
+				f_puts("40=7.074\n", &fil2);
+				f_puts("30=10.136\n", &fil2);
+				f_puts("20=14.074\n", &fil2);
+				f_puts("17=18.100\n", &fil2);
+				f_puts("15=21.074\n", &fil2);
+				f_puts("12=24.915\n", &fil2);
+				f_puts("10=28.074\n", &fil2);
+				f_puts("[MISC]\n", &fil2);
+				f_puts("COMMENT=MY TESTING COMMENT\n", &fil2);
+			}
+		}
+		f_close(&fil2);
 	}
 }
 
@@ -279,3 +281,37 @@ void queue_custom_text(const char *tx_msg)
 	pack77(tx_msg, packed);
 	genft8(packed, tones);
 }
+
+void update_stationdata(void){
+	char write_buffer[64];
+	static const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
+
+	FRESULT fres = f_mount(&FS, SDPath, 1);
+	if(fres == FR_OK)
+	    fres = f_open(&fil2, ini_file_name, FA_OPEN_ALWAYS | FA_WRITE);
+	if (fres == FR_OK)
+	{
+		fres = f_lseek(&fil2, 0);
+		if (fres == FR_OK)
+		{
+			f_puts("[Station]\n", &fil2);
+			sprintf(write_buffer, "Call=%s\nLocator=%s\n", Station_Call, Locator);
+			f_puts(write_buffer, &fil2);
+			f_puts("[FreeText]\n", &fil2);
+			sprintf(write_buffer, "1=%s\n", Free_Text1);
+			f_puts(write_buffer, &fil2);
+			sprintf(write_buffer, "2=%s\n", Free_Text2);
+			f_puts(write_buffer, &fil2);
+			f_puts("[BandData]\n", &fil2);
+			for (int idx = _40M; idx <= _10M; ++idx){
+				sprintf(write_buffer, "%s=%u.%03u\n", bands[idx], sBand_Data[idx].Frequency / 1000, sBand_Data[idx].Frequency % 1000 );
+				f_puts(write_buffer, &fil2);
+			}
+			f_puts("[MISC]\n", &fil2);
+			sprintf(write_buffer, "COMMENT=%s\n", Comment);
+			f_puts(write_buffer, &fil2);
+		}
+	}
+	f_close(&fil2);
+}
+

@@ -36,11 +36,16 @@ int AGC_Gain = 20;
 int Band_Minimum;
 int Skip_Tx1;
 
-char Free_Text1_Holder[MESSAGE_SIZE];
-char Free_Text2_Holder[MESSAGE_SIZE];
+int EditingFreq=0;
+int EditingComment=0;
+int EditingCall=0;
+int EditingGrid=0;
+int EditingFree1=0;
+int EditingFree2=0;
+
+char EditingText[MESSAGE_SIZE]={'\0'};
 
 char display_frequency[BAND_DATA_SIZE] = "14.075";
-static char shorten_text[21];
 const char *start;
 
 FreqStruct sBand_Data[NumBands] =
@@ -224,8 +229,8 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 0,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 356,
-	 /*y*/ 92,
+	 /*x*/ 420,
+	 /*y*/ SETUP_line1,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -417,7 +422,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 1,
 	 /*x*/ 240,
-	 /*y*/ 150,
+	 /*y*/ SETUP_line4,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -429,7 +434,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 300,
-	 /*y*/ 150,
+	 /*y*/ SETUP_line4,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -441,7 +446,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 360,
-	 /*y*/ 150,
+	 /*y*/ SETUP_line4,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -453,7 +458,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 420,
-	 /*y*/ 150,
+	 /*y*/ SETUP_line4,
 	 /*w*/ button_width,
 	 /*h*/ 30},
 
@@ -465,7 +470,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 256,
-	 /*y*/ 190,
+	 /*y*/ SETUP_line5,
 	 /*w*/ 160,
 	 /*h*/ 30},
 
@@ -477,7 +482,7 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 256,
-	 /*y*/ 215,
+	 /*y*/ SETUP_line6,
 	 /*w*/ 160,
 	 /*h*/ 30},
 
@@ -488,80 +493,88 @@ ButtonStruct sButtonData[NumButtons] = {
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
-	 /*x*/ 240,
-	 /*y*/ 120,
+	 /*x*/ 356,
+	 /*y*/ SETUP_line2,
 	 /*w*/ 110,
 	 /*h*/ 30},
 
-	{// button 36 SkipTx1 On/Off
-	 /*text0*/ "CallGrid",
-	 /*text1*/ "CallGrid",
-	 /*blank*/ "   ",
+	{// button 36 EditCall
+	 /*text0*/ Station_Call,
+	 /*text1*/ Station_Call,
+	 /*blank*/ "    ",
+	 /*Active*/ 1,
+	 /*Displayed*/ 1,
+	 /*state*/ 0,
+	 /*x*/ 240,
+	 /*y*/ SETUP_line3,
+	 /*w*/ 70,
+	 /*h*/ 30},
+
+	{// button 37 EditGrid
+	 /*text0*/ Locator,
+	 /*text1*/ Locator,
+	 /*blank*/ "    ",
 	 /*Active*/ 1,
 	 /*Displayed*/ 1,
 	 /*state*/ 0,
 	 /*x*/ 356,
-	 /*y*/ 120,
-	 /*w*/ 110,
+	 /*y*/ SETUP_line3,
+	 /*w*/ 60,
 	 /*h*/ 30},
+
 
 	 //text0, text1, blank, Active, Displayed, state,   x,   y,   w,   h
 
-	/*37*/ {   "E",  "E",  "  ",  0,      1,         0,     240,  190,  16,  30},    //EditFreeText1
-	/*38*/ {   "E",  "E",  "  ",  0,      1,         0,     240,  215,  16,  30},    //EditFreeText2
+	/*38*/ {   "E",  "E",  "  ",  0,      1,         0,     240,  SETUP_line5,  16,  30},    //EditFreeText1
+	/*39*/ {   "E",  "E",  "  ",  0,      1,         0,     240,  SETUP_line6,  16,  30},    //EditFreeText2
 
-	/*39*/ {   "Edit",  "Edit",  "  ",  0,      1,         0,     420,  65,  60,  30},    //EditFreq
-	/*40*/ {  "COMMENT",  "COMMENT",  "  ",  0,      1,         0,     240,  92,  110,  30},    //EditComment
+	/*40*/ {   "Edit",  "Edit",  "  ",  0,      1,         0,     270,  SETUP_line1,  60,  30},    //EditFreq
+	/*41*/ {  "COMMENT",  "COMMENT",  "  ",  0,      1,         0,     240,  SETUP_line2,  110,  30},    //EditComment
+	/*42*/ {  "COMMENT",  "COMMENT",  " ",  0,      1,         0,     KEYBASE_X,  SETUP_line0,  259,  30},    //EditingWindow
 
-
-	/*41*/ {   "A",  "A",  " ",  0,      1,         0,     240,  65,  25,  25},
-	/*  */ {   "B",  "B",  " ",  0,      1,         0,     265,  65,  25,  25},
-	/*  */ {   "C",  "C",  " ",  0,      1,         0,     290,  65,  25,  25},
-	/*  */ {   "D",  "D",  " ",  0,      1,         0,     315,  65,  25,  25},
-	/*  */ {   "E",  "E",  " ",  0,      1,         0,     340,  65,  25,  25},
-	/*  */ {   "F",  "F",  " ",  0,      1,         0,     365,  65,  25,  25},
-	/*  */ {   "G",  "G",  " ",  0,      1,         0,     390,  65,  25,  25},
-	/*  */ {   "H",  "H",  " ",  0,      1,         0,     415,  65,  25,  25},
-	/*  */ {   "I",  "I",  " ",  0,      1,         0,     440,  65,  25,  25},
-                                                                                 
-	/*  */ {   "J",  "J",  " ",  0,      1,         0,     240,  90,  25,  25},
-	/*  */ {   "K",  "K",  " ",  0,      1,         0,     265,  90,  25,  25},
-	/*  */ {   "L",  "L",  " ",  0,      1,         0,     290,  90,  25,  25},
-	/*  */ {   "M",  "M",  " ",  0,      1,         0,     315,  90,  25,  25},
-	/*  */ {   "N",  "N",  " ",  0,      1,         0,     340,  90,  25,  25},
-	/*  */ {   "O",  "O",  " ",  0,      1,         0,     365,  90,  25,  25},
-	/*  */ {   "P",  "P",  " ",  0,      1,         0,     390,  90,  25,  25},
-	/*  */ {   "Q",  "Q",  " ",  0,      1,         0,     415,  90,  25,  25},
-	/*  */ {   "R",  "R",  " ",  0,      1,         0,     440,  90,  25,  25},
-            
-	/*  */ {   "S",  "S",  " ",  0,      1,         0,     240,  115,  25,  25},
-	/*  */ {   "T",  "T",  " ",  0,      1,         0,     265,  115,  25,  25},
-	/*  */ {   "U",  "U",  " ",  0,      1,         0,     290,  115,  25,  25},
-	/*  */ {   "V",  "V",  " ",  0,      1,         0,     315,  115,  25,  25},
-	/*  */ {   "W",  "W",  " ",  0,      1,         0,     340,  115,  25,  25},
-	/*  */ {   "X",  "X",  " ",  0,      1,         0,     365,  115,  25,  25},
-	/*  */ {   "Y",  "Y",  " ",  0,      1,         0,     390,  115,  25,  25},
-	/*  */ {   "Z",  "Z",  " ",  0,      1,         0,     415,  115,  25,  25},
-	/*  */ {   "0",  "0",  " ",  0,      1,         0,     440,  115,  25,  25},
-                                                                                  
-	/*  */ {   "1",  "1",  " ",  0,      1,         0,     240,  140,  25,  25},
-	/*  */ {   "2",  "2",  " ",  0,      1,         0,     265,  140,  25,  25},
-	/*  */ {   "3",  "3",  " ",  0,      1,         0,     290,  140,  25,  25},
-	/*  */ {   "4",  "4",  " ",  0,      1,         0,     315,  140,  25,  25},
-	/*  */ {   "5",  "5",  " ",  0,      1,         0,     340,  140,  25,  25},
-	/*  */ {   "6",  "6",  " ",  0,      1,         0,     365,  140,  25,  25},
-	/*  */ {   "7",  "7",  " ",  0,      1,         0,     390,  140,  25,  25},
-	/*  */ {   "8",  "8",  " ",  0,      1,         0,     415,  140,  25,  25},
-	/*  */ {   "9",  "9",  " ",  0,      1,         0,     440,  140,  25,  25},
-            
-	/*  */ {   "+",  "+",  " ",  0,      1,         0,     240,  165,  25,  25},
-	/*  */ {   "-",  "-",  " ",  0,      1,         0,     265,  165,  25,  25},
-	/*  */ {   ".",  ".",  " ",  0,      1,         0,     290,  165,  25,  25},
-	/*  */ {   "/",  "/",  " ",  0,      1,         0,     315,  165,  25,  25},
-	/*  */ {   "?",  "?",  " ",  0,      1,         0,     340,  165,  25,  25},
-	/*  */ {   "SPC",  "SPC",  "   ",  0,      1,      0,     365,  165,  25,  25},
-	/*83*/ {   "<--",  "<--",  "  ",  0,        1,         0,     415,  165,  25,  25},
-
+  	/*	Key1	*/ {	" 1 "	,	" 1 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key2	*/ {	" 2 "	,	" 2 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key3	*/ {	" 3 "	,	" 3 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key4	*/ {	" 4 "	,	" 4 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key5	*/ {	" 5 "	,	" 5 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key6	*/ {	" 6 "	,	" 6 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key7	*/ {	" 7 "	,	" 7 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key8	*/ {	" 8 "	,	" 8 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key9	*/ {	" 9 "	,	" 9 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Key0	*/ {	" 0 "	,	" 0 "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyDash	*/ {	" - "	,	" - "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*0	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyQ	*/ {	" Q "	,	" Q "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyW	*/ {	" W "	,	" W "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyE	*/ {	" E "	,	" E "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyR	*/ {	" R "	,	" R "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyT	*/ {	" T "	,	" T "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyY	*/ {	" Y "	,	" Y "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyU	*/ {	" U "	,	" U "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyI	*/ {	" I "	,	" I "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyO	*/ {	" O "	,	" O "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyP	*/ {	" P "	,	" P "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	keyPlus	*/ {	" + "	,	" + "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*1	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyA	*/ {	" A "	,	" A "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyS	*/ {	" S "	,	" S "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyD	*/ {	" D "	,	" D "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyF	*/ {	" F "	,	" F "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyG	*/ {	" G "	,	" G "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyH	*/ {	" H "	,	" H "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyJ	*/ {	" J "	,	" J "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyK	*/ {	" K "	,	" K "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyL	*/ {	" L "	,	" L "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	Keydot	*/ {	" . "	,	" . "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeySlash*/ {	" / "	,	" / "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*10	,	KEYBASE_Y+KEYHIGHT*2	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyZ	*/ {	" Z "	,	" Z "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*0	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyX	*/ {	" X "	,	" X "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*1	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyC	*/ {	" C "	,	" C "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*2	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyV	*/ {	" V "	,	" V "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*3	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyB	*/ {	" B "	,	" B "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*4	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyN	*/ {	" N "	,	" N "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*5	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+  	/*	KeyM	*/ {	" M "	,	" M "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*6	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+	/*	KeyQMark*/ {	" ? "	,	" ? "	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*7	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+	/*	KeySpace*/ {	"SPC"	,	"SPC"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*8	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
+	/*	KeyBack	*/ {	"<--"	,	"<--"	,"   "	, 0, 1, 0,	KEYBASE_X + KEYWIDTH*9	,	KEYBASE_Y+KEYHIGHT*3	,	KEYWIDTH	,	KEYHIGHT	},
 
 }; // end of button definition
 
@@ -830,125 +843,131 @@ void executeButton(uint16_t index)
 		drawButton(SkipTx1);
 		break;
 
-	case CallGrid:
-		if(sButtonData[CallGrid].state == 1){
-			//Load station_call and grid
-			strcpy(Free_Text1_Holder,Free_Text1);
-			strcpy(Free_Text2_Holder,Free_Text2);
-			strcpy(Free_Text1,Station_Call);
-			strcpy(Free_Text2,Locator);
-			UpdateFreeText1();
-			UpdateFreeText2();
-		}
-		else {
-			//restore free text
-			strcpy(Station_Call,Free_Text1);
-			strcpy(Locator, Free_Text2);
-			strcpy(Free_Text1,Free_Text1_Holder);
-			strcpy(Free_Text2,Free_Text2_Holder);
-			UpdateFreeText1();
-			UpdateFreeText2();
-		}
+	case EditCall:
+		strcpy(EditingText,Station_Call);
+		EnableKeyboard();
+		EditingCall = 1;
+		toggle_button_state(EditCall);
+		break;
+
+	case EditGrid:
+		strcpy(EditingText,Locator);
+		EnableKeyboard();
+		EditingGrid = 1;
+		toggle_button_state(EditGrid);
 		break;
 
 	case EditFreq:
-		if(sButtonData[EditFreq].state == 1){
-			sprintf(display_frequency, "%i", sBand_Data[BandIndex].Frequency);
-			strcpy(Free_Text2_Holder,Free_Text2);
-			strcpy(Free_Text2,display_frequency);
-			UpdateFreeText2();
-		}
-		else {
-			//restore free text
-			strcpy(display_frequency, Free_Text2);
-			strcpy(Free_Text2,Free_Text2_Holder);
-			UpdateFreeText2();
-
-			sBand_Data[BandIndex].Frequency = (uint16_t)(atoi(display_frequency));
-			strcpy(sBand_Data[BandIndex].display, display_frequency);
-
-			show_wide(340, 55, sBand_Data[BandIndex].Frequency);
-
-		}
+		sprintf(display_frequency, "%i", sBand_Data[BandIndex].Frequency);
+		strcpy(EditingText,display_frequency);
+		EnableKeyboard();
+		EditingFreq = 1;
+		toggle_button_state(EditFreq);
 		break;
 
 	case EditComment:
-		if(sButtonData[EditComment].state == 1){
-			//Load station_call and grid
-			strcpy(Free_Text2_Holder,Free_Text2);
-			strcpy(Free_Text2,Comment);
-			UpdateFreeText2();
-		}
-		else {
-			//restore free text
-			strcpy(Comment, Free_Text2);
-			strcpy(Free_Text2,Free_Text2_Holder);
-			UpdateFreeText2();
-		}
+		strcpy(EditingText,Comment);
+		sButtonData[EditingWindow].text0 = Comment;
+		EnableKeyboard();
+		EditingComment = 1;
+		toggle_button_state(EditComment);
 		break;
 
 
-	case EditFreeText1: // Enable Edit
-		if (sButtonData[EditFreeText1].state == 1){
-			sButtonData[EditFreeText2].state = 0; drawButton(EditFreeText2);
-			EnableKeyboard();
-		}
-		else
-			DisableKeyboard();
+	case EditFreeText1: //
+		strcpy(EditingText,Free_Text1);
+		EnableKeyboard();
+		EditingFree1 = 1;
+		toggle_button_state(EditFreeText1);
 		break;
 
-	case EditFreeText2: // Enable Edit
-		if (sButtonData[EditFreeText2].state == 1){
-			sButtonData[EditFreeText1].state = 0; drawButton(EditFreeText1);
-			EnableKeyboard();
-		}
-		else
-			DisableKeyboard();
+	case EditFreeText2: //
+		strcpy(EditingText,Free_Text2);
+		EnableKeyboard();
+		EditingFree2 = 1;
+		toggle_button_state(EditFreeText2);
 		break;
-             
-	case 41: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'A'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(41); break;
-	case 42: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'B'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(42); break;
-	case 43: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'C'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(43); break;
-	case 44: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'D'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(44); break;
-	case 45: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'E'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(45); break;
-	case 46: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'F'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(46); break;
-	case 47: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'G'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(47); break;
-	case 48: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'H'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(48); break;
-	case 49: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'I'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(49); break;
-	case 50: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'J'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(50); break;
-	case 51: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'K'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(51); break;
-	case 52: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'L'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(52); break;
-	case 53: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'M'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(53); break;
-	case 54: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'N'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(54); break;
-	case 55: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'O'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(55); break;
-	case 56: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'P'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(56); break;
-	case 57: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'Q'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(57); break;
-	case 58: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'R'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(58); break;
-	case 59: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'S'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(59); break;
-	case 60: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'T'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(60); break;
-	case 61: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'U'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(61); break;
-	case 62: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'V'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(62); break;
-	case 63: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'W'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(63); break;
-	case 64: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'X'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(64); break;
-	case 65: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'Y'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(65); break;
-	case 66: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, 'Z'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(66); break;
-	case 67: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '0'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(67); break;
-	case 68: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '1'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(68); break;
-	case 69: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '2'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(69); break;
-	case 70: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '3'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(70); break;
-	case 71: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '4'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(71); break;
-	case 72: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '5'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(72); break;
-	case 73: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '6'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(73); break;
-	case 74: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '7'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(74); break;
-	case 75: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '8'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(75); break;
-	case 76: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '9'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(76); break;
-	case 77: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '+'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(77); break;
-	case 78: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '-'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(78); break;
-	case 79: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '.'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(79); break;
-	case 80: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '/'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(80); break;
-	case 81: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, '?'); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(81); break;
-	case 82: AppendChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2, ' '); sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(82); break;
-	case 83: DeleteLastChar(sButtonData[EditFreeText2].state == 0 ? Free_Text1 : Free_Text2);  sButtonData[EditFreeText2].state == 0 ? UpdateFreeText1() : UpdateFreeText2(); toggle_button_state(83); break;
+
+	case EditingWindow: //
+		toggle_button_state(EditingWindow);
+
+		if(EditingFreq == 1){
+			EditingFreq = 0;
+			sBand_Data[BandIndex].Frequency = (uint16_t)atoi(EditingText);
+			strcpy(sBand_Data[BandIndex].display, EditingText);
+		}
+		if(EditingComment == 1){
+			EditingComment = 0;
+			strcpy(Comment, EditingText);
+		}
+		if(EditingCall == 1){
+			EditingCall = 0;
+			strcpy(Station_Call, EditingText);
+			sButtonData[EditCall].text0 = Station_Call;
+
+		}
+		if(EditingGrid == 1){
+			EditingGrid = 0;
+			strcpy(Locator, EditingText);
+			sButtonData[EditGrid].text0 = Locator;
+		}
+		if(EditingFree1 == 1){
+			EditingFree1 = 0;
+			strcpy(Free_Text1, EditingText);
+			sButtonData[FreeText1].text0 = Free_Text1;
+		}
+		if(EditingFree2 == 1){
+			EditingFree2 = 0;
+			strcpy(Free_Text2, EditingText);
+			sButtonData[FreeText2].text0 = Free_Text2;
+		}
+		DisableKeyboard();
+		update_stationdata();
+		break;
+
+	case Key1	: AppendChar(EditingText, '1'); UpdateEditingWindow(); toggle_button_state(Key1	); break;
+	case Key2	: AppendChar(EditingText, '2'); UpdateEditingWindow(); toggle_button_state(Key2	); break;
+	case Key3	: AppendChar(EditingText, '3'); UpdateEditingWindow(); toggle_button_state(Key3	); break;
+	case Key4	: AppendChar(EditingText, '4'); UpdateEditingWindow(); toggle_button_state(Key4	); break;
+	case Key5	: AppendChar(EditingText, '5'); UpdateEditingWindow(); toggle_button_state(Key5	); break;
+	case Key6	: AppendChar(EditingText, '6'); UpdateEditingWindow(); toggle_button_state(Key6	); break;
+	case Key7	: AppendChar(EditingText, '7'); UpdateEditingWindow(); toggle_button_state(Key7	); break;
+	case Key8	: AppendChar(EditingText, '8'); UpdateEditingWindow(); toggle_button_state(Key8	); break;
+	case Key9	: AppendChar(EditingText, '9'); UpdateEditingWindow(); toggle_button_state(Key9	); break;
+	case Key0	: AppendChar(EditingText, '0'); UpdateEditingWindow(); toggle_button_state(Key0	); break;
+	case KeyDash	: AppendChar(EditingText, '-'); UpdateEditingWindow(); toggle_button_state(KeyDash	); break;
+	case KeyQ	: AppendChar(EditingText, 'Q'); UpdateEditingWindow(); toggle_button_state(KeyQ	); break;
+	case KeyW	: AppendChar(EditingText, 'W'); UpdateEditingWindow(); toggle_button_state(KeyW	); break;
+	case KeyE	: AppendChar(EditingText, 'E'); UpdateEditingWindow(); toggle_button_state(KeyE	); break;
+	case KeyR	: AppendChar(EditingText, 'R'); UpdateEditingWindow(); toggle_button_state(KeyR	); break;
+	case KeyT	: AppendChar(EditingText, 'T'); UpdateEditingWindow(); toggle_button_state(KeyT	); break;
+	case KeyY	: AppendChar(EditingText, 'Y'); UpdateEditingWindow(); toggle_button_state(KeyY	); break;
+	case KeyU	: AppendChar(EditingText, 'U'); UpdateEditingWindow(); toggle_button_state(KeyU	); break;
+	case KeyI	: AppendChar(EditingText, 'I'); UpdateEditingWindow(); toggle_button_state(KeyI	); break;
+	case KeyO	: AppendChar(EditingText, 'O'); UpdateEditingWindow(); toggle_button_state(KeyO	); break;
+	case KeyP	: AppendChar(EditingText, 'P'); UpdateEditingWindow(); toggle_button_state(KeyP	); break;
+	case keyPlus	: AppendChar(EditingText, '+'); UpdateEditingWindow(); toggle_button_state(keyPlus	); break;
+	case KeyA	: AppendChar(EditingText, 'A'); UpdateEditingWindow(); toggle_button_state(KeyA	); break;
+	case KeyS	: AppendChar(EditingText, 'S'); UpdateEditingWindow(); toggle_button_state(KeyS	); break;
+	case KeyD	: AppendChar(EditingText, 'D'); UpdateEditingWindow(); toggle_button_state(KeyD	); break;
+	case KeyF	: AppendChar(EditingText, 'F'); UpdateEditingWindow(); toggle_button_state(KeyF	); break;
+	case KeyG	: AppendChar(EditingText, 'G'); UpdateEditingWindow(); toggle_button_state(KeyG	); break;
+	case KeyH	: AppendChar(EditingText, 'H'); UpdateEditingWindow(); toggle_button_state(KeyH	); break;
+	case KeyJ	: AppendChar(EditingText, 'J'); UpdateEditingWindow(); toggle_button_state(KeyJ	); break;
+	case KeyK	: AppendChar(EditingText, 'K'); UpdateEditingWindow(); toggle_button_state(KeyK	); break;
+	case KeyL	: AppendChar(EditingText, 'L'); UpdateEditingWindow(); toggle_button_state(KeyL	); break;
+	case Keydot	: AppendChar(EditingText, '.'); UpdateEditingWindow(); toggle_button_state(Keydot	); break;
+	case KeySlash   : AppendChar(EditingText, '/'); UpdateEditingWindow(); toggle_button_state(KeySlash ); break;
+	case KeyZ	: AppendChar(EditingText, 'Z'); UpdateEditingWindow(); toggle_button_state(KeyZ	); break;
+	case KeyX	: AppendChar(EditingText, 'X'); UpdateEditingWindow(); toggle_button_state(KeyX	); break;
+	case KeyC	: AppendChar(EditingText, 'C'); UpdateEditingWindow(); toggle_button_state(KeyC	); break;
+	case KeyV	: AppendChar(EditingText, 'V'); UpdateEditingWindow(); toggle_button_state(KeyV	); break;
+	case KeyB	: AppendChar(EditingText, 'B'); UpdateEditingWindow(); toggle_button_state(KeyB	); break;
+	case KeyN	: AppendChar(EditingText, 'N'); UpdateEditingWindow(); toggle_button_state(KeyN	); break;
+	case KeyM	: AppendChar(EditingText, 'M'); UpdateEditingWindow(); toggle_button_state(KeyM	); break;
+	case KeyQMark   : AppendChar(EditingText, '?'); UpdateEditingWindow(); toggle_button_state(KeyQMark ); break;
+	case KeySpace   : AppendChar(EditingText, ' '); UpdateEditingWindow(); toggle_button_state(KeySpace ); break;
+	case KeyBack	: DeleteLastChar(EditingText);  UpdateEditingWindow(); toggle_button_state(KeyBack	); break;
 
 	}
 }
@@ -1069,7 +1088,7 @@ void setup_Cal_Display(void)
 
 	sButtonData[SkipTx1].state = Skip_Tx1;
 	drawButton(SkipTx1);
-	for (int button = StandardCQ; button < NumButtons-43; ++button) //43:skip keyboard
+	for (int button = StandardCQ; button < NumButtons-43-1; ++button) //43:skip keyboard
 	{
 		sButtonData[button].Active = 1;
 		drawButton(button);
@@ -1088,7 +1107,6 @@ void erase_Cal_Display(void)
 {
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
 	BSP_LCD_FillRect(0, FFT_H, 480, 201);
-	BSP_LCD_FillRect(240, 220, 223, 30); //clear FreeText2
 
 	for (int button = BandDown; button < StandardCQ; button++)
 	{
@@ -1263,54 +1281,35 @@ void FT8_Sync(void)
 
 void EnableKeyboard(void)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(240, 70, 239, 135);
-
 	//disable buttons
-	sButtonData[TxCalibrate].Active = 0;
-	sButtonData[SaveBand].Active = 0;
-	sButtonData[SkipTx1].Active = 0;
-	sButtonData[CallGrid].Active = 0;
-	sButtonData[EditFreq].Active = 0;
-	sButtonData[EditComment].Active = 0;
-	for(int i=29; i<33; i++) sButtonData[i].Active = 0;
+	for(int i=NUMMAINBUTTON; i<NumButtons-NUMKEYS; i++)
+		sButtonData[i].Active = 0;
 
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_FillRect(0, 50, 480, 180);
+
+	HAL_Delay(200);
 	//Enable Keyboard
-	for(int i=41; i<84; i++) {
+	for(int i=NumButtons-NUMKEYS; i<NumButtons; i++) {
 		sButtonData[i].Active = 2;
 		drawButton(i);
 	}
+	sButtonData[EditingWindow].Active = 1;
+	drawButton(EditingWindow);
 }
 
 void DisableKeyboard(void)
 {
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(240, 70, 239, 135);
-
 	//disable keyboard
-	for(int i=41; i<84; i++) {
+	for(int i=NumButtons-NUMKEYS; i<NumButtons; i++) {
 		sButtonData[i].Active = 0;
-
 	}
 
-	//Enable buttons
-	sButtonData[TxCalibrate].Active = 1;
-	sButtonData[SaveBand].Active = 1;
-	sButtonData[SkipTx1].Active = 1;
-	sButtonData[CallGrid].Active = 1;
-	sButtonData[EditFreq].Active = 1;
-	sButtonData[EditComment].Active = 1;
-	drawButton(TxCalibrate);
-	drawButton(SaveBand);
-	drawButton(SkipTx1);
-	drawButton(CallGrid);
-	drawButton(EditFreq);
-	drawButton(EditComment);
+	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+	BSP_LCD_FillRect(0, 50, 480, 180);
 
-	for(int i=29; i<33; i++) {
-		sButtonData[i].Active = 1;
-		drawButton(i);
-	}
+	setup_Cal_Display();
+	show_wide(340, 55, sBand_Data[BandIndex].Frequency);
 }
 
 void AppendChar(char *str, char c){
@@ -1326,32 +1325,12 @@ void DeleteLastChar(char *str){
 	if(len > 0) str[len-1] = '\0';
 }
 
-void UpdateFreeText1(void) {
+void UpdateEditingWindow(void) {
 	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(256, 195, 223, 30);
-	sButtonData[33].text0 = Free_Text1;
-	sButtonData[33].text1 = Free_Text1;
-	drawButton(33);
+	BSP_LCD_FillRect(KEYBASE_X, SETUP_line0, 259, 35);
+	sButtonData[EditingWindow].text0 = EditingText;
+	sButtonData[EditingWindow].text1 = EditingText;
+	drawButton(EditingWindow);
 }
 
-void UpdateFreeText2(void) {
-	BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-	BSP_LCD_FillRect(256, 220, 223, 30);
-	int len = strlen(Free_Text2);
-	start = Free_Text2 + (len > 20 ? len - 20 : 0);
-	strncpy(shorten_text, start, 20);
-	sButtonData[34].text0 = shorten_text;
-	sButtonData[34].text1 = shorten_text;
-	drawButton(34);
-
-	if(len > 20){
-		BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-		BSP_LCD_FillRect(256, 195, 223, 30);
-		strncpy(shorten_text, Free_Text2, 20);
-		sButtonData[33].text0 = shorten_text;
-		sButtonData[33].text1 = shorten_text;
-		drawButton(33);
-	}
-	else UpdateFreeText1();
-}
 

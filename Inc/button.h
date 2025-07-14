@@ -37,6 +37,22 @@
 #define RTC_Button 100
 #define RTC_Add 180
 
+#define KEYBASE_X 25
+#define KEYBASE_Y 70
+#define KEYWIDTH 40
+#define KEYHIGHT 40
+
+#define SETUP_line0 40
+#define SETUP_line1 65
+#define SETUP_line2 90
+#define SETUP_line3 115
+#define SETUP_line4 140
+#define SETUP_line5 165
+#define SETUP_line6 190
+
+#define NUMKEYS 43
+#define NUMMAINBUTTON 11
+
 typedef struct
 {
 	char *text0;
@@ -85,6 +101,7 @@ enum ButtonIds
 	GainUp,
 	FreqDown,
 	FreqUp,
+
 	BandDown,
 	BandUp,
 	TxCalibrate,
@@ -110,13 +127,58 @@ enum ButtonIds
 	FreeText1,
 	FreeText2,
 	SkipTx1,
-	CallGrid,
+	EditCall,
+	EditGrid,
 	EditFreeText1,
 	EditFreeText2,
 	EditFreq,
 	EditComment,
-	//41-83 is keyboard
-	NumButtons = 84
+	EditingWindow,
+	//43-85 is keyboard
+	Key1,
+	Key2,
+	Key3,
+	Key4,
+	Key5,
+	Key6,
+	Key7,
+	Key8,
+	Key9,
+	Key0,
+	KeyDash,
+	KeyQ,
+	KeyW,
+	KeyE,
+	KeyR,
+	KeyT,
+	KeyY,
+	KeyU,
+	KeyI,
+	KeyO,
+	KeyP,
+	keyPlus,
+	KeyA,
+	KeyS,
+	KeyD,
+	KeyF,
+	KeyG,
+	KeyH,
+	KeyJ,
+	KeyK,
+	KeyL,
+	Keydot,
+	KeySlash,
+	KeyZ,
+	KeyX,
+	KeyC,
+	KeyV,
+	KeyB,
+	KeyN,
+	KeyM,
+	KeyQMark,
+	KeySpace,
+	KeyBack,
+	NumButtons = 86
 };
 
 extern int Tune_On; // 0 = Receive, 1 = Xmit Tune Signal
@@ -162,8 +224,7 @@ void EnableKeyboard(void);
 void DisableKeyboard(void);
 void AppendChar(char *str, char c);
 void DeleteLastChar(char *str);
-void UpdateFreeText1(void);
-void UpdateFreeText2(void);
+void UpdateEditingWindow(void);
 
 void SelectFilterBlock();
 
