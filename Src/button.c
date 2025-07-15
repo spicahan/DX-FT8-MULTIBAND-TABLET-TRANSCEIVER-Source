@@ -639,11 +639,11 @@ void checkButton(void)
 	{
 		if (testButton(sButtonData[button].x, sButtonData[button].y, sButtonData[button].w, sButtonData[button].h) == 1)
 		{
+			if (sButtonData[button].Active == 0) {
+				continue;
+			}
 			switch (sButtonData[button].Active)
 			{
-			case 0:
-				break;
-
 			case 1:
 				sButtonData[button].state = !sButtonData[button].state;
 				drawButton(button);
@@ -658,6 +658,7 @@ void checkButton(void)
 				executeCalibrationButton(button);
 				break;
 			}
+			break;
 		}
 	}
 }
