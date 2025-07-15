@@ -214,8 +214,8 @@ void Read_Station_File(void)
 			if (fres == FR_OK)
 			{
 				f_puts("[Station]\n", &fil2);
-				f_puts("Call=N0CAL\n", &fil2);
-				f_puts("Locator=AA00\n", &fil2);
+				f_puts("Call=FT8DX\n", &fil2);
+				f_puts("Locator=FN20\n", &fil2); // K1JT
 				f_puts("[FreeText]\n", &fil2);
 				f_puts("1=Free text 1\n", &fil2);
 				f_puts("2=Free text 2\n", &fil2);
@@ -228,7 +228,7 @@ void Read_Station_File(void)
 				f_puts("12=24.915\n", &fil2);
 				f_puts("10=28.074\n", &fil2);
 				f_puts("[MISC]\n", &fil2);
-				f_puts("COMMENT=MY TESTING COMMENT\n", &fil2);
+				f_puts("COMMENT=DXFT8\n", &fil2);
 			}
 		}
 		f_close(&fil2);
@@ -284,11 +284,11 @@ void queue_custom_text(const char *tx_msg)
 
 void update_stationdata(void){
 	char write_buffer[64];
-	static const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
+	const char *bands[NumBands] = {"40", "30", "20", "17", "15", "12", "10"};
 
 	FRESULT fres = f_mount(&FS, SDPath, 1);
 	if(fres == FR_OK)
-	    fres = f_open(&fil2, ini_file_name, FA_OPEN_ALWAYS | FA_WRITE);
+	    fres = f_open(&fil2, ini_file_name, FA_CREATE_ALWAYS | FA_WRITE);
 	if (fres == FR_OK)
 	{
 		fres = f_lseek(&fil2, 0);

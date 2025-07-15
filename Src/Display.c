@@ -86,11 +86,11 @@ void setup_display(void)
 	BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
 
 	BSP_LCD_DisplayStringAt(0, 60, (const uint8_t *)"DX FT8: A FT8 Xceiver", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(44, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(44, 100, (const uint8_t *)"Firmware: 250708s", LEFT_MODE);
-	BSP_LCD_DisplayStringAt(44, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(33, 80, (const uint8_t *)"Hardware: V2.0", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(33, 100, (const uint8_t *)"Firmware: 250715s", LEFT_MODE);
+	BSP_LCD_DisplayStringAt(33, 120, (const uint8_t *)"W5BAA - WB2CBA", LEFT_MODE);
 
-	BSP_LCD_DisplayStringAt(44, 160,
+	BSP_LCD_DisplayStringAt(33, 160,
 							(Band_Minimum == _20M)
 								? (const uint8_t *)"Five Band Board"
 								: (const uint8_t *)"Seven Band Board",
@@ -106,9 +106,9 @@ void setup_display(void)
 	{
 		char callOrLocator[32];
 		sprintf(callOrLocator, "Call    : %s", Station_Call);
-		BSP_LCD_DisplayStringAt(44, 180, (const uint8_t *)callOrLocator, LEFT_MODE);
+		BSP_LCD_DisplayStringAt(33, 180, (const uint8_t *)callOrLocator, LEFT_MODE);
 		sprintf(callOrLocator, "Locator : %s", Locator);
-		BSP_LCD_DisplayStringAt(44, 200, (const uint8_t *)callOrLocator, LEFT_MODE);
+		BSP_LCD_DisplayStringAt(33, 200, (const uint8_t *)callOrLocator, LEFT_MODE);
 	}
 
 	for (int buttonId = Clear; buttonId <= FreqUp; ++buttonId)

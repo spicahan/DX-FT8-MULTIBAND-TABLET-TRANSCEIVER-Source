@@ -92,21 +92,23 @@ void display_messages(Decode new_decoded[], int decoded_messages)
         char message[MAX_MSG_LEN];
 		snprintf(message, MAX_LINE_LEN, "%s %s %s %2i", call_to, call_from, locator, new_decoded[i].snr);
         message[MAX_LINE_LEN] = '\0'; // Make sure it fits the display region
-        MsgColor color = White;
+        MsgColor textcolor = White;
+        MsgColor background = Black;
 		if (strcmp(call_to, "CQ") == 0 || strncmp(call_to, "CQ ", 3) == 0)
 		{
-			color = Green;
+			textcolor = Green;
 		}
 		// Addressed me
 		if (strncmp(call_to, Station_Call, sizeof(Station_Call)) == 0)
 		{
-			color = Red;
+			textcolor = White;
+			background = Red;
 		}
 		// Mark own TX in yellow (WSJT-X)
 		if (was_txing) {
-			color = Yellow;
+			textcolor = Yellow;
 		}
-        display_line(false, i, Black, color, message);
+        display_line(false, i, background, textcolor, message);
 	}
 }
 
