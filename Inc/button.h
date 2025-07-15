@@ -45,11 +45,11 @@
 #define SETUP_line0 40
 #define SETUP_line1 65
 #define SETUP_line2 90
-#define SETUP_line3 115
-#define SETUP_line4 140
-#define SETUP_line5 165
-#define SETUP_line6 190
-#define SETUP_line7 215
+#define SETUP_line3 100
+#define SETUP_line4 125
+#define SETUP_line5 150
+#define SETUP_line6 175
+#define SETUP_line7 205
 
 #define NUMKEYS 43
 #define NUMMAINBUTTON 11
