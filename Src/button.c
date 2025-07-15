@@ -938,7 +938,8 @@ void executeButton(uint16_t index)
 		}
 		else {
 			sBand_Data[BandIndex].Frequency = (uint16_t)atoi(EditingText);
-			strcpy(sBand_Data[BandIndex].display, EditingText);
+			sprintf(display_frequency, "%u.%03u", sBand_Data[BandIndex].Frequency / 1000, sBand_Data[BandIndex].Frequency % 1000);
+			strcpy(sBand_Data[BandIndex].display, display_frequency);
 			DisableKeyboard();
 			update_stationdata();
 		}
